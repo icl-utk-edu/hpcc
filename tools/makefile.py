@@ -82,7 +82,10 @@ deps = (
      ("bench_lat_bw_1.5.1",  "hpcc",  "io"), "-I../../../../include $(CCFLAGS)"),
 
     ("../DGEMM/", (hhpcc, hhpl),
-     ("tstdgemm",  "onecpu"), "-I../../../../include $(CCFLAGS)")
+     ("tstdgemm",  "onecpu"), "-I../../../../include $(CCFLAGS)"),
+
+    ("../FFT/", (hhpcc, hhpl, "../../../../FFT/hpccfft.h", "../../../../FFT/wrapfftw.h", "../../../../FFT/wrapmpifftw.h"),
+     ("bcnrand", "kernel1", "kernel2", "zfft1d", "pzfft1d", "pzb2c", "pzc2b", "pztrans", "ztrans", "onecpu", "tstfft", "wrapfftw", "wrapmpifftw", "mpifft"), "-I../../../../include $(CCFLAGS)")
 
     )
 
