@@ -5,8 +5,8 @@ include hpl/Make.$(arch)
 
 all:
 	- $(MKDIR) hpl/lib/$(arch)
-	( $(CD) hpl/lib/arch/build ; $(MAKE) -f ../../../Makefile.hpcc )
+	( $(CD) hpl/lib/arch/build ; $(MAKE) -f Makefile.hpcc )
 
 clean:
 	- $(MKDIR) hpl/lib/$(arch)
-	( $(CD) hpl/lib/arch/build ; $(MAKE) -f ../../../Makefile.hpcc clean )
+	( $(CD) hpl/lib/arch/build ; $(MAKE) -f Makefile.hpcc clean )
