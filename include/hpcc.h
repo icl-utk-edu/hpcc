@@ -18,6 +18,13 @@ mpi.h
 #include <math.h>
 #include <time.h>
 
+#define MPIFFT_TIMING_COUNT 8
+
+typedef struct {
+  double GBs, time, residual;
+  int n, nb, nprow, npcol;
+} PTRANS_RuntimeData;
+
 /* parameters of execution */
 typedef struct {
   /* HPL section */
@@ -42,18 +49,25 @@ typedef struct {
   int PTRANSns, PTRANSnval[2 * HPL_MAX_PARAM];
   int PTRANSnbs, PTRANSnbval[2 * HPL_MAX_PARAM];
   int PTRANSnpqs, PTRANSpval[2 * HPL_MAX_PARAM], PTRANSqval[2 * HPL_MAX_PARAM];
-  double Tflops, ptransGBs, MPIGUPs, StarGUPs, SingleGUPs, StarStreamCopyGBs, StarStreamScaleGBs,
+  double MPIGUPs, StarGUPs, SingleGUPs, MPIRandomAccess_N, RandomAccess_N,
+    StarStreamCopyGBs, StarStreamScaleGBs,
     StarStreamAddGBs, StarStreamTriadGBs, SingleStreamCopyGBs, SingleStreamScaleGBs,
     SingleStreamAddGBs, SingleStreamTriadGBs, StarDGEMMGflops, SingleDGEMMGflops;
-  double StarFFTGflops, SingleFFTGflops, MPIFFTGflops, MPIFFTn;
+  double StarFFTGflops, SingleFFTGflops, MPIFFTGflops, MPIFFT_N;
   double MaxPingPongLatency, RandomlyOrderedRingLatency, MinPingPongBandwidth,
     NaturallyOrderedRingBandwidth, RandomlyOrderedRingBandwidth,
     MinPingPongLatency, AvgPingPongLatency, MaxPingPongBandwidth, AvgPingPongBandwidth,
     NaturallyOrderedRingLatency;
+  int DGEMM_N;
+  int StreamThreads, StreamVectorSize;
+  int FFT_N;
+
+  HPL_RuntimeData HPLrdata;
+  PTRANS_RuntimeData PTRANSrdata;
 
   int Failure; /* over all failure of the benchmark */
 
-  double MPIFFTtimingsForward[8], MPIFFTtimingsBackward[8];
+  double MPIFFTtimingsForward[MPIFFT_TIMING_COUNT], MPIFFTtimingsBackward[MPIFFT_TIMING_COUNT];
 
   unsigned long HPLMaxProcMem;
   int HPLMaxProc;
