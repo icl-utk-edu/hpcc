@@ -45,13 +45,15 @@ typedef struct {
   double Tflops, ptransGBs, MPIGUPs, StarGUPs, SingleGUPs, StarStreamCopyGBs, StarStreamScaleGBs,
     StarStreamAddGBs, StarStreamTriadGBs, SingleStreamCopyGBs, SingleStreamScaleGBs,
     SingleStreamAddGBs, SingleStreamTriadGBs, StarDGEMMGflops, SingleDGEMMGflops;
-  double StarFFTGflops, SingleFFTGflops, MPIFFTGflops;
+  double StarFFTGflops, SingleFFTGflops, MPIFFTGflops, MPIFFTn;
   double MaxPingPongLatency, RandomlyOrderedRingLatency, MinPingPongBandwidth,
     NaturallyOrderedRingBandwidth, RandomlyOrderedRingBandwidth,
     MinPingPongLatency, AvgPingPongLatency, MaxPingPongBandwidth, AvgPingPongBandwidth,
     NaturallyOrderedRingLatency;
 
   int Failure; /* over all failure of the benchmark */
+
+  double MPIFFTtimingsForward[8], MPIFFTtimingsBackward[8];
 
   unsigned long HPLMaxProcMem;
   int HPLMaxProc;
