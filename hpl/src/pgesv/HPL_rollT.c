@@ -52,7 +52,7 @@
 #define   I_SEND    0
 #define   I_RECV    1
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_rollT
 (
    HPL_T_panel *                    PBCST,

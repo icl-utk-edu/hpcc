@@ -56,7 +56,7 @@
 #define    HPL_LASWP04T_LOG2_DEPTH   5
 #endif
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_dlaswp04T
 (
    const int                        M0,

@@ -49,7 +49,7 @@
  */
 #include "hpl.h"
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 double HPL_pdlange
 (
    const HPL_T_grid *               GRID,

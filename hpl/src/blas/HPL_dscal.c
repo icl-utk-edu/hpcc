@@ -51,7 +51,7 @@
 
 #ifndef HPL_dscal
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_dscal
 (
    const int                        N,

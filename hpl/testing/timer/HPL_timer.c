@@ -63,7 +63,7 @@ static double                 HPL_timer_cpusec   [HPL_NTIMER],
  * User callable functions
  * ---------------------------------------------------------------------
  */
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_timer_boot( void )
 #else
 void HPL_timer_boot()
@@ -91,7 +91,7 @@ void HPL_timer_boot()
  */
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_timer( const int I )
 #else
 void HPL_timer( I )
@@ -150,7 +150,7 @@ void HPL_timer( I )
  */
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_timer_enable( void )
 #else
 void HPL_timer_enable()
@@ -169,7 +169,7 @@ void HPL_timer_enable()
  */
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_timer_disable( void )
 #else
 void HPL_timer_disable()
@@ -188,7 +188,7 @@ void HPL_timer_disable()
  */
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 double HPL_timer_inquire
 (
    const HPL_T_TIME           TMTYPE,

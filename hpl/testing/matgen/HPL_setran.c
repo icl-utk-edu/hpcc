@@ -55,7 +55,7 @@
  */
 static int       ias[2], ics[2], irand[2];
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_setran
 (
    const int                        OPTION,

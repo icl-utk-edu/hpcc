@@ -56,7 +56,7 @@
 #undef HPL_USE_MPI_DATATYPE
 #endif
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 int HPL_recv
 (
    double *                         RBUF,

@@ -56,7 +56,7 @@
 #define    HPL_LOCSWP_LOG2_DEPTH    5
 #endif
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_dlocswpN
 (
    HPL_T_panel *                    PANEL,

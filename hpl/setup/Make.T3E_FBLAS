@@ -61,13 +61,13 @@ TOUCH        = touch
 # - Platform identifier ------------------------------------------------
 # ----------------------------------------------------------------------
 #
-ARCH         = T3E_FBLAS
+ARCH         = $(arch)
 #
 # ----------------------------------------------------------------------
 # - HPL Directory Structure / HPL library ------------------------------
 # ----------------------------------------------------------------------
 #
-TOPdir       = $(HOME)/hpl
+TOPdir       = ../../..
 INCdir       = $(TOPdir)/include
 BINdir       = $(TOPdir)/bin/$(ARCH)
 LIBdir       = $(TOPdir)/lib/$(ARCH)
@@ -149,7 +149,7 @@ F2CDEFS      = -DUpCase -DF77_INTEGER=long -DStringCrayStyle \
 # ----------------------------------------------------------------------
 #
 HPL_INCLUDES = -I$(INCdir) -I$(INCdir)/$(ARCH) $(LAinc) $(MPinc)
-HPL_LIBS     = $(HPLlib) $(LAlib) $(MPlib)
+HPL_LIBS     = $(HPLlib) $(LAlib) $(MPlib) -lm
 #
 # - Compile time options -----------------------------------------------
 #

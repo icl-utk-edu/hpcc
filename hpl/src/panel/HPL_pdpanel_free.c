@@ -46,7 +46,7 @@
  */ 
 #include "hpl.h"
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 int HPL_pdpanel_free
 (
    HPL_T_panel *                    PANEL

@@ -5,7 +5,7 @@
 
 #ifndef HPL_daxpy
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_daxpy
 (
    const int                        N,

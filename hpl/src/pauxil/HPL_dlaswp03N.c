@@ -56,7 +56,7 @@
 #define    HPL_LASWP03N_LOG2_DEPTH   5
 #endif
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_dlaswp03N
 (
    const int                        M,

@@ -49,7 +49,7 @@
  */
 #include "hpl.h"
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_pdinfo
 (
    HPL_T_test *                     TEST,
@@ -271,7 +271,7 @@ void HPL_pdinfo
    char                       file[HPL_LINE_MAX], line[HPL_LINE_MAX],
                               auth[HPL_LINE_MAX], num [HPL_LINE_MAX];
    FILE                       * infp;
-   int                        * iwork = NULL;
+   int                        iwork[15];
    char                       * lineptr;
    int                        error=0, fid, i, j, lwork, maxp, nprocs,
                               rank, size;
@@ -294,10 +294,11 @@ void HPL_pdinfo
 /*
  * Open file and skip data file header
  */
-      if( ( infp = fopen( "HPL.dat", "r" ) ) == NULL )
+#define INFILE "hpccinf.txt"
+      if( ( infp = fopen( INFILE, "r" ) ) == NULL )
       { 
          HPL_pwarn( stderr, __LINE__, "HPL_pdinfo",
-                    "cannot open file HPL.dat" );
+                    "cannot open file " INFILE );
          error = 1; goto label_error;
       }
 
@@ -311,9 +312,11 @@ void HPL_pdinfo
       (void) fgets( line, HPL_LINE_MAX - 2, infp );
       (void) sscanf( line, "%s", num  );
       fid = atoi( num );
+      fid = 8; /* always write to a file */
+      strcpy( file, "hpccoutf.txt" );
       if     ( fid == 6 ) TEST->outfp = stdout;
       else if( fid == 7 ) TEST->outfp = stderr;
-      else if( ( TEST->outfp = fopen( file, "w" ) ) == NULL )
+      else if( ( TEST->outfp = fopen( file, "a" ) ) == NULL )
       {
          HPL_pwarn( stderr, __LINE__, "HPL_pdinfo", "cannot open file %s.",
                     file );
@@ -619,7 +622,7 @@ label_error:
    {
       if( rank == 0 )
          HPL_pwarn( stderr, __LINE__, "HPL_pdinfo",
-                    "Illegal input in file HPL.dat. Exiting ..." );
+                    "Illegal input in file " INFILE ". Exiting ..." );
       MPI_Finalize();
 #ifdef HPL_CALL_VSIPL
       (void) vsip_finalize( NULL );
@@ -638,7 +641,7 @@ label_error:
 /*
  * Broadcast array sizes
  */
-   iwork = (int *)malloc( 15 * sizeof( int ) );
+   /* iwork = (int *)malloc( 15 * sizeof( int ) ); */
    if( rank == 0 )
    {
       iwork[ 0] = *NS;      iwork[ 1] = *NBS;
@@ -658,7 +661,7 @@ label_error:
       *NDHS     = iwork[ 9]; *TSWAP = iwork[10]; *L1NOTRAN = iwork[11];
       *UNOTRAN  = iwork[12]; *EQUIL = iwork[13]; *ALIGN    = iwork[14];
    }
-   if( iwork ) free( iwork );
+   /* if( iwork ) free( iwork ); */
 /*
  * Pack information arrays and broadcast
  */

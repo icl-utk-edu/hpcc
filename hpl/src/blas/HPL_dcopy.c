@@ -51,7 +51,7 @@
 
 #ifndef HPL_dcopy
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_dcopy
 (
    const int                        N,

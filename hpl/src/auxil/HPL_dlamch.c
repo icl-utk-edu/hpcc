@@ -74,7 +74,7 @@ static double   HPL_dipow
 STDC_ARGS(
 (  const double,    const int ) );
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 double HPL_dlamch
 (
    const HPL_T_MACH                 CMACH
@@ -190,7 +190,7 @@ double HPL_dlamch
  */
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dlamc1
 (
    int                        * BETA,
@@ -325,7 +325,7 @@ static void HPL_dlamc1
    *BETA  = lbeta; *T = lt; *RND = lrnd; *IEEE1 = lieee1;
 } 
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dlamc2
 (
    int                        * BETA, 
@@ -573,7 +573,7 @@ static void HPL_dlamc2( BETA, T, RND, EPS, EMIN, RMIN, EMAX, RMAX )
    *EMIN = lemin; *RMIN = lrmin; *EMAX = lemax; *RMAX = lrmax;
 } 
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static double HPL_dlamc3( const double A, const double B )
 #else
 static double HPL_dlamc3( A, B )
@@ -611,7 +611,7 @@ static double HPL_dlamc3( A, B )
    return( A + B );
 } 
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dlamc4
 (
    int                        * EMIN,
@@ -680,7 +680,7 @@ static void HPL_dlamc4( EMIN, START, BASE )
    } while( ( c1 == a ) && ( c2 == a ) &&  ( d1 == a ) && ( d2 == a ) );
 } 
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dlamc5
 (
    const int                  BETA,
@@ -828,7 +828,7 @@ l_10:
  */
 } 
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static double HPL_dipow
 (
    const double               X,

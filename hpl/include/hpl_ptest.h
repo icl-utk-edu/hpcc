@@ -142,7 +142,8 @@ STDC_ARGS( (
    HPL_T_grid *,
    HPL_T_palg *,
    const int,
-   const int
+   const int,
+   double *
 ) );
 
 #endif

@@ -51,14 +51,14 @@
  * ---------------------------------------------------------------------
  */
 #ifdef __STDC__
-#define STDC_HEADERS
+#define HPL_STDC_HEADERS
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 #include <stdarg.h>
 #define STDC_ARGS(p)           p
 #else

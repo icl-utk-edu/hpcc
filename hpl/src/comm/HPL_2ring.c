@@ -55,7 +55,7 @@
 #endif
 #endif
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 int HPL_binit_2ring
 (
    HPL_T_panel *              PANEL
@@ -113,7 +113,7 @@ int HPL_binit_2ring( PANEL )
  
 #endif
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 int HPL_bcast_2ring
 (
    HPL_T_panel                * PANEL,
@@ -190,7 +190,7 @@ int HPL_bcast_2ring( PANEL, IFLAG )
    return( *IFLAG );
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 int HPL_bwait_2ring
 (
    HPL_T_panel *              PANEL

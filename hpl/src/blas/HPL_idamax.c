@@ -51,7 +51,7 @@
 
 #ifndef HPL_idamax
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 int HPL_idamax
 (
    const int                        N,

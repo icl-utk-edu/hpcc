@@ -58,7 +58,7 @@
 #define   I_SEND    0
 #define   I_RECV    1
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 int HPL_binit_blong
 (
    HPL_T_panel *              PANEL
@@ -127,7 +127,7 @@ int HPL_binit_blong( PANEL )
  
 #endif
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 int HPL_bcast_blong
 (
    HPL_T_panel                * PANEL,
@@ -343,7 +343,7 @@ int HPL_bcast_blong( PANEL, IFLAG )
    return( *IFLAG );
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 int HPL_bwait_blong
 (
    HPL_T_panel *              PANEL

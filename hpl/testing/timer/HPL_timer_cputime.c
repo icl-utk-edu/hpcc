@@ -71,7 +71,7 @@
  
 #include <time.h>
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 double HPL_timer_cputime( void )
 #else
 double HPL_timer_cputime()
@@ -93,7 +93,7 @@ double HPL_timer_cputime()
 #include <sys/times.h>
 #include <unistd.h>
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 double HPL_timer_cputime( void )
 #else
 double HPL_timer_cputime()
@@ -114,7 +114,7 @@ double HPL_timer_cputime()
 #include <sys/time.h>
 #include <sys/resource.h>
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 double HPL_timer_cputime( void )
 #else
 double HPL_timer_cputime()
@@ -129,7 +129,7 @@ double HPL_timer_cputime()
 /* 
 #else
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 double HPL_timer_cputime( void )
 #else
 double HPL_timer_cputime()

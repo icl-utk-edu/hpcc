@@ -55,7 +55,7 @@
 #endif
 #endif
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_pdpanel_init
 (
    HPL_T_grid *                     GRID,

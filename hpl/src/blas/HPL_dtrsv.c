@@ -53,7 +53,7 @@
 
 #ifdef HPL_CALL_VSIPL
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dtrsvLNN
 (
    const int                  N,
@@ -80,7 +80,7 @@ static void HPL_dtrsvLNN( N, A, LDA, X, INCX )
    }
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dtrsvLNU
 (
    const int                  N,
@@ -107,7 +107,7 @@ static void HPL_dtrsvLNU( N, A, LDA, X, INCX )
    }
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dtrsvLTN
 (
    const int                  N,
@@ -136,7 +136,7 @@ static void HPL_dtrsvLTN( N, A, LDA, X, INCX )
    }
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dtrsvLTU
 (
    const int                  N,
@@ -166,7 +166,7 @@ static void HPL_dtrsvLTU( N, A, LDA, X, INCX )
 }
 
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dtrsvUNN
 (
    const int                  N,
@@ -195,7 +195,7 @@ static void HPL_dtrsvUNN( N, A, LDA, X, INCX )
 }
 
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dtrsvUNU
 (
    const int                  N,
@@ -224,7 +224,7 @@ static void HPL_dtrsvUNU( N, A, LDA, X, INCX )
 }
 
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dtrsvUTN
 (
    const int                  N,
@@ -252,7 +252,7 @@ static void HPL_dtrsvUTN( N, A, LDA, X, INCX )
    }
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dtrsvUTU
 (
    const int                  N,
@@ -280,7 +280,7 @@ static void HPL_dtrsvUTU( N, A, LDA, X, INCX )
    }
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dtrsv0
 (
    const enum HPL_UPLO        UPLO,
@@ -334,7 +334,7 @@ static void HPL_dtrsv0( UPLO, TRANS, DIAG, N, A, LDA, X, INCX )
 
 #endif
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_dtrsv
 (
    const enum HPL_ORDER             ORDER,

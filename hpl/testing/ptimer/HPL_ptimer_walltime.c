@@ -64,7 +64,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 double HPL_ptimer_walltime( void )
 #else
 double HPL_ptimer_walltime()
@@ -88,7 +88,7 @@ double HPL_ptimer_walltime()
 
 #else
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 double HPL_ptimer_walltime( void )
 #else
 double HPL_ptimer_walltime()

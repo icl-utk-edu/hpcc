@@ -49,7 +49,7 @@
  */
 #include "hpl.h"
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_pwarn
 (
    FILE *                           STREAM,
@@ -101,7 +101,7 @@ va_dcl
    va_list                    argptr;
    int                        rank;
    char                       cline[128];
-#ifndef STDC_HEADERS
+#ifndef HPL_STDC_HEADERS
    FILE                       * STREAM;
    int                        LINE;
    char                       * FORM, * SRNAME;
@@ -109,7 +109,7 @@ va_dcl
 /* ..
  * .. Executable Statements ..
  */
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
    va_start( argptr, FORM );
 #else
    va_start( argptr );

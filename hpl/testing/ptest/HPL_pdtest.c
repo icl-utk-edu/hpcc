@@ -49,23 +49,25 @@
  */
 #include "hpl.h"
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_pdtest
 (
    HPL_T_test *                     TEST,
    HPL_T_grid *                     GRID,
    HPL_T_palg *                     ALGO,
    const int                        N,
-   const int                        NB
+   const int                        NB,
+   double *curGflops
 )
 #else
 void HPL_pdtest
-( TEST, GRID, ALGO, N, NB )
+( TEST, GRID, ALGO, N, NB, curGflops )
    HPL_T_test *                     TEST;
    HPL_T_grid *                     GRID;
    HPL_T_palg *                     ALGO;
    const int                        N;
    const int                        NB;
+   double *curGflops;
 #endif
 {
 /* 
@@ -157,6 +159,8 @@ void HPL_pdtest
       while( ii > 1 ) { ii >>= 1; ip2 <<= 1; }
    }
    while( mat.ld == ip2 );
+
+   *curGflops = 0.0;
 /*
  * Allocate dynamic memory
  */
@@ -221,6 +225,7 @@ void HPL_pdtest
  * 2/3 N^3 - 1/2 N^2 flops for LU factorization + 2 N^2 flops for solve.
  * Print WALL time
  */
+      *curGflops =
       Gflops = ( ( (double)(N) /   1.0e+9 ) * 
                  ( (double)(N) / wtime[0] ) ) * 
                  ( ( 2.0 / 3.0 ) * (double)(N) + ( 3.0 / 2.0 ) );

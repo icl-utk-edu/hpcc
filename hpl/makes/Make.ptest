@@ -65,7 +65,7 @@ HPL_pteobj       = \
 #
 ## Targets #############################################################
 #
-all     : dexe
+all     : lib.grd # dexe
 #
 dexe    : dexe.grd
 #
@@ -76,6 +76,11 @@ dexe.grd: $(HPL_pteobj) $(HPLlib)
 	$(LINKER) $(LINKFLAGS) -o $(xhpl) $(HPL_pteobj) $(HPL_LIBS)
 	$(MAKE) $(BINdir)/HPL.dat
 	$(TOUCH) dexe.grd
+#
+lib.grd : $(HPL_pteobj)
+	$(ARCHIVER) $(ARFLAGS) $(HPLlib) $(HPL_pteobj)
+	$(RANLIB) $(HPLlib)
+	$(TOUCH) lib.grd
 #
 # ######################################################################
 #

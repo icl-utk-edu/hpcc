@@ -51,7 +51,7 @@
 
 #ifndef HPL_dger
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_dger
 (
    const enum HPL_ORDER             ORDER,

@@ -49,7 +49,7 @@
  */
 #include "hpl.h"
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_pabort
 (
    int                              LINE,
@@ -97,14 +97,14 @@ va_dcl
    va_list                    argptr;
    int                        rank;
    char                       cline[128];
-#ifndef STDC_HEADERS
+#ifndef HPL_STDC_HEADERS
    int                        LINE;
    char                       * FORM, * SRNAME;
 #endif
 /* ..
  * .. Executable Statements ..
  */
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
    va_start( argptr, FORM );
 #else
    va_start( argptr );

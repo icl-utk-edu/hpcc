@@ -49,14 +49,16 @@
  */
 #include "hpl.h"
 
-#ifdef STDC_HEADERS
-int main
+#ifdef HPL_STDC_HEADERS
+int HPL_main
 (
    int                        ARGC,
-   char                       * * ARGV
+   char                       * * ARGV,
+   double *TflopsPtr,
+   int *failure
 )
 #else
-int main( ARGC, ARGV )
+int HPL_main( ARGC, ARGV, TflopsPtr, failure )
 /*
  * .. Scalar Arguments ..
  */
@@ -65,6 +67,8 @@ int main( ARGC, ARGV )
  * .. Array Arguments ..
  */
    char                       * * ARGV;
+   double *TflopsPtr;
+   int *failure;
 #endif
 {
 /* 
@@ -103,10 +107,12 @@ int main( ARGC, ARGV )
    HPL_T_ORDER                pmapping;
    HPL_T_FACT                 rpfa;
    HPL_T_SWAP                 fswap;
+   double curGflops;
+   *TflopsPtr = 0.0;
 /* ..
  * .. Executable Statements ..
  */
-   MPI_Init( &ARGC, &ARGV );
+   /* MPI_Init( &ARGC, &ARGV ); */
 #ifdef HPL_CALL_VSIPL
    vsip_init((void*)0);
 #endif
@@ -220,7 +226,8 @@ int main( ARGC, ARGV )
               algo.fswap = fswap; algo.fsthr = tswap;
               algo.equil = equil; algo.align = align;
 
-              HPL_pdtest( &test, &grid, &algo, nval[in], nbval[inb] );
+              HPL_pdtest( &test, &grid, &algo, nval[in], nbval[inb], &curGflops );
+              if (*TflopsPtr < curGflops * 1e-3) *TflopsPtr = curGflops * 1e-3;
 
              }
             }
@@ -238,6 +245,7 @@ label_end_of_npqs: ;
  */
    if( rank == 0 )
    {
+     if (test.kfail || test.kskip) *failure = 1;
       test.ktest = test.kpass + test.kfail + test.kskip;
 #ifndef HPL_DETAILED_TIMING
       HPL_fprintf( test.outfp, "%s%s\n",
@@ -283,8 +291,8 @@ label_end_of_npqs: ;
 #ifdef HPL_CALL_VSIPL
    vsip_finalize((void*)0);
 #endif
-   MPI_Finalize();
-   exit( 0 );
+   /* MPI_Finalize(); */
+   /* exit( 0 ); */
 
    return( 0 );
 /*

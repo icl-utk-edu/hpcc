@@ -68,7 +68,7 @@
 #define    HPL_LATCPY_LOG2_N_DEPTH  1
 #endif
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_dlatcpy
 (
    const int                        M,

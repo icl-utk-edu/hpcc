@@ -51,7 +51,7 @@
 
 #ifndef HPL_dswap
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_dswap
 (
    const int                        N,

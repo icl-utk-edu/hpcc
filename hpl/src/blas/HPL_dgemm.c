@@ -53,7 +53,7 @@
 
 #ifdef HPL_CALL_VSIPL
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dgemmNN
 (
    const int                  M,
@@ -91,7 +91,7 @@ static void HPL_dgemmNN( M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
    }
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dgemmNT
 (
    const int                  M,
@@ -129,7 +129,7 @@ static void HPL_dgemmNT( M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
    }
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dgemmTN
 (
    const int                  M,
@@ -169,7 +169,7 @@ static void HPL_dgemmTN( M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
    }
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dgemmTT
 (
    const int                  M,
@@ -209,7 +209,7 @@ static void HPL_dgemmTT( M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC )
    }
 }
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dgemm0
 (
    const enum HPL_TRANS       TRANSA,
@@ -267,7 +267,7 @@ static void HPL_dgemm0( TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB,
 
 #endif
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_dgemm
 (
    const enum HPL_ORDER             ORDER,

@@ -53,7 +53,7 @@
 
 #ifdef HPL_CALL_VSIPL
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 static void HPL_dgemv0
 (
    const enum HPL_TRANS       TRANS,
@@ -114,7 +114,7 @@ static void HPL_dgemv0( TRANS, M, N, ALPHA, A, LDA, X, INCX, BETA, Y, INCY )
 }
 #endif
 
-#ifdef STDC_HEADERS
+#ifdef HPL_STDC_HEADERS
 void HPL_dgemv
 (
    const enum HPL_ORDER             ORDER,
