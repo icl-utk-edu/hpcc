@@ -241,7 +241,9 @@ HPCC_Init(HPCC_Params *params) {
   params->SingleStreamAddGBs = params->SingleStreamTriadGBs =
   params->SingleFFTGflops = params->StarFFTGflops = params->MPIFFTGflops =
   params->MaxPingPongLatency = params-> RandomlyOrderedRingLatency = params-> MinPingPongBandwidth =
-  params->NaturallyOrderedRingBandwidth = params->RandomlyOrderedRingBandwidth = -1.0;
+  params->NaturallyOrderedRingBandwidth = params->RandomlyOrderedRingBandwidth =
+  params->MinPingPongLatency = params->AvgPingPongLatency = params->MaxPingPongBandwidth =
+  params->AvgPingPongBandwidth = params->NaturallyOrderedRingLatency = -1.0;
 
   procMax = 0;
   for (i = 0; i < params->npqs; i++) {
@@ -314,6 +316,11 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "MinPingPongBandwidth_GBytes=%g", params->MinPingPongBandwidth );
   FPRINTF( myRank, outputFile, "NaturallyOrderedRingBandwidth_GBytes=%g", params->NaturallyOrderedRingBandwidth );
   FPRINTF( myRank, outputFile, "RandomlyOrderedRingBandwidth_GBytes=%g", params->RandomlyOrderedRingBandwidth );
+  FPRINTF( myRank, outputFile, "MinPingPongLatency_usec=%g", params->MinPingPongLatency );
+  FPRINTF( myRank, outputFile, "AvgPingPongLatency_usec=%g", params->AvgPingPongLatency );
+  FPRINTF( myRank, outputFile, "MaxPingPongBandwidth_GBytes=%g", params->MaxPingPongBandwidth );
+  FPRINTF( myRank, outputFile, "AvgPingPongBandwidth_GBytes=%g", params->AvgPingPongBandwidth );
+  FPRINTF( myRank, outputFile, "NaturallyOrderedRingLatency_usec=%g", params->NaturallyOrderedRingLatency );
   FPRINTF( myRank, outputFile, "End of Summary section.%s", "" );
   FPRINTF( myRank, outputFile,
             "########################################################################%s", "" );

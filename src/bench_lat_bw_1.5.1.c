@@ -1267,7 +1267,9 @@ void bench_lat_bw(
  * ----------------------------------------------------------------------- */
 void bench_lat_bw_print(double *MaxPingPongLatency, double *RandomlyOrderedRingLatency,
   double *MinPingPongBandwidth, double *NaturallyOrderedRingBandwidth,
-  double *RandomlyOrderedRingBandwidth) {
+  double *RandomlyOrderedRingBandwidth,
+  double *MinPingPongLatency, double *AvgPingPongLatency, double *MaxPingPongBandwidth,
+  double *AvgPingPongBandwidth, double *NaturallyOrderedRingLatency) {
   int msg_length_for_lat;
   int msg_length_for_bw;
   double ring_lat, rand_lat; 
@@ -1329,6 +1331,12 @@ void bench_lat_bw_print(double *MaxPingPongLatency, double *RandomlyOrderedRingL
       *NaturallyOrderedRingBandwidth = ring_bw * 1e-9; /* GB/s */
       *RandomlyOrderedRingBandwidth = rand_bw * 1e-9;  /* GB/s */
  
+      *MinPingPongLatency = latency_min * 1e6;      /* usec */
+      *AvgPingPongLatency = latency_avg * 1e6;      /* usec */
+      *MaxPingPongBandwidth = bandwidth_max * 1e-9;    /* GB/s */
+      *AvgPingPongBandwidth = bandwidth_avg * 1e-9;    /* GB/s */
+      *NaturallyOrderedRingLatency = ring_lat * 1e6; /* usec */
+
       fprintf ( OutFile, "\n------------------------------------------------------------------\n");
  
       fprintf( OutFile,  "\nDetailed benchmark results:\n" );
@@ -1386,13 +1394,21 @@ main_bench_lat_bw(HPCC_Params *params) {
 
   bench_lat_bw_print( &params->MaxPingPongLatency, &params->RandomlyOrderedRingLatency,
                       &params->MinPingPongBandwidth, &params->NaturallyOrderedRingBandwidth,
-                      &params->RandomlyOrderedRingBandwidth );
+                      &params->RandomlyOrderedRingBandwidth,
+		      &params->MinPingPongLatency, &params->AvgPingPongLatency,
+		      &params->MaxPingPongBandwidth, &params->AvgPingPongBandwidth,
+		      &params->NaturallyOrderedRingLatency );
 
   MPI_Bcast( &params->MaxPingPongLatency, 1, MPI_DOUBLE, 0, comm );
   MPI_Bcast( &params->RandomlyOrderedRingLatency, 1, MPI_DOUBLE, 0, comm );
   MPI_Bcast( &params->MinPingPongBandwidth, 1, MPI_DOUBLE, 0, comm );
   MPI_Bcast( &params->NaturallyOrderedRingBandwidth, 1, MPI_DOUBLE, 0, comm );
   MPI_Bcast( &params->RandomlyOrderedRingBandwidth, 1, MPI_DOUBLE, 0, comm );
+  MPI_Bcast( &params->MinPingPongLatency, 1, MPI_DOUBLE, 0, comm );
+  MPI_Bcast( &params->AvgPingPongLatency, 1, MPI_DOUBLE, 0, comm );
+  MPI_Bcast( &params->MaxPingPongBandwidth, 1, MPI_DOUBLE, 0, comm );
+  MPI_Bcast( &params->AvgPingPongBandwidth, 1, MPI_DOUBLE, 0, comm );
+  MPI_Bcast( &params->NaturallyOrderedRingLatency, 1, MPI_DOUBLE, 0, comm );
 
   fflush( OutFile );
   if (stderr != OutFile) fclose(OutFile);

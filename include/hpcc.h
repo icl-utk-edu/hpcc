@@ -47,7 +47,9 @@ typedef struct {
     SingleStreamAddGBs, SingleStreamTriadGBs, StarDGEMMGflops, SingleDGEMMGflops;
   double StarFFTGflops, SingleFFTGflops, MPIFFTGflops;
   double MaxPingPongLatency, RandomlyOrderedRingLatency, MinPingPongBandwidth,
-    NaturallyOrderedRingBandwidth, RandomlyOrderedRingBandwidth;
+    NaturallyOrderedRingBandwidth, RandomlyOrderedRingBandwidth,
+    MinPingPongLatency, AvgPingPongLatency, MaxPingPongBandwidth, AvgPingPongBandwidth,
+    NaturallyOrderedRingLatency;
 
   int Failure; /* over all failure of the benchmark */
 
