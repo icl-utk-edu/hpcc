@@ -122,14 +122,14 @@ def Gen(deps):
     sallobj = reduce(lambda x, y: x + " " + y, allobj)
     print
     print exe, ": $(HPLlib)"
-    print "\t$(LINKER) $(LINKFLAGS) -o", exe, sallobj, "$(HPL_LIBS)"
+    print "\t$(LINKER) $(LINKFLAGS) -o", exe, "$(HPL_LIBS)"
     print
     print "$(HPLlib):", sallobj
     print "\t$(ARCHIVER) $(ARFLAGS) $(HPLlib)", sallobj
     print "\t$(RANLIB) $(HPLlib)"
     print
     print "clean:"
-    print "\t$(RM)", exe
+    print "\t$(RM)", exe, "$(HPLlib)"
     print "\t$(RM)", sallobj
     print
 
@@ -156,7 +156,7 @@ def Gen(deps):
 def Dist(deps):
     allPrfx = "hpcc/"
 
-    addItems = ["Makefile", "README.xml", "hpccinf.txt", "hpl/Make.UNKNOWN", "hpl/Makefile.hpcc", "hpl/lib/arch/build", "hpl/makes", "hpl/man", "hpl/setup", "hpl/www"]
+    addItems = ["Makefile", "README.xml", "hpccinf.txt", "hpl/Make.UNKNOWN", "hpl/lib/arch/build/Makefile.hpcc", "hpl/makes", "hpl/man", "hpl/setup", "hpl/www"]
 
     allFiles = []
     hDict = {}
