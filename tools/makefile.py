@@ -69,17 +69,20 @@ deps = (
     ("testing/ptest/HPL_", (hmisc, hblas, hauxil, hgesv, hpmisc, hpauxil, hpanel, hpmatgen, hpgesv, hptimer, hptest),
      ("pddriver", "pdinfo", "pdtest"), ""),
 
-    ("../RandomAccess/", (hhpcc, hhpccv, hhpl, "../../../../RandomAccess/RandomAccess.h"),
+    ("../RandomAccess/", (hhpcc, hhpl, "../../../../RandomAccess/RandomAccess.h"),
      ("MPIRandomAccess", "RandomAccess", "onecpu"), "-I../../../../include $(CCFLAGS)"),
 
-    ("../STREAM/", (hhpcc, hhpccv, hhpl),
+    ("../STREAM/", (hhpcc, hhpl),
      ("onecpu", "stream"), "-I../../../../include $(CCFLAGS)"),
 
-    ("../PTRANS/", (hhpcc, hhpccv, hhpl),
+    ("../PTRANS/", (hhpcc, hhpl),
      ("pmatgeninc", "pdmatgen", "pdtransdriver", "pdmatcmp", "pdtrans", "sclapack", "cblacslt", "mem"), "-I../../../../include $(CCFLAGS)"),
 
     ("../src/", (hhpcc, hhpccv, hhpl),
-     ("bench_lat_bw_1.5.1",  "hpcc",  "io"), "-I../../../../include $(CCFLAGS)")
+     ("bench_lat_bw_1.5.1",  "hpcc",  "io"), "-I../../../../include $(CCFLAGS)"),
+
+    ("../DGEMM/", (hhpcc, hhpl),
+     ("tstdgemm",  "onecpu"), "-I../../../../include $(CCFLAGS)")
 
     )
 
