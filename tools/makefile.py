@@ -4,7 +4,7 @@
 # Use this file to generate ../hpl/Makefile.hpcc
 #
 
-import string, sys
+import os, string, sys
 
 hauxil = "../../../include/hpl_auxil.h"
 hblas = "../../../include/hpl_blas.h"
@@ -153,10 +153,40 @@ def Gen(deps):
             print "\t$(CC) -o", fo, "-c", fc, flags
             print
 
-def Dist(deps):
-    allPrfx = "hpcc/"
+def DirVisitor(newItems, dirname, items):
+    if dirname[-3:] == "CVS": # skip CVS directories
+        return
 
-    addItems = ["Makefile", "README.xml", "hpccinf.txt", "hpl/Make.UNKNOWN", "hpl/lib/arch/build/Makefile.hpcc", "hpl/makes", "hpl/man", "hpl/setup", "hpl/www"]
+    for name in items:
+        path = os.path.join(dirname, name)
+        if name[-1] == "~": continue
+        elif name in ("semantic.cache", "CVS"): continue
+        elif os.path.isfile(path):
+            newItems.append(path)
+
+def TraverseDirs(prfx, items):
+    newItems = []
+    for i in items:
+        name = os.path.join(prfx, i)
+
+        if os.path.isdir(name):
+            os.path.walk(name, DirVisitor, newItems)
+        else:
+            newItems.append(name)
+
+    l = len(prfx) + 1
+    for i in range(len(newItems)):
+        newItems[i] = newItems[i][l:]
+
+    return newItems
+
+def Dist(deps, prfx="hpcc"):
+    allPrfx = prfx + "/"
+
+    addItems = ["Makefile", "README.xml", "README.html", "hpccinf.txt", "hpl/Make.UNKNOWN", "hpl/lib/arch/build/Makefile.hpcc", "hpl/makes", "hpl/man", "hpl/setup", "hpl/www"]
+
+    addItems = TraverseDirs(prfx, addItems)
+    #print string.join(addItems, "\n")
 
     allFiles = []
     hDict = {}
@@ -182,14 +212,17 @@ def Dist(deps):
 
     allItems = map(lambda x, p=allPrfx: p + x, addItems) + allFiles + hDict.keys()
     allItems.sort()
-    print "tar --group=root --owner=root -cvohf hpcc.tar", string.join( allItems, " " )
+    print "tar --group=root --owner=root -cvohf " + allPrfx[:-1] + ".tar", string.join( allItems, " " )
 
 
 def main(argv):
     global allDeps
 
     if len(argv) > 1 and argv[1] == "dist":
-        Dist(allDeps)
+        if len(argv) > 2:
+            Dist(allDeps, argv[2])
+        else:
+            Dist(allDeps)
     else:
         Gen(allDeps)
 
