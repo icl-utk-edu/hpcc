@@ -9,6 +9,7 @@
 
 double *HPCC_fft_timings_forward, *HPCC_fft_timings_backward;
 
+/*
 static int
 ilog2u(unsigned long x) {
   int l;
@@ -16,6 +17,7 @@ ilog2u(unsigned long x) {
     ;
   return l-1;
 }
+*/
 
 static int
 LocalVectorSize(long maxCount) {
@@ -123,7 +125,6 @@ int
 MPIFFT(HPCC_Params *params) {
   int commRank, commSize;
   int i, procPow2, isComputing, doIO, failure;
-  long allN;
   s64Int_t n;
   double Gflops = -1.0;
   MPI_Comm comm;
@@ -160,6 +161,8 @@ MPIFFT(HPCC_Params *params) {
   if (isComputing)
     MPIFFT0( params->HPLMaxProcMem, params->test.thrsh, doIO, outFile, comm, &Gflops, &n,
 	     &failure );
+
+  params->MPIFFT_N = (double)n;
 
   MPI_Bcast( &Gflops, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD );
 
