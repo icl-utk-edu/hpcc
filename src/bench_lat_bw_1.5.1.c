@@ -924,6 +924,10 @@ void ring_lat_bw_loop(
 			else meas_ok=1;
 			MPI_Allreduce (&meas_ok, &meas_ok_recv, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 			meas_ok = meas_ok_recv;
+            /* Correction (by Hans Joraandstad): Must synchronize on loop_length here! */
+            MPI_Allreduce (&loop_length, &loop_length_recv, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+            loop_length = loop_length_recv;
+            /* End of Correction */
 		  }
 		  while (!meas_ok);
           lat_sendrecv = (end_time-start_time) / (2 * loop_length);
