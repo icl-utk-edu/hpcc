@@ -447,7 +447,7 @@ static integer c__3 = 3;
     /* Local variables */
     integer i__;
     doublereal px, pi2;
-    doublereal *w = (doublereal)*w_;
+    doublereal *w = (doublereal *)w_;
 
 
     /* Parameter adjustments */
