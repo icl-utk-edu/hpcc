@@ -134,7 +134,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   int NumberReceiving = NumProcs - 1;
   u64Int inmsg;
   MPI_Request inreq, outreq = MPI_REQUEST_NULL;
-  MPI_Status status;
+  MPI_Status status, ignoredStatus;
   int have_done;
 
   /* Initialize main table */
@@ -183,7 +183,9 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
      }
 #if USE_NONBLOCKING_SEND
      /* no way we can get here unless outreq is an active request */
-     MPI_Test(&outreq, &have_done, MPI_STATUS_IGNORE);
+     /* Cray X1 doesn't have MPI_STATUS_IGNORE */
+     /* MPI_Test(&outreq, &have_done, MPI_STATUS_IGNORE); */
+     MPI_Test(&outreq, &have_done, &ignoredStatus);
      if (have_done) {
        outreq = MPI_REQUEST_NULL;
        i++;
@@ -276,7 +278,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
   int NumberReceiving = NumProcs - 1;
   u64Int inmsg;
   MPI_Request inreq, outreq = MPI_REQUEST_NULL;
-  MPI_Status status;
+  MPI_Status status, ignoredStatus;
   int have_done;
 
   /* Initialize main table */
@@ -321,7 +323,9 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
      }
 #if USE_NONBLOCKING_SEND
      /* no way we can get here unless outreq is an active request */
-     MPI_Test(&outreq, &have_done, MPI_STATUS_IGNORE);
+     /* Cray X1 doesn't have MPI_STATUS_IGNORE */
+     /* MPI_Test(&outreq, &have_done, MPI_STATUS_IGNORE); */
+     MPI_Test(&outreq, &have_done, &ignoredStatus);
      if (have_done) {
        outreq = MPI_REQUEST_NULL;
        i++;
