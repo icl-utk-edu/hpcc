@@ -1,0 +1,262 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<article class="productsheet">
+  <articleinfo>
+    <title>
+      <acronym>DARPA</acronym>/<acronym>DOE</acronym> <acronym>HPCchallange</acronym> benchmark
+    </title>
+    <author>
+      <firstname>Piotr</firstname>
+      <surname>Luszczek</surname>
+      <affiliation>
+	<shortaffil>ICL</shortaffil>
+	<orgname>Innovative Computing Laboratory</orgname>
+      </affiliation>
+    </author>
+  </articleinfo>
+  <section>
+    <title>Introduction</title>
+    <para>
+      This is a suite of benchmarks that measure performance of <acronym>CPU</acronym>, memory
+      subsytem and the interconnect. For details refer to the <ulink
+      url="http://icl.cs.utk.edu/projectsdev/hpcc/"><citetitle>HPCchallenge</citetitle></ulink>
+      web site.
+    </para>
+    <para>
+      In essence, <acronym>HPCchallange</acronym> consists of a number of subbenchmarks each of
+      which tests different aspect of the system.
+    </para>
+    <para>
+      If you familiar with the <acronym>HPL</acronym> benchmark code (see the <ulink
+      url="http://www.netlib.org/benchmark/hpl/"><citetitle>HPL</citetitle></ulink> web site)
+      then you can reuse the configuration file and the input file that you already have for
+      <acronym>HPL</acronym>. The <acronym>HPCchallange</acronym> benchmark includes
+      <acronym>HPL</acronym> and uses its configuration and input files with only slight
+      modifications.
+    </para>
+  </section>
+  <section>
+    <title>Compiling</title>
+    <para>
+      The first step is to create a configuration file that reflects characteristics of your
+      machine. The configuration file should be created in the <filename
+      class="directory">hpl</filename> directory. This directory contains instructions (files
+      <filename>README</filename> and <filename>INSTALL</filename>) on how to create the
+      configuration file. This file is reused by all the components of the
+      <acronym>HPCchallange</acronym> suite.
+    </para>
+    <para>
+      When configuration is done, a file should exists in the <filename
+      class="directory">hpl</filename> whose name starts with <filename>Make.</filename> and ends
+      with a name for the system used for tests. For example, if the name for the system is
+      <filename>Unix</filename>, the file should be named <filename>Make.Unix</filename>.
+    </para>
+    <para>
+      To build the benchmark executable (for a system named <filename>Unix</filename>) type:
+      <userinput>make arch=Unix</userinput>.  This command should be run in the current (not in
+      <filename class="directory">hpl</filename>) directory. It will look in the <filename
+      class="directory">hpl</filename> directory for the configuration file and use it to build
+      the benchmark executable.
+    </para>
+  </section>
+  <section>
+    <title>Configuration</title>
+    <para>
+      The HPCchallange is drivien by a short input file named <filename>hpccinf.txt</filename>
+      that is almost the same as the input file for <acronym>HPL</acronym>. Refer to the
+      directory <filename>hpl/www/tuning.html</filename> for details about the input file for
+      <acronym>HPL</acronym>. A sample input file is included with
+      <acronym>HPCchallange</acronym> distribution.
+    </para>
+    <para>
+      The differences between <acronym>HPL</acronym> input file and <acronym>HPCchallange</acronym>
+      input file can be summarized as follows:
+    <itemizedlist>
+      <listitem>
+	<para>
+	  Lines 3 and 4 are ignored. The output always goes to the file named
+	  <filename>hpccoutf.txt</filename>.
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  There are additional lines (starting with line 32) that may (but do not have to) be
+	  used to customize the <acronym>HPCchallenge</acronym> benchmark. They are described
+	  below.
+	</para>
+      </listitem>
+    </itemizedlist>
+    </para>
+
+    <para>
+      The additional lines in the <acronym>HPCchallenge</acronym> input file (compared to the
+      <acronym>HPL</acronym> input file) are:
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    Lines 32 and 33 describe additional matrix sizes to be used for running the
+	    <acronym>PTRANS</acronym> benchmark (one of the components of the
+	    <acronym>HPCchallange</acronym> benchmark).
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    Lines 34 and 35 describe additional blocking factors to be used for running
+	    <acronym>PTRANS</acronym> benchmark.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      Just for completeness, here is the list of lines of the input file and brief description of
+      their meaning:
+      <itemizedlist mark="">
+	<listitem>
+        Line 1: ignored
+	</listitem>
+	<listitem>
+        Line 2: ignored
+	</listitem>
+	<listitem>
+        Line 3: ignored
+	</listitem>
+	<listitem>
+        Line 4: ignored
+	</listitem>
+	<listitem>
+        Line 5: number of matrix sizes for <acronym>HPL</acronym> (and <acronym>PTRANS</acronym>)
+	</listitem>
+	<listitem>
+        Line 6: matrix sizes for <acronym>HPL</acronym> (and <acronym>PTRANS</acronym>)
+	</listitem>
+	<listitem>
+        Line 7: number of blocking factors for <acronym>HPL</acronym> (and
+        <acronym>PTRANS</acronym>)
+	</listitem>
+	<listitem>
+        Line 8: blocking factors for <acronym>HPL</acronym> (and <acronym>PTRANS</acronym>)
+	</listitem>
+	<listitem>
+        Line 9: number of process grids for <acronym>HPL</acronym> (and
+        <acronym>PTRANS</acronym>)
+	</listitem>
+	<listitem>
+        Line 10: numbers of process rows of each process grid for <acronym>HPL</acronym> (and
+        <acronym>PTRANS</acronym>)
+	</listitem>
+	<listitem>
+        Line 11: numbers of process columns of each process grid for <acronym>HPL</acronym> (and
+        <acronym>PTRANS</acronym>)
+	</listitem>
+	<listitem>
+        Line 12: threshold value not to be exceeded by scaled residual for <acronym>HPL</acronym>
+        (and <acronym>PTRANS</acronym>)
+	</listitem>
+	<listitem>
+        Line 13: number of panel factorization methods for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 14: panel factorization methods for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 15: number of recursive stopping criteria for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 16: recursive stopping criteria for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 17: number of recursion panel counts for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 18: recursion panel counts for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 19: number of recursive panel factorization methods for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 20: recursive panel factorization methods for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 21: number of broadcast methods for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 22: broadcast methods for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 23: number of look-ahead depths for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 24: look-ahead depths for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 25: swap methods for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 26: swapping method for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 27: form of L1 for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 28: form of U for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 29: value that specifies whether equilibration should be used by
+        <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 30: memory alignment for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 31: ignored
+	</listitem>
+	<listitem>
+        Line 32: number of additional problem sizes for <acronym>PTRANS</acronym>
+	</listitem>
+	<listitem>
+        Line 33: additional problem sizes for <acronym>PTRANS</acronym>
+	</listitem>
+	<listitem>
+        Line 34: number of additional blocking factors for <acronym>PTRANS</acronym>
+	</listitem>
+	<listitem>
+        Line 35: additional blocking factors for <acronym>PTRANS</acronym>
+	</listitem>
+      </itemizedlist>
+    </para>
+  </section>
+
+  <section>
+    <title>Running</title>
+    <para>
+    It is hard to describe all the possible ways that the <acronym>HPCchallange</acronym>
+    benchmark should be run and various systems. A simple example with addition explanation is
+    provided. An example command to run the benchmark could like like this:
+    <command>mpirun -np 4 hpcc</command>. The meaning of the command's components is as follows:
+    <itemizedlist>
+      <listitem>
+      <para>
+      <command>mpirun</command> is the command that starts execution of an <acronym>MPI</acronym>
+      code. Depending on the system, it might also be <command>aprun</command>,
+      <command>mpiexec</command>, <command>mprun</command>, <command>poe</command>, or something
+      else.
+      </para>
+      </listitem>
+      <listitem>
+      <para>
+      <command>-np 4</command> is the argument that specifies that 4 <acronym>MPI</acronym>
+      processes should be started. The number of <acronym>MPI</acronym> processes should be large
+      enough to accomodate all the process grids specified in the
+      <filename>hpccinf.txt</filename> file.
+      </para>
+      </listitem>
+      <listitem>
+      <para>
+      <command>hpcc</command> is the name of the <acronym>HPCchallange</acronym> executable to
+      run.
+      </para>
+      </listitem>
+    </itemizedlist>
+    </para>
+  </section>
+</article>
