@@ -69,8 +69,8 @@
       <acronym>HPCchallange</acronym> distribution.
     </para>
     <para>
-      The differences between <acronym>HPL</acronym> input file and <acronym>HPCchallange</acronym>
-      input file can be summarized as follows:
+      The differences between <acronym>HPL</acronym> input file and
+      <acronym>HPCchallange</acronym> input file can be summarized as follows:
     <itemizedlist>
       <listitem>
 	<para>
@@ -80,7 +80,7 @@
       </listitem>
       <listitem>
 	<para>
-	  There are additional lines (starting with line 32) that may (but do not have to) be
+	  There are additional lines (starting with line 33) that may (but do not have to) be
 	  used to customize the <acronym>HPCchallenge</acronym> benchmark. They are described
 	  below.
 	</para>
@@ -94,14 +94,14 @@
       <itemizedlist>
 	<listitem>
 	  <para>
-	    Lines 32 and 33 describe additional matrix sizes to be used for running the
+	    Lines 33 and 34 describe additional matrix sizes to be used for running the
 	    <acronym>PTRANS</acronym> benchmark (one of the components of the
 	    <acronym>HPCchallange</acronym> benchmark).
 	  </para>
 	</listitem>
 	<listitem>
 	  <para>
-	    Lines 34 and 35 describe additional blocking factors to be used for running
+	    Lines 35 and 36 describe additional blocking factors to be used for running
 	    <acronym>PTRANS</acronym> benchmark.
 	  </para>
 	</listitem>
@@ -137,90 +137,93 @@
         Line 8: blocking factors for <acronym>HPL</acronym> (and <acronym>PTRANS</acronym>)
 	</listitem>
 	<listitem>
-        Line 9: number of process grids for <acronym>HPL</acronym> (and
+        Line 9: type of process ordering for <acronym>HPL</acronym>
+	</listitem>
+	<listitem>
+        Line 10: number of process grids for <acronym>HPL</acronym> (and
         <acronym>PTRANS</acronym>)
 	</listitem>
 	<listitem>
-        Line 10: numbers of process rows of each process grid for <acronym>HPL</acronym> (and
+        Line 11: numbers of process rows of each process grid for <acronym>HPL</acronym> (and
         <acronym>PTRANS</acronym>)
 	</listitem>
 	<listitem>
-        Line 11: numbers of process columns of each process grid for <acronym>HPL</acronym> (and
+        Line 12: numbers of process columns of each process grid for <acronym>HPL</acronym> (and
         <acronym>PTRANS</acronym>)
 	</listitem>
 	<listitem>
-        Line 12: threshold value not to be exceeded by scaled residual for <acronym>HPL</acronym>
+        Line 13: threshold value not to be exceeded by scaled residual for <acronym>HPL</acronym>
         (and <acronym>PTRANS</acronym>)
 	</listitem>
 	<listitem>
-        Line 13: number of panel factorization methods for <acronym>HPL</acronym>
+        Line 14: number of panel factorization methods for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 14: panel factorization methods for <acronym>HPL</acronym>
+        Line 15: panel factorization methods for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 15: number of recursive stopping criteria for <acronym>HPL</acronym>
+        Line 16: number of recursive stopping criteria for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 16: recursive stopping criteria for <acronym>HPL</acronym>
+        Line 17: recursive stopping criteria for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 17: number of recursion panel counts for <acronym>HPL</acronym>
+        Line 18: number of recursion panel counts for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 18: recursion panel counts for <acronym>HPL</acronym>
+        Line 19: recursion panel counts for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 19: number of recursive panel factorization methods for <acronym>HPL</acronym>
+        Line 20: number of recursive panel factorization methods for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 20: recursive panel factorization methods for <acronym>HPL</acronym>
+        Line 21: recursive panel factorization methods for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 21: number of broadcast methods for <acronym>HPL</acronym>
+        Line 22: number of broadcast methods for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 22: broadcast methods for <acronym>HPL</acronym>
+        Line 23: broadcast methods for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 23: number of look-ahead depths for <acronym>HPL</acronym>
+        Line 24: number of look-ahead depths for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 24: look-ahead depths for <acronym>HPL</acronym>
+        Line 25: look-ahead depths for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 25: swap methods for <acronym>HPL</acronym>
+        Line 26: swap methods for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 26: swapping method for <acronym>HPL</acronym>
+        Line 27: swapping threshold for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 27: form of L1 for <acronym>HPL</acronym>
+        Line 28: form of L1 for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 28: form of U for <acronym>HPL</acronym>
+        Line 29: form of U for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 29: value that specifies whether equilibration should be used by
+        Line 30: value that specifies whether equilibration should be used by
         <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 30: memory alignment for <acronym>HPL</acronym>
+        Line 31: memory alignment for <acronym>HPL</acronym>
 	</listitem>
 	<listitem>
-        Line 31: ignored
+        Line 33: ignored
 	</listitem>
 	<listitem>
-        Line 32: number of additional problem sizes for <acronym>PTRANS</acronym>
+        Line 33: number of additional problem sizes for <acronym>PTRANS</acronym>
 	</listitem>
 	<listitem>
-        Line 33: additional problem sizes for <acronym>PTRANS</acronym>
+        Line 34: additional problem sizes for <acronym>PTRANS</acronym>
 	</listitem>
 	<listitem>
-        Line 34: number of additional blocking factors for <acronym>PTRANS</acronym>
+        Line 35: number of additional blocking factors for <acronym>PTRANS</acronym>
 	</listitem>
 	<listitem>
-        Line 35: additional blocking factors for <acronym>PTRANS</acronym>
+        Line 36: additional blocking factors for <acronym>PTRANS</acronym>
 	</listitem>
       </itemizedlist>
     </para>
