@@ -447,7 +447,7 @@ MPIRandomAccess(HPCC_Params *params) {
   }
 
   TotalMem = params->HPLMaxProcMem; /* max single node memory */
-  /*  TotalMem *= NumProcs; */             /* max memory in NumProcs nodes */
+  TotalMem *= NumProcs;             /* max memory in NumProcs nodes */
   TotalMem /= sizeof(u64Int);
 
   /* calculate TableSize --- the size of update array (must be a power of 2) */
