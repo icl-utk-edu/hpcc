@@ -78,6 +78,12 @@ typedef struct HPL_S_test
    int                 ktest;                /* total number of tests */
 } HPL_T_test;
 
+typedef struct {
+  double Gflops, time, eps, RnormI, Anorm1, AnormI, Xnorm1, XnormI;
+  int N, NB, nprow, npcol, depth, nbdiv, nbmin;
+  char cpfact, crfact, ctop, order;
+} HPL_RuntimeData;
+
 /*
  * ---------------------------------------------------------------------
  * #define macro constants for testing only
@@ -143,7 +149,7 @@ STDC_ARGS( (
    HPL_T_palg *,
    const int,
    const int,
-   double *
+   HPL_RuntimeData *
 ) );
 
 #endif
