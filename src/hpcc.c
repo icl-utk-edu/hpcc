@@ -47,7 +47,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of HPL section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunHPL) HPL_main( argc, argv, &params.Tflops, &params.Failure );
+  if (params.RunHPL) HPL_main( argc, argv, &params.HPLrdata, &params.Failure );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
