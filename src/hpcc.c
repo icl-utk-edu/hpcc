@@ -56,6 +56,42 @@ main(int argc, char *argv[]) {
   END_IO(   myRank, outputFile );
 
   /* -------------------------------------------------- */
+  /*                    StarDGEMM                       */
+  /* -------------------------------------------------- */
+
+  MPI_Barrier( MPI_COMM_WORLD );
+
+  BEGIN_IO( myRank, outFname, outputFile);
+  FPRINTF(  myRank, outputFile, "Begin of StarDGEMM section.%s", "" );
+  END_IO(   myRank, outputFile );
+
+  if (params.RunHPL) StarDGEMM( &params );
+
+  time( &currentTime );
+  BEGIN_IO( myRank, outFname, outputFile);
+  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
+  FPRINTF(  myRank, outputFile, "End of StarDGEMM section.%s", "" );
+  END_IO(   myRank, outputFile );
+
+  /* -------------------------------------------------- */
+  /*                    SingleDGEMM                     */
+  /* -------------------------------------------------- */
+
+  MPI_Barrier( MPI_COMM_WORLD );
+
+  BEGIN_IO( myRank, outFname, outputFile);
+  FPRINTF(  myRank, outputFile, "Begin of SingleDGEMM section.%s", "" );
+  END_IO(   myRank, outputFile );
+
+  if (params.RunHPL) SingleDGEMM( &params );
+
+  time( &currentTime );
+  BEGIN_IO( myRank, outFname, outputFile);
+  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
+  FPRINTF(  myRank, outputFile, "End of SingleDGEMM section.%s", "" );
+  END_IO(   myRank, outputFile );
+
+  /* -------------------------------------------------- */
   /*                    StarSTREAM                      */
   /* -------------------------------------------------- */
 

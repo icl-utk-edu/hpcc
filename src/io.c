@@ -218,6 +218,8 @@ HPCC_Init(HPCC_Params *params) {
   HPCC_InputFileInit( params );
 
   params->RunHPL = 0;
+  params->RunStarDGEMM = 0;
+  params->RunSingleDGEMM = 0;
   params->RunPTRANS = 0;
   params->RunStarStream = 1;
   params->RunSingleStream = 0;
@@ -225,11 +227,13 @@ HPCC_Init(HPCC_Params *params) {
   params->RunStarRandomAccess = 0;
   params->RunSingleRandomAccess = 0;
   params->RunLatencyBandwidth = 0;
-  params->RunHPL = params->RunPTRANS = params->RunStarStream = params->RunSingleStream =
+  params->RunMPIFFT = 0;
+  params->RunHPL = params->RunStarDGEMM = params->RunSingleDGEMM =
   params->RunPTRANS = params->RunStarStream = params->RunSingleStream =
   params->RunLatencyBandwidth = 1;
 
-  params->Tflops = params->ptransGBs = params->MPIGUPs = params->StarGUPs = params->SingleGUPs= -1.0;
+  params->Tflops = params->ptransGBs = params->MPIGUPs = params->StarGUPs = params->SingleGUPs =
+  params->StarDGEMMGflops = params->SingleDGEMMGflops = -1.0;
   params->StarStreamCopyGBs = params->StarStreamScaleGBs = params->StarStreamAddGBs =
   params->StarStreamTriadGBs = params->SingleStreamCopyGBs = params->SingleStreamScaleGBs =
   params->SingleStreamAddGBs = params->SingleStreamTriadGBs =
@@ -284,6 +288,8 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "CommWorldProcs=%d", commSize );
   FPRINTF( myRank, outputFile, "HPL_Tflops=%g", params->Tflops );
   FPRINTF( myRank, outputFile, "HPLMaxProcs=%d", params->HPLMaxProc );
+  FPRINTF( myRank, outputFile, "StarDGEMM_Gflops=%g",   params->StarDGEMMGflops );
+  FPRINTF( myRank, outputFile, "SingleDGEMM_Gflops=%g", params->SingleDGEMMGflops );
   FPRINTF( myRank, outputFile, "PTRANS_GBs=%g", params->ptransGBs );
   FPRINTF( myRank, outputFile, "MPIRandomAccess_GUPs=%g", params->MPIGUPs );
   FPRINTF( myRank, outputFile, "StarRandomAccess_GUPs=%g", params->StarGUPs );
