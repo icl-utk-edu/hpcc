@@ -49,7 +49,7 @@ typedef struct {
   double MaxPingPongLatency, RandomlyOrderedRingLatency, MinPingPongBandwidth,
     NaturallyOrderedRingBandwidth, RandomlyOrderedRingBandwidth;
 
-  int Failure; /* over all failure failure of the benchmark */
+  int Failure; /* over all failure of the benchmark */
 
   unsigned long HPLMaxProcMem;
   int HPLMaxProc;
@@ -66,8 +66,9 @@ This is what needs to be done to add a new benchmark:
 -  Make sure that all the processes fill out the structure with the same data.
 -  Print the output of the benchmark in HPCC_Finalize().
 -  For tests that have "Star" and "Single" variants (DGEMM, RandomAccess, STREAM) the function
-that performs a test returns a value (0 or 1) that indicates runtime failure and also returns
-benchamark failure (due to wrong optimization causing numerical error).
+that performs the test returns a value (0 or 1) that indicates runtime failure and also returns
+benchamark failure (due to wrong optimization that causes numerical error) by setting
+params->Failure.
 */
 
 extern int HPCC_Init(HPCC_Params *params);
