@@ -1,92 +1,92 @@
 /* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*- */
 
-/* 
- * This code has been contributed by the DARPA HPCS program.  Contact 
- * David Koester <dkoester@mitre.org> or Bob Lucas <rflucas@isi.edu> 
+/*
+ * This code has been contributed by the DARPA HPCS program.  Contact
+ * David Koester <dkoester@mitre.org> or Bob Lucas <rflucas@isi.edu>
  * if you have questions.
  *
- * 
- * GUPS (Giga UPdates per Second) is a measurement that profiles the memory 
- * architecture of a system and is a measure of performance similar to MFLOPS. 
- * The HPCS HPCchallenge RandomAccess benchmark is intended to exercise the 
- * GUPS capability of a system, much like the LINPACK benchmark is intended to 
- * exercise the MFLOPS capability of a computer.  In each case, we would 
- * expect these benchmarks to achieve close to the "peak" capability of the 
- * memory system. The extent of the similarities between RandomAccess and 
- * LINPACK are limited to both benchmarks attempting to calculate a peak system 
- * capability.  
- * 
- * GUPS is calculated by identifying the number of memory locations that can be 
- * randomly updated in one second, divided by 1 billion (1e9). The term “randomly” 
- * means that there is little relationship between one address to be updated and 
- * the next, except that they occur in the space of one half the total system 
- * memory.  An update is a read-modify-write operation on a table of 64-bit words.  
- * An address is generated, the value at that address read from memory, modified 
- * by an integer operation (add, and, or, xor) with a literal value, and that 
- * new value is written back to memory. 
- * 
- * We are interested in knowing the GUPS performance of both entire systems and 
- * system subcomponents --- e.g., the GUPS rating of a distributed memory 
- * multiprocessor the GUPS rating of an SMP node, and the GUPS rating of a 
- * single processor.  While there is typically a scaling of FLOPS with processor 
- * count, a similar phenomenon may not always occur for GUPS.  
- * 
- * Select the memory size to be the power of two such that 2^n <= 1/2 of the 
- * total memory.  Each CPU operates on its own address stream, and the single 
- * table may be distributed among nodes. The distribution of memory to nodes 
- * is left to the implementer.  A uniform data distribution may help balance 
- * the workload, while non-uniform data distributions may simplify the 
- * calculations that identify processor location by eliminating the requirement 
- * for integer divides. A small (less than 1%) percentage of missed updates 
- * are permitted.
- * 
- * When implementing a benchmark that measures GUPS on a distributed memory  
- * multiprocessor system, it may be required to define constraints as to how 
- * far in the random address stream each node is permitted to "look ahead".  
- * Likewise, it may be required to define a constraint as to the number of 
- * update messages that can be stored before processing to permit multi-level 
- * parallelism for those systems that support such a paradigm.  The limits on 
- * “look ahead” and “stored updates” are being implemented to assure that the 
- * benchmark meets the intent to profile memory architecture and not induce 
- * significant artificial data locality. For the purpose of measuring GUPS, 
- * we will stipulate that each thread is permitted to look ahead no more than 
- * 1024 random address stream samples with the same number of update messages 
- * stored before processing.  
  *
- * The supplied MPI-1 code generates the input stream {A} on all processors 
- * and the global table has been distributed as uniformly as possible to 
- * balance the workload and minimize any Amdahl fraction.  This code does not 
- * exploit “look-ahead”.  Addresses are sent to the appropriate processor 
- * where the table entry resides as soon as each address is calculated.  
- * Updates are performed as addresses are received.  Each message is limited 
- * to a single 64 bit long integer containing element ai from {A}.  
+ * GUPS (Giga UPdates per Second) is a measurement that profiles the memory
+ * architecture of a system and is a measure of performance similar to MFLOPS.
+ * The HPCS HPCchallenge RandomAccess benchmark is intended to exercise the
+ * GUPS capability of a system, much like the LINPACK benchmark is intended to
+ * exercise the MFLOPS capability of a computer.  In each case, we would
+ * expect these benchmarks to achieve close to the "peak" capability of the
+ * memory system. The extent of the similarities between RandomAccess and
+ * LINPACK are limited to both benchmarks attempting to calculate a peak system
+ * capability.
+ *
+ * GUPS is calculated by identifying the number of memory locations that can be
+ * randomly updated in one second, divided by 1 billion (1e9). The term "randomly"
+ * means that there is little relationship between one address to be updated and
+ * the next, except that they occur in the space of one half the total system
+ * memory.  An update is a read-modify-write operation on a table of 64-bit words.
+ * An address is generated, the value at that address read from memory, modified
+ * by an integer operation (add, and, or, xor) with a literal value, and that
+ * new value is written back to memory.
+ *
+ * We are interested in knowing the GUPS performance of both entire systems and
+ * system subcomponents --- e.g., the GUPS rating of a distributed memory
+ * multiprocessor the GUPS rating of an SMP node, and the GUPS rating of a
+ * single processor.  While there is typically a scaling of FLOPS with processor
+ * count, a similar phenomenon may not always occur for GUPS.
+ *
+ * Select the memory size to be the power of two such that 2^n <= 1/2 of the
+ * total memory.  Each CPU operates on its own address stream, and the single
+ * table may be distributed among nodes. The distribution of memory to nodes
+ * is left to the implementer.  A uniform data distribution may help balance
+ * the workload, while non-uniform data distributions may simplify the
+ * calculations that identify processor location by eliminating the requirement
+ * for integer divides. A small (less than 1%) percentage of missed updates
+ * are permitted.
+ *
+ * When implementing a benchmark that measures GUPS on a distributed memory
+ * multiprocessor system, it may be required to define constraints as to how
+ * far in the random address stream each node is permitted to "look ahead".
+ * Likewise, it may be required to define a constraint as to the number of
+ * update messages that can be stored before processing to permit multi-level
+ * parallelism for those systems that support such a paradigm.  The limits on
+ * "look ahead" and "stored updates" are being implemented to assure that the
+ * benchmark meets the intent to profile memory architecture and not induce
+ * significant artificial data locality. For the purpose of measuring GUPS,
+ * we will stipulate that each thread is permitted to look ahead no more than
+ * 1024 random address stream samples with the same number of update messages
+ * stored before processing.
+ *
+ * The supplied MPI-1 code generates the input stream {A} on all processors
+ * and the global table has been distributed as uniformly as possible to
+ * balance the workload and minimize any Amdahl fraction.  This code does not
+ * exploit "look-ahead".  Addresses are sent to the appropriate processor
+ * where the table entry resides as soon as each address is calculated.
+ * Updates are performed as addresses are received.  Each message is limited
+ * to a single 64 bit long integer containing element ai from {A}.
  * Local offsets for T[ ] are extracted by the destination processor.
- * 
- * If the number of processors is equal to a power of two, then the global 
- * table can be distributed equally over the processors.  In addition, the 
- * processor number can be determined from that portion of the input stream 
- * that identifies the address into the global table by masking off log2(p) 
- * bits in the address.  
- * 
- * If the number of processors is not equal to a power of two, then the global 
- * table cannot be equally distributed between processors.  In the MPI-1 
- * implementation provided, there has been an attempt to minimize the differences 
- * in workloads and the largest difference in elements of T[ ] is one.  The 
- * number of values in the input stream generated by each processor will be 
+ *
+ * If the number of processors is equal to a power of two, then the global
+ * table can be distributed equally over the processors.  In addition, the
+ * processor number can be determined from that portion of the input stream
+ * that identifies the address into the global table by masking off log2(p)
+ * bits in the address.
+ *
+ * If the number of processors is not equal to a power of two, then the global
+ * table cannot be equally distributed between processors.  In the MPI-1
+ * implementation provided, there has been an attempt to minimize the differences
+ * in workloads and the largest difference in elements of T[ ] is one.  The
+ * number of values in the input stream generated by each processor will be
  * related to the number of global table entries on each processor.
- * 
- * The MPI-1 version of RandomAccess treats the potential instance where the 
- * number of processors is a power of two as a special case, because of the 
- * significant simplifications possible because processor location and local 
- * offset can be determined by applying masks to the input stream values.  
- * The non power of two case uses an integer division to determine the processor 
- * location.  The integer division will be more costly in terms of machine 
+ *
+ * The MPI-1 version of RandomAccess treats the potential instance where the
+ * number of processors is a power of two as a special case, because of the
+ * significant simplifications possible because processor location and local
+ * offset can be determined by applying masks to the input stream values.
+ * The non power of two case uses an integer division to determine the processor
+ * location.  The integer division will be more costly in terms of machine
  * cycles to perform than the bit masking operations
  *
  * For additional information on the GUPS metric, the HPCchallenge RandomAccess
- * Benchmark,and the rules to run RandomAccess or modify it to optimize 
- * performance -- see http://www.netlib.org/parkbench/html/RandomAccess/
- *  
+ * Benchmark,and the rules to run RandomAccess or modify it to optimize
+ * performance -- see http://icl.cs.utk.edu/hpcc/
+ *
  */
 
 #include <hpcc.h>
@@ -104,7 +104,7 @@ u64Int *Table;
 #define FINISHED_TAG 1
 #define UPDATE_TAG   2
 #define USE_NONBLOCKING_SEND 1
-              
+
 void
 Sum64(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
   int i, n = *len; s64Int *invec64 = invec, *inoutvec64 = inoutvec;
@@ -160,7 +160,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
      if (outreq == MPI_REQUEST_NULL) {
        Ran = (Ran << 1) ^ ((s64Int) Ran < ZERO64B ? POLY : ZERO64B);
        GlobalOffset = Ran & (TableSize-1);
-       if ( GlobalOffset < Top) 
+       if ( GlobalOffset < Top)
          WhichPe = ( GlobalOffset / (MinLocalTableSize + 1) );
        else
          WhichPe = ( (GlobalOffset - Remainder) / MinLocalTableSize );
@@ -172,10 +172,10 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
          continue;
        } else {
 #if USE_NONBLOCKING_SEND
-         MPI_Isend(&Ran, 1, INT64_DT, (int) WhichPe, UPDATE_TAG, 
+         MPI_Isend(&Ran, 1, INT64_DT, (int) WhichPe, UPDATE_TAG,
                    MPI_COMM_WORLD, &outreq);
 #else
-         MPI_Send(&Ran, 1, INT64_DT, (int) WhichPe, UPDATE_TAG, 
+         MPI_Send(&Ran, 1, INT64_DT, (int) WhichPe, UPDATE_TAG,
                   MPI_COMM_WORLD);
          i++;
 #endif
@@ -213,7 +213,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
    for (proc_count = 0 ; proc_count < NumProcs ; ++proc_count) {
      if (proc_count == MyProc) continue;
      /* send garbage - who cares, no one will look at it */
-     MPI_Send(&Ran, 1, INT64_DT, proc_count, FINISHED_TAG, 
+     MPI_Send(&Ran, 1, INT64_DT, proc_count, FINISHED_TAG,
               MPI_COMM_WORLD);
    }
 
@@ -310,10 +310,10 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
          continue;
        } else {
 #if USE_NONBLOCKING_SEND
-         MPI_Isend(&Ran, 1, INT64_DT, (int) WhichPe, UPDATE_TAG, 
+         MPI_Isend(&Ran, 1, INT64_DT, (int) WhichPe, UPDATE_TAG,
                    MPI_COMM_WORLD, &outreq);
 #else
-         MPI_Send(&Ran, 1, INT64_DT, (int) WhichPe, UPDATE_TAG, 
+         MPI_Send(&Ran, 1, INT64_DT, (int) WhichPe, UPDATE_TAG,
                   MPI_COMM_WORLD);
          i++;
 #endif
@@ -350,7 +350,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
    for (proc_count = 0 ; proc_count < NumProcs ; ++proc_count) {
      if (proc_count == MyProc) continue;
      /* send garbage - who cares, no one will look at it */
-     MPI_Send(&Ran, 1, INT64_DT, proc_count, FINISHED_TAG, 
+     MPI_Send(&Ran, 1, INT64_DT, proc_count, FINISHED_TAG,
               MPI_COMM_WORLD);
    }
 
@@ -398,8 +398,8 @@ MPIRandomAccess(HPCC_Params *params) {
   s64Int WhichPe;
   u64Int GlobalOffset, GlobalStartMyProc, LocalOffset;
 
-  u64Int logTableSize, TableSize;  
-  u64Int RanTemp;               /* Current random number */ 
+  u64Int logTableSize, TableSize;
+  u64Int RanTemp;               /* Current random number */
   double CPUTime;               /* CPU  time to update table */
   double RealTime;              /* Real time to update table */
   double TotalMem;
@@ -456,7 +456,7 @@ MPIRandomAccess(HPCC_Params *params) {
   /* determine whether the number of processors is a power of 2 */
 
   for (i = 1, logNumProcs = 0; ; logNumProcs++, i <<= 1) {
-    if (i == NumProcs) { 
+    if (i == NumProcs) {
       PowerofTwo = TRUE;
       Remainder = 0;
       Top = 0;
@@ -466,7 +466,7 @@ MPIRandomAccess(HPCC_Params *params) {
       break;
 
     /* number of processes is not a power 2 (too many shifts may introduce negative values or 0) */
-    } 
+    }
     else if (i > NumProcs || i <= 0) {
       PowerofTwo = FALSE;
 /* Minimum local table size --- some processors have an additional entry */
@@ -512,7 +512,7 @@ MPIRandomAccess(HPCC_Params *params) {
       else
         fprintf( outFile, "PE Main table size = (2^" FSTR64 ")/%d  = " FSTR64 " words/PE MAX\n",
                  logTableSize, NumProcs, LocalTableSize);
-   
+
     fprintf( outFile, "Number of updates = " FSTR64 "\n", Nupdate);
   }
 
@@ -523,14 +523,14 @@ MPIRandomAccess(HPCC_Params *params) {
   RealTime = -RTSEC();
 
   if (PowerofTwo) {
-    Power2NodesMPIRandomAccessUpdate(logTableSize, TableSize, LocalTableSize, 
-                                     MinLocalTableSize, GlobalStartMyProc, Top, 
-                                     logNumProcs, NumProcs, Remainder, 
+    Power2NodesMPIRandomAccessUpdate(logTableSize, TableSize, LocalTableSize,
+                                     MinLocalTableSize, GlobalStartMyProc, Top,
+                                     logNumProcs, NumProcs, Remainder,
                                      MyProc, INT64_DT);
   } else {
-    AnyNodesMPIRandomAccessUpdate(logTableSize, TableSize, LocalTableSize, 
-                                  MinLocalTableSize, GlobalStartMyProc, Top, 
-                                  logNumProcs, NumProcs, Remainder, 
+    AnyNodesMPIRandomAccessUpdate(logTableSize, TableSize, LocalTableSize,
+                                  MinLocalTableSize, GlobalStartMyProc, Top,
+                                  logNumProcs, NumProcs, Remainder,
                                   MyProc, INT64_DT);
   }
 
@@ -543,14 +543,14 @@ MPIRandomAccess(HPCC_Params *params) {
     *GUPs = 1e-9*Nupdate / RealTime;
     fprintf( outFile, "CPU time used = %.6f seconds\n", CPUTime );
     fprintf( outFile, "Real time used = %.6f seconds\n", RealTime );
-    fprintf( outFile, "%.9f Billion(10^9) Updates    per second [GUP/s]\n", 
+    fprintf( outFile, "%.9f Billion(10^9) Updates    per second [GUP/s]\n",
              *GUPs );
     fprintf( outFile, "%.9f Billion(10^9) Updates/PE per second [GUP/s]\n",
              *GUPs / NumProcs );
     *GUPs /= NumProcs;
   }
   /* distribute result to all nodes */
-  MPI_Bcast( GUPs, 1, MPI_INT, 0, MPI_COMM_WORLD ); 
+  MPI_Bcast( GUPs, 1, MPI_INT, 0, MPI_COMM_WORLD );
 
   /* Verification of results (in serial or "safe" mode; optional) */
   CPUTime  = -CPUSEC();
@@ -611,8 +611,8 @@ MPIRandomAccess(HPCC_Params *params) {
     fprintf( outFile, "Check  CPU time used = %.6f seconds\n", CPUTime);
     fprintf( outFile, "Check Real time used = %.6f seconds\n", RealTime);
     fprintf( outFile, "Found " FSTR64 " errors in " FSTR64 " locations (%s).\n",
-	    GlbSendCnt, TableSize, (GlbSendCnt <= 0.01*TableSize) ?
-	    "passed" : "failed");
+      GlbSendCnt, TableSize, (GlbSendCnt <= 0.01*TableSize) ?
+      "passed" : "failed");
     if (GlbSendCnt > 0.01*TableSize) params->Failure = 1;
   }
 
