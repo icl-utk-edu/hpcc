@@ -7,9 +7,11 @@
  * The test runs on all cpus in the MPI universe, but there is no communication
  * between cpus during the process (each cpu runs its own version of the
  * single_cpu test).  The final result is the average of the entire system.
- *
- * This test uses the computational core found in core_single_cpu.c
  */
+/* This file contains the interface for the single cpu RandomAccess test.  The
+ * test is only run on a single (random) node in the MPI universe, with all
+ * other CPUs stuck (in theory, idle) in an MPI_Bcast waiting for the selected
+ * CPU to finish the RandomAccess test. */
 
 #include <hpcc.h>
 #include "RandomAccess.h"
@@ -51,21 +53,6 @@ StarRandomAccess(HPCC_Params *params)
 
   return 0;
 }
-/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*- 
- *
- * See RandomAccess.h for a comprehensive description of this test and
- * its goals.
- *
- * This file contains the interface for the single cpu RandomAccess test.  The
- * test is only run on a single (random) node in the MPI universe, with all
- * other CPUs stuck (in theory, idle) in an MPI_Bcast waiting for the selected
- * CPU to finish the RandomAccess test.
- *
- * This test uses the computational core found in core_single_cpu.c
- */
-
-#include <hpcc.h>
-#include "RandomAccess.h"
 
 int
 SingleRandomAccess(HPCC_Params *params)
@@ -85,10 +72,13 @@ SingleRandomAccess(HPCC_Params *params)
   srand(time(NULL));
   scl *= commSize;
 
-  /* select a node at random, but not node 0 */
-  for (rank = 0; ; rank = scl * rand()) {
-    if (rank > 0 && rank < commSize) break;
-  }
+  /* select a node at random, but not node 0 (unless there is just one node) */
+  if (1 == commSize)
+    rank = 0;
+  else
+    for (rank = 0; ; rank = (int)(scl * rand())) {
+      if (rank > 0 && rank < commSize) break;
+    }
 
   MPI_Bcast( &rank, 1, MPI_INT, 0, comm ); /* broadcast the rank selected on node 0 */
 

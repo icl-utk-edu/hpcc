@@ -33,7 +33,6 @@
  *
  */
 
-#include <assert.h>
 #include <hpcc.h>
 
 #include "RandomAccess.h"
@@ -69,12 +68,11 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
                               int MyProc,
                               MPI_Datatype INT64_DT)
 {
-  s64Int i, k, m;
+  s64Int i;
   int proc_count;
 
   s64Int SendCnt;
-  u64Int Ran, RanTemp;
-  s64Int lcRecvDone =  FALSE;
+  u64Int Ran;
   s64Int WhichPe;
   u64Int GlobalOffset, LocalOffset;
   int NumberReceiving = NumProcs - 1;
@@ -212,14 +210,13 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
                                  int MyProc,
                                  MPI_Datatype INT64_DT)
 {
-  s64Int i, k, m;
+  s64Int i;
   int proc_count;
 
   s64Int SendCnt;
-  u64Int Ran, RanTemp;
-  s64Int lcRecvDone =  FALSE;
+  u64Int Ran;
   s64Int WhichPe;
-  u64Int GlobalOffset, LocalOffset;
+  u64Int LocalOffset;
   int NumberReceiving = NumProcs - 1;
   u64Int inmsg;
   MPI_Request inreq, outreq = MPI_REQUEST_NULL;

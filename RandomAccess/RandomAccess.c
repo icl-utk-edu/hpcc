@@ -156,17 +156,6 @@ RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
 
   return 0;
 }
-/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*- 
- *
- * See RandomAccess.h for a comprehensive description of this test and
- * its goals.
- *
- * This file provides utility functions for the RandomAccess benchmark suite.
- */
-
-#include <hpcc.h>
-#include "RandomAccess.h"
-
 
 /* Utility routine to start random number generator at Nth step */
 u64Int
