@@ -494,8 +494,6 @@ MPIRandomAccess(HPCC_Params *params) {
   } /* end for i */
 
 
-  params->MPIRandomAccess_N = (double)TableSize;
-
   Table = XMALLOC( u64Int, LocalTableSize);
   sAbort = 0; if (! Table) sAbort = 1;
 
@@ -504,6 +502,8 @@ MPIRandomAccess(HPCC_Params *params) {
     if (MyProc == 0) fprintf(outFile, "Failed to allocate memory for the main table.\n");
     goto failed_table;
   }
+
+  params->MPIRandomAccess_N = (double)TableSize;
 
   /* Number of global updates to table - 4x number of table entries */
   Nupdate = 4 * TableSize;
