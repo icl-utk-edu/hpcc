@@ -547,6 +547,7 @@ MPIRandomAccess(HPCC_Params *params) {
 
   /* Print timing results */
   if (MyProc == 0){
+    params->MPIRandomAccess_time = RealTime;
     *GUPs = 1e-9*Nupdate / RealTime;
     fprintf( outFile, "CPU time used = %.6f seconds\n", CPUTime );
     fprintf( outFile, "Real time used = %.6f seconds\n", RealTime );
@@ -616,6 +617,7 @@ MPIRandomAccess(HPCC_Params *params) {
   CPUTime += CPUSEC();
   RealTime += RTSEC();
   if(MyProc == 0){
+    params->MPIRandomAccess_CheckTime = RealTime;
     fprintf( outFile, "Check  CPU time used = %.6f seconds\n", CPUTime);
     fprintf( outFile, "Check Real time used = %.6f seconds\n", RealTime);
     fprintf( outFile, "Found " FSTR64 " errors in " FSTR64 " locations (%s).\n",
