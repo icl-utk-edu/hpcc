@@ -182,6 +182,60 @@ main(int argc, char *argv[]) {
   END_IO(   myRank, outputFile );
 
   /* -------------------------------------------------- */
+  /*                       MPIFFT                       */
+  /* -------------------------------------------------- */
+
+  MPI_Barrier( MPI_COMM_WORLD );
+
+  BEGIN_IO( myRank, outFname, outputFile);
+  FPRINTF(  myRank, outputFile, "Begin of MPIFFT section.%s", "" );
+  END_IO(   myRank, outputFile );
+
+  if (params.RunMPIFFT) MPIFFT( &params );
+
+  time( &currentTime );
+  BEGIN_IO( myRank, outFname, outputFile);
+  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
+  FPRINTF(  myRank, outputFile, "End of MPIFFT section.%s", "" );
+  END_IO(   myRank, outputFile );
+
+  /* -------------------------------------------------- */
+  /*                      StarFFT                       */
+  /* -------------------------------------------------- */
+
+  MPI_Barrier( MPI_COMM_WORLD );
+
+  BEGIN_IO( myRank, outFname, outputFile);
+  FPRINTF(  myRank, outputFile, "Begin of StarFFT section.%s", "" );
+  END_IO(   myRank, outputFile );
+
+  if (params.RunStarFFT) StarFFT( &params );
+
+  time( &currentTime );
+  BEGIN_IO( myRank, outFname, outputFile);
+  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
+  FPRINTF(  myRank, outputFile, "End of StarFFT section.%s", "" );
+  END_IO(   myRank, outputFile );
+
+  /* -------------------------------------------------- */
+  /*                      SingleFFT                     */
+  /* -------------------------------------------------- */
+
+  MPI_Barrier( MPI_COMM_WORLD );
+
+  BEGIN_IO( myRank, outFname, outputFile);
+  FPRINTF(  myRank, outputFile, "Begin of SingleFFT section.%s", "" );
+  END_IO(   myRank, outputFile );
+
+  if (params.RunSingleFFT) SingleFFT( &params );
+
+  time( &currentTime );
+  BEGIN_IO( myRank, outFname, outputFile);
+  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
+  FPRINTF(  myRank, outputFile, "End of SingleFFT section.%s", "" );
+  END_IO(   myRank, outputFile );
+
+  /* -------------------------------------------------- */
   /*                  Latency/Bandwidth                 */
   /* -------------------------------------------------- */
 

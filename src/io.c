@@ -230,6 +230,8 @@ HPCC_Init(HPCC_Params *params) {
   params->RunMPIFFT = 0;
   params->RunHPL = params->RunStarDGEMM = params->RunSingleDGEMM =
   params->RunPTRANS = params->RunStarStream = params->RunSingleStream =
+  params->RunMPIRandomAccess = params->RunStarRandomAccess = params->RunSingleRandomAccess = 
+  params->RunMPIFFT = params->RunStarFFT = params->RunSingleFFT = 
   params->RunLatencyBandwidth = 1;
 
   params->Tflops = params->ptransGBs = params->MPIGUPs = params->StarGUPs = params->SingleGUPs =
@@ -237,6 +239,7 @@ HPCC_Init(HPCC_Params *params) {
   params->StarStreamCopyGBs = params->StarStreamScaleGBs = params->StarStreamAddGBs =
   params->StarStreamTriadGBs = params->SingleStreamCopyGBs = params->SingleStreamScaleGBs =
   params->SingleStreamAddGBs = params->SingleStreamTriadGBs =
+  params->SingleFFTGflops = params->StarFFTGflops = params->MPIFFTGflops =
   params->MaxPingPongLatency = params-> RandomlyOrderedRingLatency = params-> MinPingPongBandwidth =
   params->NaturallyOrderedRingBandwidth = params->RandomlyOrderedRingBandwidth = -1.0;
 
@@ -302,6 +305,9 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "SingleSTREAM_Scale=%g", params->SingleStreamScaleGBs );
   FPRINTF( myRank, outputFile, "SingleSTREAM_Add=%g", params->SingleStreamAddGBs );
   FPRINTF( myRank, outputFile, "SingleSTREAM_Triad=%g", params->SingleStreamTriadGBs );
+  FPRINTF( myRank, outputFile, "StarFFT_Gflops=%g",   params->StarFFTGflops );
+  FPRINTF( myRank, outputFile, "SingleFFT_Gflops=%g", params->SingleFFTGflops );
+  FPRINTF( myRank, outputFile, "MPIFFT_Gflops=%g", params->MPIFFTGflops );
   FPRINTF( myRank, outputFile, "MaxPingPongLatency_usec=%g", params->MaxPingPongLatency );
   FPRINTF( myRank, outputFile, "RandomlyOrderedRingLatency_usec=%g", params->RandomlyOrderedRingLatency );
   FPRINTF( myRank, outputFile, "MinPingPongBandwidth_GBytes=%g", params->MinPingPongBandwidth );
