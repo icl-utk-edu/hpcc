@@ -45,6 +45,7 @@ typedef struct {
   double Tflops, ptransGBs, MPIGUPs, StarGUPs, SingleGUPs, StarStreamCopyGBs, StarStreamScaleGBs,
     StarStreamAddGBs, StarStreamTriadGBs, SingleStreamCopyGBs, SingleStreamScaleGBs,
     SingleStreamAddGBs, SingleStreamTriadGBs, StarDGEMMGflops, SingleDGEMMGflops;
+  double StarFFTGflops, SingleFFTGflops, MPIFFTGflops;
   double MaxPingPongLatency, RandomlyOrderedRingLatency, MinPingPongBandwidth,
     NaturallyOrderedRingBandwidth, RandomlyOrderedRingBandwidth;
 
@@ -54,7 +55,7 @@ typedef struct {
   int HPLMaxProc;
   int RunHPL, RunStarDGEMM, RunSingleDGEMM, RunPTRANS, RunStarStream,
     RunSingleStream, RunMPIRandomAccess, RunStarRandomAccess,
-    RunSingleRandomAccess, RunLatencyBandwidth;
+    RunSingleRandomAccess, RunLatencyBandwidth, RunStarFFT, RunSingleFFT, RunMPIFFT;
 } HPCC_Params;
 /*
 This is what needs to be done to add a new benchmark:
@@ -82,7 +83,11 @@ extern int SingleRandomAccess(HPCC_Params *params);
 extern int StarRandomAccess(HPCC_Params *params);
 extern int SingleStream(HPCC_Params *params);
 extern int StarStream(HPCC_Params *params);
+extern int StarFFT(HPCC_Params *params);
+extern int SingleFFT(HPCC_Params *params);
+extern int MPIFFT(HPCC_Params *params);
 
+extern int TestFFT(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure);
 extern int TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure);
 extern int MaxMem(int nprocs, int imrow, int imcol, int nmat, int *mval, int *nval, int nbmat,
   int *mbval, int *nbval, int ngrids, int *npval, int *nqval, long *maxMem);
