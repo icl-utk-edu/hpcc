@@ -3,7 +3,7 @@
 <article class="productsheet">
   <articleinfo>
     <title>
-      <acronym>DARPA</acronym>/<acronym>DOE</acronym> <acronym>HPCchallange</acronym> benchmark
+      <acronym>DARPA</acronym>/<acronym>DOE</acronym> <acronym>HPC Challange</acronym> benchmark
     </title>
     <author>
       <firstname>Piotr</firstname>
@@ -23,7 +23,7 @@
       web site.
     </para>
     <para>
-      In essence, <acronym>HPCchallange</acronym> consists of a number of subbenchmarks each of
+      In essence, <acronym>HPC Challange</acronym> consists of a number of subbenchmarks each of
       which tests different aspect of the system.
     </para>
     <para>
@@ -31,7 +31,7 @@
       url="http://www.netlib.org/benchmark/hpl/"><citetitle>HPL</citetitle></ulink> web site)
       then you can reuse the configuration file (input for <command>make(1)</command>)
        and the input file that you already have for
-      <acronym>HPL</acronym>. The <acronym>HPCchallange</acronym> benchmark includes
+      <acronym>HPL</acronym>. The <acronym>HPC Challange</acronym> benchmark includes
       <acronym>HPL</acronym> and uses its configuration and input files with only slight
       modifications.
     </para>
@@ -41,38 +41,40 @@
     <para>
       The first step is to create a configuration file that reflects characteristics of your
       machine. The configuration file should be created in the <filename
-      class="directory">hpl</filename> directory. This directory contains instructions (files
+      class="directory">hpl</filename> directory. This directory contains instructions (the files
       <filename>README</filename> and <filename>INSTALL</filename>) on how to create the
       configuration file. This file is reused by all the components of the
-      <acronym>HPCchallange</acronym> suite.
+      <acronym>HPC Challange</acronym> suite.
     </para>
     <para>
-      When configuration is done, a file should exists in the <filename
-      class="directory">hpl</filename> whose name starts with <filename>Make.</filename> and
-      ends with a name for the system used for tests. For example, if the name for the system is
-      <filename>Unix</filename>, the file should be named <filename>Make.Unix</filename>.
+      When configuration is done, a file should exist in the <filename
+      class="directory">hpl</filename> directory whose name starts with
+      <filename>Make.</filename> and ends with the name for the system used for tests.
+      For example, if the name of the system is <filename>Unix</filename>, the file
+      should be named <filename>Make.Unix</filename>.
     </para>
     <para>
-      To build the benchmark executable (for a system named <filename>Unix</filename>) type:
-      <userinput>make arch=Unix</userinput>.  This command should be run in the current (not in
-      <filename class="directory">hpl</filename>) directory. It will look in the <filename
-      class="directory">hpl</filename> directory for the configuration file and use it to build
-      the benchmark executable.
+      To build the benchmark executable (for the system named <filename>Unix</filename>) type:
+      <userinput>make arch=Unix</userinput>.  This command should be run in the top directory
+      (not in the <filename class="directory">hpl</filename> directory). It will look in the
+      <filename class="directory">hpl</filename> directory for the configuration file and use
+      it to build the benchmark executable.
     </para>
   </section>
   <section>
     <title>Configuration</title>
     <para>
-      The HPCchallange is drivien by a short input file named <filename>hpccinf.txt</filename>
+      The <acronym>HPC Challange</acronym> is driven by a short input file named
+      <filename>hpccinf.txt</filename>
       that is almost the same as the input file for <acronym>HPL</acronym> (customarily called
-       <filename>HPL.dat</filename>). Refer to the
-      directory <filename>hpl/www/tuning.html</filename> for details about the input file for
-      <acronym>HPL</acronym>. A sample input file is included with
-      <acronym>HPCchallange</acronym> distribution.
+      <filename>HPL.dat</filename>). Refer to the
+      file <filename>hpl/www/tuning.html</filename> for details about the input file for
+      <acronym>HPL</acronym>. A sample input file is included with the
+      <acronym>HPC Challange</acronym> distribution.
     </para>
     <para>
       The differences between <acronym>HPL</acronym> input file and
-      <acronym>HPCchallange</acronym> input file can be summarized as follows:
+      <acronym>HPC Challange</acronym> input file can be summarized as follows:
     <itemizedlist>
       <listitem><simpara>
 	  Lines 3 and 4 are ignored. The output always goes to the file named
@@ -95,7 +97,7 @@
 	<listitem><simpara>
 	    Lines 33 and 34 describe additional matrix sizes to be used for running the
 	    <acronym>PTRANS</acronym> benchmark (one of the components of the
-	    <acronym>HPCchallange</acronym> benchmark).
+	    <acronym>HPC Challange</acronym> benchmark).
 	  </simpara>
 	</listitem>
 	<listitem><simpara>
@@ -106,8 +108,8 @@
       </itemizedlist>
     </para>
     <para>
-      Just for completeness, here is the list of lines of the input file and brief description of
-      their meaning:
+      Just for completeness, here is the list of lines of the <acronym>HPC Challange's</acronym>
+      input file with brief descriptions of their meaning:
       <itemizedlist mark="">
 	<listitem><simpara>Line 1: ignored</simpara></listitem>
 	<listitem><simpara>Line 2: ignored</simpara></listitem>
@@ -210,8 +212,8 @@
   <section>
     <title>Running</title>
     <para>
-    It is hard to describe all the possible ways that the <acronym>HPCchallange</acronym>
-    benchmark should be run and various systems. An example command to run the benchmark could
+    It is hard to describe all the possible ways in which the <acronym>HPC Challange</acronym>
+    benchmark could be run on various systems. An example command to run the benchmark could
     like like this:
     <command>mpirun -np 4 hpcc</command>. The meaning of the command's components is as follows:
     <itemizedlist>
@@ -230,7 +232,7 @@
       </simpara>
       </listitem>
       <listitem><simpara>
-      <command>hpcc</command> is the name of the <acronym>HPCchallange</acronym> executable to
+      <command>hpcc</command> is the name of the <acronym>HPC Challange</acronym> executable to
       run.
       </simpara>
       </listitem>
