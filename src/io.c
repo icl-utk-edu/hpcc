@@ -207,7 +207,6 @@ HPCC_Init(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "Compiled on " __DATE__ " at %s", __TIME__ );
   FPRINTF2(myRank, outputFile, "Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
   FPRINTF( myRank, outputFile, "Hostname: '%s'", hostname );
-  FPRINTF( myRank, outputFile, "MPI_Wtick()=%e", MPI_Wtick() );
   FPRINTF( myRank, outputFile,
             "########################################################################%s", "" );
   END_IO(  myRank, outputFile );
@@ -314,6 +313,7 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "sizeof(float)=%d", (int)sizeof(float) );
   FPRINTF( myRank, outputFile, "sizeof(double)=%d", (int)sizeof(double) );
   FPRINTF( myRank, outputFile, "CommWorldProcs=%d", commSize );
+  FPRINTF( myRank, outputFile, "MPI_Wtick()=%e", MPI_Wtick() );
   FPRINTF( myRank, outputFile, "HPL_Tflops=%g", params->HPLrdata.Gflops * 1e-3 );
   FPRINTF( myRank, outputFile, "HPL_time=%g", params->HPLrdata.time );
   FPRINTF( myRank, outputFile, "HPL_eps=%g", params->HPLrdata.eps );
