@@ -35,7 +35,7 @@
 
 int
 pzc2b_(doublecomplex *a, doublecomplex *b, doublecomplex 
-       *c__, integer *nn, integer *npu, hpcc_fftw_mpi_plan p) {
+       *c__, s64Int_t *nn, integer *npu, hpcc_fftw_mpi_plan p) {
     integer nn2;
     extern int ztrans_(doublecomplex *, doublecomplex *, integer *, integer *),
       pztrans_(doublecomplex *, doublecomplex *, integer *, integer *, hpcc_fftw_mpi_plan);

@@ -13,18 +13,26 @@ typedef struct hpcc_fftw_mpi_plan_struct *fftw_mpi_plan;
 
 struct hpcc_fftw_mpi_plan_struct {
   MPI_Comm comm;
+  MPI_Datatype cmplx;
   fftw_complex *wx, *wy, *wz, *c, *d, *ww, *www;
-  int n0, n;
+  s64Int_t n0, n;
   int flags;
   fftw_direction dir;
+  double *timings;
 };
 typedef struct hpcc_fftw_mpi_plan_struct *hpcc_fftw_mpi_plan;
 
 extern hpcc_fftw_mpi_plan
-hpcc_fftw_mpi_create_plan(MPI_Comm comm, int n, fftw_direction dir, int flags);
+hpcc_fftw_mpi_create_plan(MPI_Comm comm, s64Int_t n, fftw_direction dir, int flags);
 extern void hpcc_fftw_mpi_destroy_plan(hpcc_fftw_mpi_plan plan);
 extern void hpcc_fftw_mpi(hpcc_fftw_mpi_plan p, int n_fields, fftw_complex *local_data,
 		     fftw_complex *work);
-extern void hpcc_fftw_mpi_local_sizes(hpcc_fftw_mpi_plan p, int *local_n, int *local_start,
-                          int *local_n_after_transform, int *local_start_after_transform,
-                          int *total_local_size);
+extern void hpcc_fftw_mpi_local_sizes(hpcc_fftw_mpi_plan p, s64Int_t *local_n,
+              s64Int_t *local_start, s64Int_t *local_n_after_transform,
+              s64Int_t *local_start_after_transform, s64Int_t *total_local_size);
+
+extern int pzfft1d_(void *a_, void *b_, void *ww_, void *www_,
+                    s64Int_t *n, integer *me, integer *npu, integer *iopt, hpcc_fftw_mpi_plan p,
+                    s64Int_t *n0);
+
+extern double *HPCC_fft_timings_forward, *HPCC_fft_timings_backward;

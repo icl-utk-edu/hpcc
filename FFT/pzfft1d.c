@@ -53,7 +53,7 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 /*     B(N/NPU) IS WORK VECTOR (COMPLEX*16) */
 /*     WW(NDA3*NDA3) IS SINE/COSINE TABLE (COMPLEX*16) */
 /*     WWW(N/NPU) IS SINE/COSINE TABLE (COMPLEX*16) */
-/*     N IS THE LENGTH OF THE TRANSFORMS (INTEGER*4) */
+/*     N IS THE LENGTH OF THE TRANSFORMS (INTEGER*8) */
 /*       ----------------------------------- */
 /*         N = (2**IP) * (3**IQ) * (5**IR) */
 /*       ----------------------------------- */
@@ -79,9 +79,9 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 
 /*     WRITTEN BY DAISUKE TAKAHASHI */
 
-/* Subroutine */ int pzfft1d_(doublecomplex *a, doublecomplex *b, 
-	doublecomplex *ww, doublecomplex *www, integer *n, integer *me, 
-	integer *npu, integer *iopt, hpcc_fftw_mpi_plan p, integer *n0)
+/* Subroutine */ int pzfft1d_(void *a_, void *b_, 
+	void *ww_, void *www_, s64Int_t *n, integer *me, 
+	integer *npu, integer *iopt, hpcc_fftw_mpi_plan p, s64Int_t *n0)
 {
     /* System generated locals */
     integer i__1, i__2;
@@ -95,13 +95,16 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
     doublecomplex *c__, *d__;
     integer i__;
     doublereal dn;
-    integer ip[3], nn, nx, ny, nz;
+    s64Int_t nn;
+    integer ip[3], nx, ny, nz;
     doublecomplex *wx, *wy, *wz;
     integer lnn[3], lnx[3], lny[3], lnz[3], lnpu[3];
+    doublecomplex *a, *b, *ww, *www;
     extern /* Subroutine */ int pzb2c_(doublecomplex *, doublecomplex *, 
-	    doublecomplex *, integer *, integer *, hpcc_fftw_mpi_plan), pzc2b_(doublecomplex *, 
-	    doublecomplex *, doublecomplex *, integer *, integer *, hpcc_fftw_mpi_plan),
-            factor_(integer *, integer *), settbl_(doublecomplex *, integer *), 
+	    doublecomplex *, s64Int_t *, integer *, hpcc_fftw_mpi_plan), pzc2b_(doublecomplex *, 
+	    doublecomplex *, doublecomplex *, s64Int_t *, integer *, hpcc_fftw_mpi_plan),
+            factor_(integer *, integer *), factor8_(s64Int_t *, integer *),
+      settbl_(doublecomplex *, integer *), 
 	    settbl3_(void *, integer *, integer *), pzfft1d0_(
 	    doublecomplex *, doublecomplex *, doublecomplex *, doublecomplex *
 	    , doublecomplex *, doublecomplex *, doublecomplex *, 
@@ -110,6 +113,10 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 	    *, integer *, hpcc_fftw_mpi_plan), settblp_(void *, integer *, integer *, 
 	    integer *, integer *, integer *);
 
+    a = (doublecomplex *)a_;
+    b = (doublecomplex *)b_;
+    ww = (doublecomplex *)ww_;
+    www = (doublecomplex *)www_;
     c__ = (doublecomplex *)p->c;
     d__ = (doublecomplex *)p->d;
     wx = (doublecomplex *)p->wx;
@@ -153,9 +160,11 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 
     /* Function Body */
 
+    p->timings[0] = MPI_Wtime();
+
     nn = *n / *npu;
     factor_(npu, lnpu);
-    factor_(&nn, lnn);
+    factor8_(&nn, lnn);
     for (i__ = 1; i__ <= 3; ++i__) {
 	ip[i__ - 1] = lnn[i__ - 1] + lnpu[i__ - 1];
 /* Computing MAX */
@@ -193,18 +202,22 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 	}
     }
 
+    p->timings[1] = MPI_Wtime();
     if (*iopt == 1 || *iopt == 2 || *iopt == 5 || *iopt == 6) {
 	pzb2c_(&a[1], &a[1], &b[1], &nn, npu, p );
     }
+    p->timings[2] = MPI_Wtime();
 
 /* $OMP PARALLEL PRIVATE(C,D) */
     pzfft1d0_(&a[1], &a[1], &a[1], &b[1], &b[1], c__, c__, d__, wx, wy, wz, &
 	    ww[1], &www[1], &nx, &ny, &nz, npu, p );
 /* $OMP END PARALLEL */
 
+    p->timings[5] = MPI_Wtime();
     if (*iopt == 1 || *iopt == 2 || *iopt == 7 || *iopt == 8) {
 	pzc2b_(&a[1], &a[1], &b[1], &nn, npu, p );
     }
+    p->timings[6] = MPI_Wtime();
 
     if (*iopt % 2 == 0) {
 	dn = 1. / (doublereal) (*n);
@@ -217,6 +230,7 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 /* L30: */
 	}
     }
+    p->timings[7] = MPI_Wtime();
     return 0;
 } /* pzfft1d_ */
 
@@ -236,11 +250,12 @@ int pzfft1d0_(doublecomplex *a, doublecomplex *ax,
     doublecomplex z__1;
 
     /* Local variables */
-    integer i__, j, k, l, ii, jj, kk, nn, lnx[3], lny[3], lnz[3], nnx, nnz;
+    integer i__, j, k, l, ii, jj, kk, lnx[3], lny[3], lnz[3], nnx, nnz;
     extern /* Subroutine */ int fft235a_(doublecomplex *, doublecomplex *, 
 	    doublecomplex *, integer *, integer *), factor_(integer *, 
-	    integer *), pztrans_(doublecomplex *, doublecomplex *, integer *, 
+	    integer *), pztrans_(doublecomplex *, doublecomplex *, s64Int_t *, 
 	    integer *, hpcc_fftw_mpi_plan);
+    s64Int_t nn;
 
 
 /*     FFTE: A FAST FOURIER TRANSFORM PACKAGE */
@@ -321,7 +336,7 @@ int pzfft1d0_(doublecomplex *a, doublecomplex *ax,
 
     nnx = *nx / *npu;
     nnz = *nz / *npu;
-    nn = *nx * *ny * *nz / *npu;
+    nn = *nx; nn *= *ny; nn *= *nz; nn /= *npu;
 
 /* $OMP DO */
     i__1 = *ny;
@@ -381,9 +396,11 @@ int pzfft1d0_(doublecomplex *a, doublecomplex *ax,
 	}
 /* L90: */
     }
+    p->timings[3] = MPI_Wtime();
 /* $OMP SINGLE */
     pztrans_(&bx[bx_offset], &ax[ax_offset], &nn, npu, p );
 /* $OMP END SINGLE */
+    p->timings[4] = MPI_Wtime();
 /* $OMP DO */
     i__1 = nnz;
     for (k = 1; k <= i__1; ++k) {
@@ -508,7 +525,7 @@ int pzfft1d0_(doublecomplex *a, doublecomplex *ax,
 
     /* Function Body */
     pi2 = atan(1.) * 8.;
-    px = -pi2 / (doublereal) (*ny * *nz);
+    px = -pi2 / ((doublereal) *ny * (doublereal)*nz);
 /* $OMP PARALLEL DO */
     i__1 = *ny;
     for (j = 1; j <= i__1; ++j) {
@@ -537,7 +554,7 @@ int pzfft1d0_(doublecomplex *a, doublecomplex *ax,
     double atan(doublereal), cos(doublereal), sin(doublereal);
 
     /* Local variables */
-    integer i__, j, k, n;
+    integer i__, j, k;
     doublereal px, pi2;
     doublereal *w = (doublereal *)w_;
 
@@ -549,9 +566,8 @@ int pzfft1d0_(doublecomplex *a, doublecomplex *ax,
     w -= w_offset;
 
     /* Function Body */
-    n = *nx * *ny * *nz;
     pi2 = atan(1.) * 8.;
-    px = -pi2 / (doublereal) n;
+    px = -pi2 / ((doublereal) *nx * (doublereal) *ny * (doublereal) *nz);
 /* $OMP PARALLEL DO */
     i__1 = *nz / *npu;
     for (k = 1; k <= i__1; ++k) {

@@ -23,7 +23,7 @@ C
 #include "wrapmpifftw.h"
 
 int
-pztrans_(fftw_complex *a, fftw_complex *b, int *nn, int *npu, hpcc_fftw_mpi_plan p) {
+pztrans_(fftw_complex *a, fftw_complex *b, s64Int_t *nn, int *npu, hpcc_fftw_mpi_plan p) {
   int i, nn2;
 
   nn2 = *nn / *npu;
@@ -31,7 +31,7 @@ pztrans_(fftw_complex *a, fftw_complex *b, int *nn, int *npu, hpcc_fftw_mpi_plan
   if (1 == *npu)
     for (i = 0; i < nn2; i++) b[i] = a[i];
   else
-    MPI_Alltoall( a, 2 * nn2, MPI_DOUBLE, b, 2 * nn2, MPI_DOUBLE, p->comm );
+    MPI_Alltoall( a, nn2, p->cmplx, b, nn2, p->cmplx, p->comm );
 
   return 0;
 }

@@ -7,34 +7,44 @@
 #include "hpccfft.h"
 #include "wrapmpifftw.h"
 
+double *HPCC_fft_timings_forward, *HPCC_fft_timings_backward;
+
+static int
+ilog2u(unsigned long x) {
+  int l;
+  for (l = 0; x; x >>= 1, l++)
+    ;
+  return l-1;
+}
+
 static int
 LocalVectorSize(long maxCount) {
   long ln;
-  int i, n, maxIntBits;
+  int n, maxIntBits;
 
   /* this is the maximum power of 2 that that can be held in a signed integer (for a 4-byte
      integer, 2**31-1 is the maximum integer, so the maximum power of 2 is 30) */
   maxIntBits = sizeof(int) * 8 - 2;
+  ln = 1L << maxIntBits;
 
   /* Find the largest size of a vector. The size of the vector has to be:  a power 2, fit in
      an integer, and small enough to fit in maxCount. */
 
-  for (i = 0, ln = 1; ln <= maxCount && i <= maxIntBits; i++, ln <<= 1)
-    ;
-  ln >>= 1; /* there was one shift too much */
+  while (ln > maxCount)
+    ln >>= 1;
 
-  if (i <= maxIntBits) n = ln;
-  else n = 1 << maxIntBits;
+  n = (int)ln;
 
   return n;
 }
 
 static void
 MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm comm,
-        double *UGflops, int *Un, int *Ufailure) {
+        double *UGflops, s64Int_t *Un, int *Ufailure) {
   int commRank, commSize;
-  int i, n, mult, failure = 1, maxVal = 1 << (sizeof(int) * 8 - 2);
-  int locn, loc0, alocn, aloc0, tls;
+  int failure = 1;
+  s64Int_t i, n;
+  s64Int_t locn, loc0, alocn, aloc0, tls;
   double maxErr, tmp1, tmp2, tmp3, t0, t1, t2, t3, Gflops = -1.0;
   double deps = HPL_dlamch( HPL_MACH_EPS );
   fftw_complex *inout, *work;
@@ -47,12 +57,7 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
   /* there are three vectors of size 'n'/'commSize': inout, work, and internal work */
   n = LocalVectorSize( HPLMaxProcMem / 3 / sizeof(fftw_complex) );
 
-  /* 'n' should be multiplied by the number of nodes but that may overflow an integer */
-  mult = maxVal / n;
-  mult = mult <= commSize ? mult : commSize;
-
-  n *= mult;
-
+  n *= commSize;
 
   t1 = MPI_Wtime();
   p = fftw_mpi_create_plan( comm, n, FFTW_FORWARD, FFTW_MEASURE );
@@ -94,7 +99,7 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
 
   if (doIO) {
     fprintf( outFile, "Number of nodes: %d\n", commSize );
-    fprintf( outFile, "Vector size: %d\n", n );
+    fprintf( outFile, "Vector size: %20.0f\n", tmp1 = (double)n );
     fprintf( outFile, "Generation time: %9.3f\n", t0 );
     fprintf( outFile, "Tuning: %9.3f\n", t1 );
     fprintf( outFile, "Computing: %9.3f\n", t2 );
@@ -117,7 +122,9 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
 int
 MPIFFT(HPCC_Params *params) {
   int commRank, commSize;
-  int i, n, procPow2, isComputing, doIO, failure;
+  int i, procPow2, isComputing, doIO, failure;
+  long allN;
+  s64Int_t n;
   double Gflops = -1.0;
   MPI_Comm comm;
   FILE *outFile;
@@ -142,6 +149,9 @@ MPIFFT(HPCC_Params *params) {
 
   isComputing = commRank < procPow2 ? 1 : 0;
 
+  HPCC_fft_timings_forward = params->MPIFFTtimingsForward;
+  HPCC_fft_timings_backward = params->MPIFFTtimingsBackward;
+
   if (commSize == procPow2)
     comm = MPI_COMM_WORLD;
   else
@@ -151,11 +161,11 @@ MPIFFT(HPCC_Params *params) {
     MPIFFT0( params->HPLMaxProcMem, params->test.thrsh, doIO, outFile, comm, &Gflops, &n,
 	     &failure );
 
+  MPI_Bcast( &Gflops, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD );
+
   params->MPIFFTGflops = Gflops;
 
   if (doIO) if (outFile != stderr) fclose( outFile );
-
-  MPI_Barrier( MPI_COMM_WORLD );
 
   return 0;
 }

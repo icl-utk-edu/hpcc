@@ -502,3 +502,33 @@ L10:
     return 0;
 } /* factor_ */
 
+/* Subroutine */ int factor8_(s64Int_t *n, integer *ip)
+{
+    s64Int_t n2;
+
+    ip[0] = 0;
+    ip[1] = 0;
+    ip[2] = 0;
+    n2 = *n;
+    if (n2 % 2 != 0 && n2 % 3 != 0 && n2 % 5 != 0) {
+	return 0;
+    }
+L10:
+    if (n2 <= 1) {
+	return 0;
+    }
+    if (n2 % 2 == 0) {
+	++ip[0];
+	n2 /= 2;
+	goto L10;
+    } else if (n2 % 3 == 0) {
+	++ip[1];
+	n2 /= 3;
+	goto L10;
+    } else if (n2 % 5 == 0) {
+	++ip[2];
+	n2 /= 5;
+	goto L10;
+    }
+    return 0;
+} /* factor_ */
