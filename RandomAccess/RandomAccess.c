@@ -1,43 +1,17 @@
-/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*- */
-
-/* 
- * This code has been contributed by the DARPA HPCS program.  Contact 
- * David Koester (MITRE) or Bob Lucas (USC/ISI) if you have questions.
+/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*- 
  *
- * Information on the rules to run RandomAccess or modify it to optimize
- * performance can be found at http://icl.cs.utk.edu/hpcc/
+ * See RandomAccess.h for a comprehensive description of this test and
+ * its goals.
  *
- * The benchmark is successfully completed if at least 99% of the table
- * is correctly built; it *is* OK, for example, to have a few errors
- * enter into the table due to rare race conditions between processors
- * updating the same memory location.
+ * This file contains the computational core of the single cpu version
+ * of GUPS.  The inner loop should easily be vectorized by compilers
+ * with such support.
  *
- * It is expected that in a multi-processor version, one will start the
- * random number generator at a location along its cycle proportional t
- * the local table size.  Each processor then steps the generator through
- * its section of the cycle.  (The starts routine provided can be used to 
- * start the random number generator at any specified point.)
- *
- * The benchmark objective is to measure interprocessor and local memory 
- * bandwidth.  It is ok to bucket sort locally and use a message passing 
- * protocol between processors if this is faster than a global shared 
- * memory approach.  More sophisticated optimizations which attempt to 
- * reorder the loop so that all updates are local are not considered "in 
- * the spirit" of the benchmark.
- *
-*/
+ * This core is used by both the single_cpu and star_single_cpu tests.
+ */
 
 #include <hpcc.h>
-
 #include "RandomAccess.h"
-
-/* Log size of main table (suggested: half of global memory) */
-#define LTABSIZE 25            
-#define TABSIZE (1L << LTABSIZE)
-
-/* Log size of substitution table (suggested: half of primary cache) */
-#define LSTSIZE 9
-#define STSIZE (1 << LSTSIZE)
 
 /* Number of updates to table (suggested: 4x number of table entries) */
 #define NUPDATE (4 * TableSize)
@@ -46,7 +20,7 @@
 u64Int *Table;
 
 void
-RandomAccessUpdate(u64Int TableSize, u64Int *stable) {
+RandomAccessUpdate(u64Int TableSize) {
   s64Int i;
   u64Int ran[128];              /* Current random numbers */
   int j;
@@ -60,24 +34,37 @@ RandomAccessUpdate(u64Int TableSize, u64Int *stable) {
    *     ran = 1;
    *     for (i=0; i<NUPDATE; i++) {
    *       ran = (ran << 1) ^ (((s64Int) ran < 0) ? POLY : 0);
-   *       table[ran & (TableSize-1)] ^= stable[ran >> (64-LSTSIZE)];
+   *       table[ran & (TableSize-1)] ^= ran;
    *     }
    */
   for (j=0; j<128; j++)
     ran[j] = starts ((NUPDATE/128) * j);
+
   for (i=0; i<NUPDATE/128; i++) {
 /* #pragma ivdep */
     for (j=0; j<128; j++) {
       ran[j] = (ran[j] << 1) ^ ((s64Int) ran[j] < 0 ? POLY : 0);
-      Table[ran[j] & (TableSize-1)] ^= stable[ran[j] >> (64-LSTSIZE)];
+      Table[ran[j] & (TableSize-1)] ^= ran[j];
     }
   }
+
+#if 0
+  {
+    char foo[200];
+    snprintf(foo, 200, "table");
+    FILE *fp;
+    fp = fopen(foo, "w");
+    for (j = 0 ; j < TableSize ; ++j) {
+      fprintf(fp, "%lld\n", Table[j]);
+    }
+    fclose(fp);
+  }
+#endif
 }
 
 int
 RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
   s64Int i;
-  u64Int stable[STSIZE];        /* Substitution table */
   u64Int temp;
   double cputime;               /* CPU time to update table */
   double realtime;              /* Real time to update table */
@@ -116,25 +103,14 @@ RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
   /* Print parameters for run */
   if (doIO) {
   fprintf( outFile, "Main table size   = 2^" FSTR64 " = " FSTR64 " words\n", logTableSize,TableSize);
-  fprintf( outFile, "Subst table size  = 2^%d = %d words\n", LSTSIZE, STSIZE);
   fprintf( outFile, "Number of updates = " FSTR64 "\n", NUPDATE);
   }
-
-  /* Initialize substitution table (not time critical) */
-  stable[0] = 0;
-  for (i=1; i<STSIZE; i++)
-    stable[i] = stable[i-1] +
-#ifdef LONG_IS_64BITS
-      0x0123456789abcdefL;
-#else
-      0x0123456789abcdefLL;
-#endif
 
   /* Begin timing here */
   cputime = -CPUSEC();
   realtime = -RTSEC();
 
-  RandomAccessUpdate( TableSize, stable );
+  RandomAccessUpdate( TableSize );
 
   /* End timed section */
   cputime += CPUSEC();
@@ -155,7 +131,7 @@ RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
   temp = 0x1;
   for (i=0; i<NUPDATE; i++) {
     temp = (temp << 1) ^ (((s64Int) temp < 0) ? POLY : 0);
-    Table[temp & (TableSize-1)] ^= stable[temp >> (64-LSTSIZE)];
+    Table[temp & (TableSize-1)] ^= temp;
   }
 
   temp = 0;
@@ -180,11 +156,22 @@ RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
 
   return 0;
 }
+/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*- 
+ *
+ * See RandomAccess.h for a comprehensive description of this test and
+ * its goals.
+ *
+ * This file provides utility functions for the RandomAccess benchmark suite.
+ */
+
+#include <hpcc.h>
+#include "RandomAccess.h"
+
 
 /* Utility routine to start random number generator at Nth step */
 u64Int
-starts(s64Int n) {
-/* s64Int i, j; */
+starts(s64Int n)
+{
   int i, j;
   u64Int m2[64];
   u64Int temp, ran;
