@@ -386,7 +386,7 @@ static integer c__3 = 3;
     /* Local variables */
     integer j, k, l, ip[3], kp4, kp8;
     extern /* Subroutine */ int factor_(integer *, integer *), settbl2_(
-	    doublecomplex *, integer *, integer *);
+	    void *, integer *, integer *);
 
 
     /* Parameter adjustments */
@@ -436,7 +436,7 @@ static integer c__3 = 3;
     return 0;
 } /* settbl_ */
 
-/* Subroutine */ int settbl2_(doublereal *w, integer *l, integer *m)
+/* Subroutine */ int settbl2_(void *w_, integer *l, integer *m)
 {
     /* System generated locals */
     integer i__1;
@@ -447,6 +447,7 @@ static integer c__3 = 3;
     /* Local variables */
     integer i__;
     doublereal px, pi2;
+    doublereal *w = (doublereal)*w_;
 
 
     /* Parameter adjustments */

@@ -88,8 +88,8 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 	    , doublecomplex *, doublecomplex *, doublecomplex *, 
 	    doublecomplex *, integer *, integer *, integer *, integer *, 
 	    integer *, integer *), settbl_(doublecomplex *, integer *), 
-	    settbls_(doublecomplex *, doublecomplex *, doublecomplex *, 
-	    doublecomplex *, integer *, integer *, integer *, integer *);
+	    settbls_(void *, void *, void *, 
+	    void *, integer *, integer *, integer *, integer *);
 
     c__ = (doublecomplex *)p->c;
     d__ = (doublecomplex *)p->d;
@@ -462,8 +462,8 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
     return 0;
 } /* zfft1d0_ */
 
-/* Subroutine */ int settbls_(doublereal *w1, doublereal *w2, doublereal *w3, 
-	doublereal *w4, integer *n1, integer *n2, integer *m1, integer *m2)
+/* Subroutine */ int settbls_(void *w1_, void *w2_, void *w3_, 
+	void *w4_, integer *n1, integer *n2, integer *m1, integer *m2)
 {
     /* System generated locals */
     integer w1_dim2, w1_offset, w2_dim2, w2_offset, w3_dim2, w3_offset, 
@@ -475,6 +475,7 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
     /* Local variables */
     integer j, k, ir, is;
     doublereal px, pi2;
+    doublereal *w1 = (doublereal *)w1_, *w2 = (doublereal *)w2_, *w3 = (doublereal *)w3_, *w4 = (doublereal *)w4_;
 
 
 /*     FFTE: A FAST FOURIER TRANSFORM PACKAGE */

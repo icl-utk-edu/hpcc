@@ -102,12 +102,12 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 	    doublecomplex *, integer *, integer *, hpcc_fftw_mpi_plan), pzc2b_(doublecomplex *, 
 	    doublecomplex *, doublecomplex *, integer *, integer *, hpcc_fftw_mpi_plan),
             factor_(integer *, integer *), settbl_(doublecomplex *, integer *), 
-	    settbl3_(doublecomplex *, integer *, integer *), pzfft1d0_(
+	    settbl3_(void *, integer *, integer *), pzfft1d0_(
 	    doublecomplex *, doublecomplex *, doublecomplex *, doublecomplex *
 	    , doublecomplex *, doublecomplex *, doublecomplex *, 
 	    doublecomplex *, doublecomplex *, doublecomplex *, doublecomplex *
 	    , doublecomplex *, doublecomplex *, integer *, integer *, integer 
-	    *, integer *, hpcc_fftw_mpi_plan), settblp_(doublecomplex *, integer *, integer *, 
+	    *, integer *, hpcc_fftw_mpi_plan), settblp_(void *, integer *, integer *, 
 	    integer *, integer *, integer *);
 
     c__ = (doublecomplex *)p->c;
@@ -487,7 +487,7 @@ int pzfft1d0_(doublecomplex *a, doublecomplex *ax,
     return 0;
 } /* pzfft1d0_ */
 
-/* Subroutine */ int settbl3_(doublereal *w, integer *ny, integer *nz)
+/* Subroutine */ int settbl3_(void *w_, integer *ny, integer *nz)
 {
     /* System generated locals */
     integer w_dim2, w_offset, i__1, i__2;
@@ -498,6 +498,7 @@ int pzfft1d0_(doublecomplex *a, doublecomplex *ax,
     /* Local variables */
     integer j, k;
     doublereal px, pi2;
+    doublereal *w = (doublereal *)w_;
 
 
     /* Parameter adjustments */
@@ -526,7 +527,7 @@ int pzfft1d0_(doublecomplex *a, doublecomplex *ax,
     return 0;
 } /* settbl3_ */
 
-/* Subroutine */ int settblp_(doublereal *w, integer *nx, integer *ny, 
+/* Subroutine */ int settblp_(void *w_, integer *nx, integer *ny, 
 	integer *nz, integer *me, integer *npu)
 {
     /* System generated locals */
@@ -538,6 +539,7 @@ int pzfft1d0_(doublecomplex *a, doublecomplex *ax,
     /* Local variables */
     integer i__, j, k, n;
     doublereal px, pi2;
+    doublereal *w = (doublereal *)w_;
 
 
     /* Parameter adjustments */
