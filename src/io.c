@@ -287,6 +287,7 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "VersionMajor=%d", HPCC_VERSION_MAJOR );
   FPRINTF( myRank, outputFile, "VersionMinor=%d", HPCC_VERSION_MINOR );
   FPRINTF( myRank, outputFile, "VersionRelease=%c", HPCC_VERSION_RELEASE );
+  FPRINTF( myRank, outputFile, "LANG=%s", "C" );
   FPRINTF( myRank, outputFile, "Success=%d", params->Failure ? 0 : 1 );
   FPRINTF( myRank, outputFile, "CommWorldProcs=%d", commSize );
   FPRINTF( myRank, outputFile, "HPL_Tflops=%g", params->Tflops );
