@@ -183,11 +183,11 @@ def TraverseDirs(prfx, items):
 def Dist(deps, prfx="hpcc"):
     allPrfx = prfx + "/"
 
-    addItems = ["Makefile", "README.xml", "README.html", "hpccinf.txt", "hpl/Make.UNKNOWN",
-                "hpl/BUGS", "hpl/COPYRIGHT", "hpl/HISTORY", "hpl/HPL.build.log.220120040613",
-                "hpl/INSTALL", "hpl/Make.top", "hpl/Makefile", "hpl/README", "hpl/TODO",
-                "hpl/TUNING", "hpl/lib/arch/build/Makefile.hpcc", "hpl/makes", "hpl/man",
-                "hpl/setup", "hpl/www"]
+    addItems = ["Makefile", "README.xml", "README.html", "README.html", "hpccinf.txt",
+                "hpl/Make.UNKNOWN", "hpl/BUGS", "hpl/COPYRIGHT", "hpl/HISTORY",
+                "hpl/HPL.build.log.220120040613", "hpl/INSTALL", "hpl/Make.top", "hpl/Makefile",
+                "hpl/README", "hpl/TODO", "hpl/TUNING", "hpl/lib/arch/build/Makefile.hpcc",
+                "hpl/makes", "hpl/man", "hpl/setup", "hpl/www"]
 
     addItems = TraverseDirs(prfx, addItems)
     #print string.join(addItems, "\n")
@@ -216,6 +216,11 @@ def Dist(deps, prfx="hpcc"):
 
     allItems = map(lambda x, p=allPrfx: p + x, addItems) + allFiles + hDict.keys()
     allItems.sort()
+    # check existence and type of all files
+    for fname in allItems:
+        if not os.path.isfile(fname):
+            raise RuntimeError, "File " + fname + " doesn't exist."
+
     print "tar --group=root --owner=root -cvohf " + allPrfx[:-1] + ".tar", string.join( allItems, " " )
 
 
@@ -223,7 +228,7 @@ def main(argv):
     global allDeps
 
     if len(argv) > 1 and argv[1] == "dist":
-        if len(argv) > 2:
+        if len(argv) > 2: # use custom directory prefix
             Dist(allDeps, argv[2])
         else:
             Dist(allDeps)
