@@ -494,6 +494,8 @@ MPIRandomAccess(HPCC_Params *params) {
   } /* end for i */
 
 
+  params->MPIRandomAccess_N = (double)TableSize;
+
   Table = XMALLOC( u64Int, LocalTableSize);
   sAbort = 0; if (! Table) sAbort = 1;
 

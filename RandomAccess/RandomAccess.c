@@ -133,6 +133,7 @@ RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
     }
     return 1;
   }
+  params->RandomAccess_N = (double)TableSize;
 
   /* Print parameters for run */
   if (doIO) {
