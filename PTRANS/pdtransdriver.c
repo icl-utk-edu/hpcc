@@ -36,7 +36,7 @@ PTRANS(HPCC_Params *params) {
   long ipa, ipc, ipw, ipiw, isw;
   int nmat, *mval, ierr[1], *nval;
     int nbmat, *mbval, imcol, *nbval;
-    double ctime[2], resid;
+    double ctime[2], resid, resid0;
     int npcol, *npval, mycol, *nqval;
     double wtime[2];
     int imrow, nprow, myrow, iaseed;
@@ -78,7 +78,7 @@ PTRANS(HPCC_Params *params) {
   double d_One = 1.0;
   long dMemSize, li;
 
-  GBs = &params->ptransGBs;
+  GBs = &params->PTRANSrdata.GBs;
   *GBs = curGBs = 0.0;
 
   Cblacs_pinfo(&iam, &nprocs);
@@ -350,6 +350,7 @@ PTRANS(HPCC_Params *params) {
 /*                  Compare A' to C */
 
           pdmatcmp(&context_1.ictxt, &np, &mq, &mem[ipa - 1], &lda, &mem[ipc - 1], &ldc, &resid);
+          resid0 = resid;
 
           resid /= eps * MAX( m, n );
           if (resid <= thresh && resid - resid == 0.0) { /* if `resid' is small and is not NaN */
@@ -381,7 +382,15 @@ PTRANS(HPCC_Params *params) {
 
           if (wtime[0] > 0.0) {
             curGBs = 1e-9 / wtime[0] * m * n * sizeof(double);
-            if (curGBs > *GBs) *GBs = curGBs;
+            if (curGBs > *GBs) {
+              *GBs = curGBs;
+              params->PTRANSrdata.time = wtime[0];
+              params->PTRANSrdata.residual = resid0;
+              params->PTRANSrdata.n = n;
+              params->PTRANSrdata.nb = nb;
+              params->PTRANSrdata.nprow = nprow;
+              params->PTRANSrdata.npcol = npcol;
+            }
             fprintf( outFile, "WALL %5d %5d %3d %3d %3d %3d %8.2f %s %8.3f %5.2f\n",
                      m, n, mb, nb, nprow, npcol, wtime[0], passed, curGBs, resid );
           }
