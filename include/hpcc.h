@@ -49,11 +49,11 @@ typedef struct {
   int PTRANSns, PTRANSnval[2 * HPL_MAX_PARAM];
   int PTRANSnbs, PTRANSnbval[2 * HPL_MAX_PARAM];
   int PTRANSnpqs, PTRANSpval[2 * HPL_MAX_PARAM], PTRANSqval[2 * HPL_MAX_PARAM];
-  double MPIGUPs, StarGUPs, SingleGUPs, MPIRandomAccess_N, RandomAccess_N,
-    StarStreamCopyGBs, StarStreamScaleGBs,
+  double MPIGUPs, StarGUPs, SingleGUPs, MPIRandomAccess_N, MPIRandomAccess_Errors,
+    MPIRandomAccess_ErrorsFraction, RandomAccess_N, StarStreamCopyGBs, StarStreamScaleGBs,
     StarStreamAddGBs, StarStreamTriadGBs, SingleStreamCopyGBs, SingleStreamScaleGBs,
     SingleStreamAddGBs, SingleStreamTriadGBs, StarDGEMMGflops, SingleDGEMMGflops;
-  double StarFFTGflops, SingleFFTGflops, MPIFFTGflops, MPIFFT_N;
+  double StarFFTGflops, SingleFFTGflops, MPIFFTGflops, MPIFFT_N, MPIFFT_maxErr;
   double MaxPingPongLatency, RandomlyOrderedRingLatency, MinPingPongBandwidth,
     NaturallyOrderedRingBandwidth, RandomlyOrderedRingBandwidth,
     MinPingPongLatency, AvgPingPongLatency, MaxPingPongBandwidth, AvgPingPongBandwidth,

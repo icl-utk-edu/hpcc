@@ -239,7 +239,7 @@ HPCC_Init(HPCC_Params *params) {
   params->StarStreamCopyGBs = params->StarStreamScaleGBs = params->StarStreamAddGBs =
   params->StarStreamTriadGBs = params->SingleStreamCopyGBs = params->SingleStreamScaleGBs =
   params->SingleStreamAddGBs = params->SingleStreamTriadGBs =
-  params->SingleFFTGflops = params->StarFFTGflops = params->MPIFFTGflops =
+  params->SingleFFTGflops = params->StarFFTGflops = params->MPIFFTGflops = params->MPIFFT_maxErr =
   params->MaxPingPongLatency = params-> RandomlyOrderedRingLatency = params-> MinPingPongBandwidth =
   params->NaturallyOrderedRingBandwidth = params->RandomlyOrderedRingBandwidth =
   params->MinPingPongLatency = params->AvgPingPongLatency = params->MaxPingPongBandwidth =
@@ -255,6 +255,8 @@ HPCC_Init(HPCC_Params *params) {
     params->PTRANSrdata.npcol = -1;
 
   params->RandomAccess_N =
+  params->MPIRandomAccess_Errors =
+  params->MPIRandomAccess_ErrorsFraction =
   params->MPIRandomAccess_N =
   params->MPIFFT_N = -1.0;
 
@@ -343,6 +345,8 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "PTRANS_nprow=%d", params->PTRANSrdata.nprow );
   FPRINTF( myRank, outputFile, "PTRANS_npcol=%d", params->PTRANSrdata.npcol );
   FPRINTF( myRank, outputFile, "MPIRandomAccess_N=%g", params->MPIRandomAccess_N );
+  FPRINTF( myRank, outputFile, "MPIRandomAccess_Errors=%g", params->MPIRandomAccess_Errors );
+  FPRINTF( myRank, outputFile, "MPIRandomAccess_ErrorsFraction=%g", params->MPIRandomAccess_ErrorsFraction );
   FPRINTF( myRank, outputFile, "MPIRandomAccess_GUPs=%g", params->MPIGUPs );
   FPRINTF( myRank, outputFile, "RandomAccess_N=%g", params->RandomAccess_N );
   FPRINTF( myRank, outputFile, "StarRandomAccess_GUPs=%g", params->StarGUPs );
@@ -362,6 +366,7 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "SingleFFT_Gflops=%g", params->SingleFFTGflops );
   FPRINTF( myRank, outputFile, "MPIFFT_N=%g", params->MPIFFT_N );
   FPRINTF( myRank, outputFile, "MPIFFT_Gflops=%g", params->MPIFFTGflops );
+  FPRINTF( myRank, outputFile, "MPIFFT_maxErr=%g", params->MPIFFT_maxErr );
   FPRINTF( myRank, outputFile, "MaxPingPongLatency_usec=%g", params->MaxPingPongLatency );
   FPRINTF( myRank, outputFile, "RandomlyOrderedRingLatency_usec=%g", params->RandomlyOrderedRingLatency );
   FPRINTF( myRank, outputFile, "MinPingPongBandwidth_GBytes=%g", params->MinPingPongBandwidth );

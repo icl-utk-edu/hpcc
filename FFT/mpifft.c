@@ -42,7 +42,7 @@ LocalVectorSize(long maxCount) {
 
 static void
 MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm comm,
-        double *UGflops, s64Int_t *Un, int *Ufailure) {
+        double *UGflops, s64Int_t *Un, double *UmaxErr, int *Ufailure) {
   int commRank, commSize;
   int failure = 1;
   s64Int_t i, n;
@@ -118,6 +118,7 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
 
   *UGflops = Gflops;
   *Un = n;
+  *UmaxErr = maxErr;
   *Ufailure = failure;
 }
 
@@ -126,7 +127,7 @@ MPIFFT(HPCC_Params *params) {
   int commRank, commSize;
   int i, procPow2, isComputing, doIO, failure;
   s64Int_t n;
-  double Gflops = -1.0;
+  double Gflops = -1.0, maxErr = -1.0;
   MPI_Comm comm;
   FILE *outFile;
 
@@ -159,10 +160,10 @@ MPIFFT(HPCC_Params *params) {
     MPI_Comm_split( MPI_COMM_WORLD, isComputing ? 0 : MPI_UNDEFINED, commRank, &comm );
 
   if (isComputing)
-    MPIFFT0( params->HPLMaxProcMem, params->test.thrsh, doIO, outFile, comm, &Gflops, &n,
-	     &failure );
+    MPIFFT0( params->HPLMaxProcMem, params->test.thrsh, doIO, outFile, comm, &Gflops, &n, &maxErr, &failure );
 
   params->MPIFFT_N = (double)n;
+  params->MPIFFT_maxErr = maxErr;
 
   MPI_Bcast( &Gflops, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD );
 

@@ -620,6 +620,8 @@ MPIRandomAccess(HPCC_Params *params) {
       GlbSendCnt, TableSize, (GlbSendCnt <= 0.01*TableSize) ?
       "passed" : "failed");
     if (GlbSendCnt > 0.01*TableSize) params->Failure = 1;
+    params->MPIRandomAccess_Errors = (double)GlbSendCnt;
+    params->MPIRandomAccess_ErrorsFraction = (double)GlbSendCnt / (double)TableSize;
   }
 
   /* Deallocate memory (in reverse order of allocation which should
