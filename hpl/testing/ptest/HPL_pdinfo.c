@@ -271,7 +271,7 @@ void HPL_pdinfo
    char                       file[HPL_LINE_MAX], line[HPL_LINE_MAX],
                               auth[HPL_LINE_MAX], num [HPL_LINE_MAX];
    FILE                       * infp;
-   int                        iwork[15];
+   int                        * iwork;
    char                       * lineptr;
    int                        error=0, fid, i, j, lwork, maxp, nprocs,
                               rank, size;
@@ -641,7 +641,7 @@ label_error:
 /*
  * Broadcast array sizes
  */
-   /* iwork = (int *)malloc( 15 * sizeof( int ) ); */
+   iwork = (int *)malloc( 15 * sizeof( int ) );
    if( rank == 0 )
    {
       iwork[ 0] = *NS;      iwork[ 1] = *NBS;
@@ -661,7 +661,7 @@ label_error:
       *NDHS     = iwork[ 9]; *TSWAP = iwork[10]; *L1NOTRAN = iwork[11];
       *UNOTRAN  = iwork[12]; *EQUIL = iwork[13]; *ALIGN    = iwork[14];
    }
-   /* if( iwork ) free( iwork ); */
+   if( iwork ) free( iwork );
 /*
  * Pack information arrays and broadcast
  */
