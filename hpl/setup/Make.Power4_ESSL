@@ -174,7 +174,7 @@ CCFLAGS      = $(HPL_DEFS) -qtune=pwr4 -qarch=pwr4 -O3 -qmaxmem=-1 -qfloat=hsflt
 # the Fortran internals used in the BLAS library.
 #
 LINKER       = mpxlf
-LINKFLAGS    = -bmaxdata:0x70000000 $(CCFLAGS)
+LINKFLAGS    = -bmaxdata:0x70000000
 #
 ARCHIVER     = ar
 ARFLAGS      = r
