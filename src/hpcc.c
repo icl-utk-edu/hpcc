@@ -65,7 +65,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of StarDGEMM section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunHPL) StarDGEMM( &params );
+  if (params.RunStarDGEMM) StarDGEMM( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
@@ -83,7 +83,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of SingleDGEMM section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunHPL) SingleDGEMM( &params );
+  if (params.RunSingleDGEMM) SingleDGEMM( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
