@@ -553,7 +553,8 @@ MPIRandomAccess(HPCC_Params *params) {
              *GUPs );
     fprintf( outFile, "%.9f Billion(10^9) Updates/PE per second [GUP/s]\n",
              *GUPs / NumProcs );
-    *GUPs /= NumProcs;
+    /* No longer reporting per CPU number */
+    /* *GUPs /= NumProcs; */
   }
   /* distribute result to all nodes */
   MPI_Bcast( GUPs, 1, MPI_INT, 0, MPI_COMM_WORLD );
