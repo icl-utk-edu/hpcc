@@ -54,7 +54,7 @@ int HPL_main
 (
    int                        ARGC,
    char                       * * ARGV,
-   double *TflopsPtr,
+   HPL_RuntimeData            * rdata,
    int *failure
 )
 #else
@@ -67,7 +67,7 @@ int HPL_main( ARGC, ARGV, TflopsPtr, failure )
  * .. Array Arguments ..
  */
    char                       * * ARGV;
-   double *TflopsPtr;
+   HPL_RuntimeData            * rdata,
    int *failure;
 #endif
 {
@@ -107,8 +107,7 @@ int HPL_main( ARGC, ARGV, TflopsPtr, failure )
    HPL_T_ORDER                pmapping;
    HPL_T_FACT                 rpfa;
    HPL_T_SWAP                 fswap;
-   double curGflops;
-   *TflopsPtr = 0.0;
+   HPL_RuntimeData rdataCur;
 /* ..
  * .. Executable Statements ..
  */
@@ -226,8 +225,8 @@ int HPL_main( ARGC, ARGV, TflopsPtr, failure )
               algo.fswap = fswap; algo.fsthr = tswap;
               algo.equil = equil; algo.align = align;
 
-              HPL_pdtest( &test, &grid, &algo, nval[in], nbval[inb], &curGflops );
-              if (*TflopsPtr < curGflops * 1e-3) *TflopsPtr = curGflops * 1e-3;
+              HPL_pdtest( &test, &grid, &algo, nval[in], nbval[inb], &rdataCur );
+              if (rdata->Gflops < rdataCur.Gflops) *rdata = rdataCur;
 
              }
             }

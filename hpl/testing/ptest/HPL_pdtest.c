@@ -57,7 +57,7 @@ void HPL_pdtest
    HPL_T_palg *                     ALGO,
    const int                        N,
    const int                        NB,
-   double *curGflops
+   HPL_RuntimeData *                rdata
 )
 #else
 void HPL_pdtest
@@ -67,7 +67,7 @@ void HPL_pdtest
    HPL_T_palg *                     ALGO;
    const int                        N;
    const int                        NB;
-   double *curGflops;
+   HPL_RuntimeData *                rdata;
 #endif
 {
 /* 
@@ -160,7 +160,6 @@ void HPL_pdtest
    }
    while( mat.ld == ip2 );
 
-   *curGflops = 0.0;
 /*
  * Allocate dynamic memory
  */
@@ -225,13 +224,15 @@ void HPL_pdtest
  * 2/3 N^3 - 1/2 N^2 flops for LU factorization + 2 N^2 flops for solve.
  * Print WALL time
  */
-      *curGflops =
+      rdata->Gflops =
       Gflops = ( ( (double)(N) /   1.0e+9 ) * 
                  ( (double)(N) / wtime[0] ) ) * 
                  ( ( 2.0 / 3.0 ) * (double)(N) + ( 3.0 / 2.0 ) );
 
+      rdata->cpfact =
       cpfact = ( ( ALGO->pfact == HPL_LEFT_LOOKING ) ? 'L' :
                  ( ( ALGO->pfact == HPL_CROUT ) ? 'C' : 'R' ) );
+      rdata->crfact =
       crfact = ( ( ALGO->rfact == HPL_LEFT_LOOKING ) ? 'L' :
                  ( ( ALGO->rfact == HPL_CROUT ) ? 'C' : 'R' ) );
 
@@ -241,7 +242,18 @@ void HPL_pdtest
       else if( ALGO->btopo == HPL_2RING_M ) ctop = '3';
       else if( ALGO->btopo == HPL_BLONG   ) ctop = '4';
       else /* if( ALGO->btopo == HPL_BLONG_M ) */ ctop = '5';
+      rdata->ctop = ctop;
 
+      rdata->eps = TEST->epsil;
+      rdata->order = ( GRID->order == HPL_ROW_MAJOR ? 'R' : 'C' );
+      rdata->depth = ALGO->depth;
+      rdata->nbdiv = ALGO->nbdiv;
+      rdata->nbmin = ALGO->nbmin;
+      rdata->time = wtime[0];
+      rdata->N = N;
+      rdata->NB = NB;
+      rdata->nprow = nprow;
+      rdata->npcol = npcol;
       if( wtime[0] > HPL_rzero )
          HPL_fprintf( TEST->outfp,
              "W%c%1d%c%c%1d%c%1d%12d %5d %5d %5d %18.2f %18.3e\n",
@@ -327,12 +339,16 @@ void HPL_pdtest
  * and norm inf of b - A x. Display residual checks.
  */
    HPL_pdmatgen( GRID, N, N+1, NB, mat.A, mat.ld, HPL_ISEED );
+   rdata->Anorm1 =
    Anorm1 = HPL_pdlange( GRID, HPL_NORM_1, N, N, NB, mat.A, mat.ld );
+   rdata->AnormI =
    AnormI = HPL_pdlange( GRID, HPL_NORM_I, N, N, NB, mat.A, mat.ld );
 /*
  * Because x is distributed in process rows, switch the norms
  */
+   rdata->XnormI =
    XnormI = HPL_pdlange( GRID, HPL_NORM_1, 1, N, NB, mat.X, 1 );
+   rdata->Xnorm1 =
    Xnorm1 = HPL_pdlange( GRID, HPL_NORM_I, 1, N, NB, mat.X, 1 );
 /*
  * If I own b, compute ( b - A x ) and ( - A x ) otherwise
@@ -359,6 +375,7 @@ void HPL_pdtest
 /*
  * Compute || b - A x ||_oo
  */
+   rdata->RnormI =
    resid0 = HPL_pdlange( GRID, HPL_NORM_I, N, 1, NB, Bptr, mat.ld );
 /*
  * Computes and displays norms, residuals ...
