@@ -43,7 +43,10 @@
       machine. The configuration file should be created in the <filename
       class="directory">hpl</filename> directory. This directory contains instructions (the files
       <filename>README</filename> and <filename>INSTALL</filename>) on how to create the
-      configuration file. This file is reused by all the components of the
+      configuration file.  The directory <filename class="directory">hpl/setup</filename>
+      contains many examples of configuration files. A good approach is to copy one of them
+      to the <filename class="directory">hpl</filename> directory and if it doesn't work then
+      change it. This file is reused by all the components of the
       <acronym>HPC Challange</acronym> suite.
     </para>
     <para>
