@@ -7,7 +7,7 @@ StarDGEMM(HPCC_Params *params) {
   int myRank, commSize;
   double localGflops, minGflops, maxGflops, avgGflops;
   int n;
-  int errCount, failure, failureAll;
+  int rv, errCount, failure, failureAll;
   FILE *outputFile;
   MPI_Comm comm = MPI_COMM_WORLD;
 
@@ -16,9 +16,9 @@ StarDGEMM(HPCC_Params *params) {
   MPI_Comm_size( comm, &commSize );
   MPI_Comm_rank( comm, &myRank );
 
-  TestDGEMM( params, 0 == myRank ? 1 : 0, &localGflops, &n, &failure );
+  rv = TestDGEMM( params, 0 == myRank ? 1 : 0, &localGflops, &n, &failure );
 
-  MPI_Reduce( &failure, &errCount, 1, MPI_INT, MPI_SUM, 0, comm );
+  MPI_Reduce( &rv, &errCount, 1, MPI_INT, MPI_SUM, 0, comm );
   MPI_Allreduce( &failure, &failureAll, 1, MPI_INT, MPI_MAX, comm );
   if (failureAll) params->Failure = 1;
 
@@ -42,7 +42,7 @@ StarDGEMM(HPCC_Params *params) {
 int
 SingleDGEMM(HPCC_Params *params) {
   int myRank, commSize;
-  int errCount, rank, failure = 0;
+  int rv, errCount, rank, failure = 0;
   double localGflops;
   int n;
   double scl = 1.0 / RAND_MAX;
@@ -68,10 +68,11 @@ SingleDGEMM(HPCC_Params *params) {
   MPI_Bcast( &rank, 1, MPI_INT, 0, comm ); /* broadcast the rank selected on node 0 */
 
   if (myRank == rank) /* if this node has been selected */
-    TestDGEMM( params, 0 == myRank ? 1 : 0, &localGflops, &n, &failure );
+    rv = TestDGEMM( params, 0 == myRank ? 1 : 0, &localGflops, &n, &failure );
 
+  MPI_Bcast( &rv, 1, MPI_INT, rank, comm ); /* broadcast error code */
   MPI_Bcast( &failure, 1, MPI_INT, rank, comm ); /* broadcast failure indication */
-  errCount = failure;
+  errCount = rv;
   if (failure) params->Failure = 1;
 
   /* broadcast result */
