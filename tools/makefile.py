@@ -4,7 +4,7 @@
 # Use this file to generate ../hpl/Makefile.hpcc
 #
 
-import sys
+import string, sys
 
 hauxil = "../../../include/hpl_auxil.h"
 hblas = "../../../include/hpl_blas.h"
@@ -21,13 +21,14 @@ hpmatgen = "../../../include/hpl_pmatgen.h"
 hpmisc = "../../../include/hpl_pmisc.h"
 hptest = "../../../include/hpl_ptest.h"
 hptimer = "../../../include/hpl_ptimer.h"
+htest = "../../../include/hpl_test.h" # this file seems to contain unsued functions
 htimer = "../../../include/hpl_timer.h"
 hhpl = "../../../include/hpl.h"
 hhpcc = "../../../../include/hpcc.h"
 hhpccv = "../../../../include/hpccver.h"
 
-deps = (
-    ("src/auxil/HPL_", (hmisc, hblas, hauxil),
+allDeps = (
+    ("src/auxil/HPL_", (hmisc, hblas, hauxil, htest),
      ("dlacpy", "dlatcpy", "fprintf", "warn", "abort", "dlaprnt", "dlange"), ""),
 
     ("src/auxil/HPL_", (hmisc, hblas, hauxil),
@@ -152,9 +153,46 @@ def Gen(deps):
             print "\t$(CC) -o", fo, "-c", fc, flags
             print
 
+def Dist(deps):
+    allPrfx = "hpcc/"
+
+    addItems = ["Makefile", "README.xml", "hpccinf.txt", "hpl/Make.UNKNOWN", "hpl/Makefile.hpcc", "hpl/lib/arch/build", "hpl/makes", "hpl/man", "hpl/setup", "hpl/www"]
+
+    allFiles = []
+    hDict = {}
+    for d in deps:
+        prfx, hfiles, files, flags = d
+
+        for f in files:
+            if prfx[0] != ".": # if it's an HPL file
+                ff = allPrfx + "hpl/" + prfx + f + ".c"
+            else: # if it's not an HPL file
+                ff = allPrfx + prfx[3:] + f + ".c"
+            allFiles.append(ff)
+
+        for h in hfiles:
+            if h[9:11] == "..": # if it's not an HPL header
+                hprfx = allPrfx
+                idx = 12
+            else:
+                hprfx = allPrfx + "hpl/"
+                idx = 9
+            hh = hprfx + h[idx:]
+            hDict[hh] = 1
+
+    allItems = map(lambda x, p=allPrfx: p + x, addItems) + allFiles + hDict.keys()
+    allItems.sort()
+    print "tar --group=root --owner=root -cvohf hpcc.tar", string.join( allItems, " " )
+
+
 def main(argv):
-    global deps
-    Gen(deps)
+    global allDeps
+
+    if len(argv) > 1 and argv[1] == "dist":
+        Dist(allDeps)
+    else:
+        Gen(allDeps)
+
     return 0
 
 if __name__ == "__main__":
