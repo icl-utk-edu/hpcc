@@ -183,7 +183,7 @@ def TraverseDirs(prfx, items):
 def Dist(deps, prfx="hpcc"):
     allPrfx = prfx + "/"
 
-    addItems = ["Makefile", "README.xml", "README.html", "README.html", "hpccinf.txt",
+    addItems = ["Makefile", "README.xml", "README.html", "README.txt", "hpccinf.txt",
                 "hpl/Make.UNKNOWN", "hpl/BUGS", "hpl/COPYRIGHT", "hpl/HISTORY",
                 "hpl/HPL.build.log.220120040613", "hpl/INSTALL", "hpl/Make.top", "hpl/Makefile",
                 "hpl/README", "hpl/TODO", "hpl/TUNING", "hpl/lib/arch/build/Makefile.hpcc",
