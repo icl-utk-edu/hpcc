@@ -172,6 +172,8 @@ Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, double 
       return 1;
     }
 
+    params->StreamVectorSize = VectorSize;
+
     /* --- SETUP --- determine precision and check timing --- */
 
     if (doIO) {
@@ -194,6 +196,7 @@ Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, double 
     {
     k = omp_get_num_threads();
     if (doIO) fprintf( outFile, "Number of Threads requested = %i\n",k);
+    params->StreamThreads = k;
     }
 #endif
 
