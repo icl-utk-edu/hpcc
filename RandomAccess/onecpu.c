@@ -1,17 +1,19 @@
-/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*-
+/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*- */
+
+/*
+ * This file contains the interfaces for both the star single cpu RandomAccess 
+ * test and the single cpu RandomAccess tests.
  *
- * See RandomAccess.h for a comprehensive description of this test and
- * its goals.
+ * The star single cpu RandomAccesstest runs on all cpus in the MPI universe, but 
+ * there is no communication between cpus during the process (each cpu runs its 
+ * own version of the single_cpu test).  The final result is the average of the 
+ * entire system.
  *
- * This file contains the interface for the star single cpu RandomAccess test.
- * The test runs on all cpus in the MPI universe, but there is no communication
- * between cpus during the process (each cpu runs its own version of the
- * single_cpu test).  The final result is the average of the entire system.
+ * The single cpu RandomAccess test is only run on a single (random) node in 
+ * the MPI universe, with all other CPUs stuck (in theory, idle) in an MPI_Bcast
+ * waiting for the selected CPU to finish the RandomAccess test. 
  */
-/* This file contains the interface for the single cpu RandomAccess test.  The
- * test is only run on a single (random) node in the MPI universe, with all
- * other CPUs stuck (in theory, idle) in an MPI_Bcast waiting for the selected
- * CPU to finish the RandomAccess test. */
+
 
 #include <hpcc.h>
 #include "RandomAccess.h"
