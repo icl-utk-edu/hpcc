@@ -94,7 +94,7 @@ extern int HPCC_Init(HPCC_Params *params);
 extern int HPCC_Finalize(HPCC_Params *params);
 extern int MinStoreBits(unsigned long x);
 
-extern int HPL_main(int ARGC, char **ARGV, double *GflopsPtr, int *failure);
+extern int HPL_main(int ARGC, char **ARGV, HPL_RuntimeData *rdata, int *failure);
 extern int StarDGEMM(HPCC_Params *params);
 extern int SingleDGEMM(HPCC_Params *params);
 extern int PTRANS(HPCC_Params *params);

@@ -87,10 +87,6 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
     integer i__1, i__2;
     doublecomplex z__1, z__2;
 
-    /* Builtin functions */
-    integer pow_ii(integer *, integer *);
-    void d_cnjg(doublecomplex *, doublecomplex *);
-
     /* Local variables */
     doublecomplex *c__, *d__;
     integer i__;
@@ -509,9 +505,6 @@ int pzfft1d0_(doublecomplex *a, doublecomplex *ax,
     /* System generated locals */
     integer w_dim2, w_offset, i__1, i__2;
 
-    /* Builtin functions */
-    double atan(doublereal), cos(doublereal), sin(doublereal);
-
     /* Local variables */
     integer j, k;
     doublereal px, pi2;
@@ -549,9 +542,6 @@ int pzfft1d0_(doublecomplex *a, doublecomplex *ax,
 {
     /* System generated locals */
     integer w_dim2, w_dim3, w_offset, i__1, i__2, i__3;
-
-    /* Builtin functions */
-    double atan(doublereal), cos(doublereal), sin(doublereal);
 
     /* Local variables */
     integer i__, j, k;

@@ -58,7 +58,7 @@ int HPL_main
    int *failure
 )
 #else
-int HPL_main( ARGC, ARGV, TflopsPtr, failure )
+int HPL_main( ARGC, ARGV, rdata, failure )
 /*
  * .. Scalar Arguments ..
  */
@@ -67,7 +67,7 @@ int HPL_main( ARGC, ARGV, TflopsPtr, failure )
  * .. Array Arguments ..
  */
    char                       * * ARGV;
-   HPL_RuntimeData            * rdata,
+   HPL_RuntimeData            * rdata;
    int *failure;
 #endif
 {

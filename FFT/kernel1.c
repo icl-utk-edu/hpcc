@@ -441,9 +441,6 @@ static integer c__3 = 3;
     /* System generated locals */
     integer i__1;
 
-    /* Builtin functions */
-    double atan(doublereal), cos(doublereal), sin(doublereal);
-
     /* Local variables */
     integer i__;
     doublereal px, pi2;

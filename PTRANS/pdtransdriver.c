@@ -26,8 +26,6 @@ PTRANS(HPCC_Params *params) {
   int kfail = 0;
   int kskip = 0;
 
-  int i__4, i__5;
-
   int i__, j, m, n;
   int mb, nb, ii, mg, ng, mp, mq, np, nq;
   int mp0, mq0, np0, nq0, lda, ldc, iam, lcm;
@@ -284,9 +282,7 @@ PTRANS(HPCC_Params *params) {
         ipc = 1;
         ipa = ipc + (long)np0 * (long)mq0;
         ipiw = (long)mp0 * (long)nq0 + ipa;
-        i__4 = 3 * sizeof(int) * MAX(npcol,nprow);
-        i__5 = sizeof(double);
-        ipw = ipiw /*+ (long)iceil_(&i__4, &i__5)*/;
+        ipw = ipiw;
         isw = ipw + (long)(iceil_(&mg, &lcm) << 1) * (long)mb * (long)iceil_(&ng, &lcm) * (long)nb;
 
 /*              Make sure have enough memory to handle problem */

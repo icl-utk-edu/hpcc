@@ -63,16 +63,12 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 
 /*     WRITTEN BY DAISUKE TAKAHASHI */
 
-/* Subroutine */ int zfft1d_(doublecomplex *a, doublecomplex *b, integer *n, 
+/* Subroutine */ int zfft1d_(void *a_, void *b_, integer *n, 
 	integer *iopt, hpcc_fftw_plan p, integer *n0)
 {
     /* System generated locals */
     integer i__1, i__2, i__3, i__4, i__5;
     doublecomplex z__1, z__2;
-
-    /* Builtin functions */
-    void d_cnjg(doublecomplex *, doublecomplex *);
-    integer pow_ii(integer *, integer *);
 
     /* Local variables */
     doublecomplex *c__, *d__;
@@ -80,6 +76,7 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
     doublecomplex *w1, *w2;
     doublereal dn;
     integer ip[3], ip1[3], ip2[3];
+    doublecomplex *a, *b;
     doublecomplex *ww1, *ww2, *ww3, *ww4;
     extern /* Subroutine */ int fft235b_(doublecomplex *, doublecomplex *, 
 	    doublecomplex *, integer *, integer *), factor_(integer *, 
@@ -91,6 +88,8 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 	    settbls_(void *, void *, void *, 
 	    void *, integer *, integer *, integer *, integer *);
 
+    a = (doublecomplex *)a_;
+    b = (doublecomplex *)b_;
     c__ = (doublecomplex *)p->c;
     d__ = (doublecomplex *)p->d;
     w1 = (doublecomplex *)p->w1;
@@ -255,9 +254,6 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 	    ww4_offset, i__1, i__2, i__3, i__4, i__5, i__6, i__7, i__8, i__9, 
 	    i__10;
     doublecomplex z__1, z__2, z__3, z__4;
-
-    /* Builtin functions */
-    integer pow_ii(integer *, integer *);
 
     /* Local variables */
     integer i__, j, ii, ij, jj, ik, ir, is, ij0;
@@ -468,9 +464,6 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
     /* System generated locals */
     integer w1_dim2, w1_offset, w2_dim2, w2_offset, w3_dim2, w3_offset, 
 	    w4_dim2, w4_offset, i__1, i__2;
-
-    /* Builtin functions */
-    double atan(doublereal), cos(doublereal), sin(doublereal);
 
     /* Local variables */
     integer j, k, ir, is;

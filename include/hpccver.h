@@ -6,4 +6,4 @@ RELEASE is a, b, f (alpha, beta, and final)
 */
 #define HPCC_VERSION_MAJOR   0
 #define HPCC_VERSION_MINOR   8
-#define HPCC_VERSION_RELEASE 'a'
+#define HPCC_VERSION_RELEASE 'b'

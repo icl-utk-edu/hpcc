@@ -61,7 +61,7 @@ void HPL_pdtest
 )
 #else
 void HPL_pdtest
-( TEST, GRID, ALGO, N, NB, curGflops )
+( TEST, GRID, ALGO, N, NB, rdata )
    HPL_T_test *                     TEST;
    HPL_T_grid *                     GRID;
    HPL_T_palg *                     ALGO;

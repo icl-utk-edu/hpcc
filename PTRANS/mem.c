@@ -6,7 +6,6 @@ static int
 CheckNode(int imrow, int imcol, int nmat, int *mval, int *nval, int nbmat, int *mbval, int *nbval, 
           int myrow, int mycol, int nprow, int npcol, long *maxMem) {
   int i__, ii, m, n, mb, nb, ierr[1];
-  int i__4, i__5;
   int lcm, np0, nq0, mp0, mq0, mg, ng, np, nq, mp, mq;
   long isw, ipw, ipiw, ipa, ipc;
 
@@ -64,9 +63,7 @@ CheckNode(int imrow, int imcol, int nmat, int *mval, int *nval, int nbmat, int *
         ipc = 1;
         ipa = ipc + (long)np0 * (long)mq0;
         ipiw = (long)mp0 * (long)nq0 + ipa;
-        i__4 = 3 * sizeof(int) * MAX(npcol,nprow);
-        i__5 = sizeof(double);
-        ipw = ipiw /*+ (long)iceil_(&i__4, &i__5)*/;
+        ipw = ipiw;
         isw = ipw + (long)(iceil_(&mg, &lcm) << 1) * (long)mb * (long)iceil_(&ng, &lcm) * (long)nb;
 
         if (*maxMem < isw) *maxMem = isw;
