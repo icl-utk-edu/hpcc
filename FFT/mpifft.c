@@ -66,7 +66,7 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
   if (! inout || ! work) goto comp_end;
 
   t0 = MPI_Wtime();
-  bcnrand( 2 * tls, 0, inout );
+  bcnrand( 2 * tls, 53 * commRank * 2 * tls, inout );
   t0 = MPI_Wtime() - t0;
 
   t2 = MPI_Wtime();
@@ -81,7 +81,7 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
   t3 = MPI_Wtime() - t3;
   hpcc_fftw_mpi_destroy_plan( ip );
 
-  bcnrand( 2 * tls, 0, work ); /* regenerate data */
+  bcnrand( 2 * tls, 53 * commRank * 2 * tls, work ); /* regenerate data */
 
   maxErr = 0.0;
   for (i = 0; i < tls; i++) {
