@@ -3,7 +3,7 @@
 <article class="productsheet">
   <articleinfo>
     <title>
-      <acronym>DARPA</acronym>/<acronym>DOE</acronym> <acronym>HPC Challange</acronym> benchmark
+      <acronym>DARPA</acronym>/<acronym>DOE</acronym> <acronym>HPC Challange</acronym> Benchmark
     </title>
     <author>
       <firstname>Piotr</firstname>
@@ -19,7 +19,7 @@
     <para>
       This is a suite of benchmarks that measure performance of <acronym>CPU</acronym>, memory
       subsytem and the interconnect. For details refer to the <ulink
-      url="http://icl.cs.utk.edu/hpcc/"><citetitle>HPC Challenge</citetitle></ulink>
+      url="http://icl.cs.utk.edu/hpcc/"><citetitle><acronym>HPC Challenge</acronym></citetitle></ulink>
       web site.
     </para>
     <para>
@@ -240,6 +240,11 @@
       </simpara>
       </listitem>
     </itemizedlist>
+    </para>
+    <para>
+    After the run, a file called <filename>hpccoutf.txt</filename> is created which contains
+    results of the benchmark. This file should be uploaded through the web form at the
+    <acronym>HPC Challenge</acronym> website.
     </para>
   </section>
 </article>
