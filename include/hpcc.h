@@ -44,7 +44,7 @@ typedef struct {
   int PTRANSnpqs, PTRANSpval[2 * HPL_MAX_PARAM], PTRANSqval[2 * HPL_MAX_PARAM];
   double Tflops, ptransGBs, MPIGUPs, StarGUPs, SingleGUPs, StarStreamCopyGBs, StarStreamScaleGBs,
     StarStreamAddGBs, StarStreamTriadGBs, SingleStreamCopyGBs, SingleStreamScaleGBs,
-    SingleStreamAddGBs, SingleStreamTriadGBs;
+    SingleStreamAddGBs, SingleStreamTriadGBs, StarDGEMMGflops, SingleDGEMMGflops;
   double MaxPingPongLatency, RandomlyOrderedRingLatency, MinPingPongBandwidth,
     NaturallyOrderedRingBandwidth, RandomlyOrderedRingBandwidth;
 
@@ -52,7 +52,8 @@ typedef struct {
 
   unsigned long HPLMaxProcMem;
   int HPLMaxProc;
-  int RunHPL, RunPTRANS, RunStarStream, RunSingleStream, RunMPIRandomAccess, RunStarRandomAccess,
+  int RunHPL, RunStarDGEMM, RunSingleDGEMM, RunPTRANS, RunStarStream,
+    RunSingleStream, RunMPIRandomAccess, RunStarRandomAccess,
     RunSingleRandomAccess, RunLatencyBandwidth;
 } HPCC_Params;
 /*
@@ -70,6 +71,8 @@ extern int HPCC_Finalize(HPCC_Params *params);
 extern int MinStoreBits(unsigned long x);
 
 extern int HPL_main(int ARGC, char **ARGV, double *GflopsPtr, int *failure);
+extern int StarDGEMM(HPCC_Params *params);
+extern int SingleDGEMM(HPCC_Params *params);
 extern int PTRANS(HPCC_Params *params);
 extern int MPIRandomAccess(HPCC_Params *params);
 extern int SingleRandomAccess(HPCC_Params *params);
@@ -77,6 +80,7 @@ extern int StarRandomAccess(HPCC_Params *params);
 extern int SingleStream(HPCC_Params *params);
 extern int StarStream(HPCC_Params *params);
 
+extern int TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure);
 extern int MaxMem(int nprocs, int imrow, int imcol, int nmat, int *mval, int *nval, int nbmat,
   int *mbval, int *nbval, int ngrids, int *npval, int *nqval, long *maxMem);
 extern int RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure);
