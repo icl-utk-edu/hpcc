@@ -1,0 +1,133 @@
+% -*- LaTeX -*-
+\documentclass[twocolumn]{article}
+\usepackage{pslatex}
+\begin{document}
+\title{DARPA/DOE HPC~Challange Benchmark} \author{Piotr
+Luszczek\footnote{University of Tennessee Knoxville, Innovative
+Computing Laboratory}} \maketitle
+
+\section{Introduction}
+This is a suite of benchmarks that measure performance of CPU, memory
+subsytem and the interconnect. For details refer to the
+HPC~Challenge web site (\texttt{http://icl.cs.utk.edu/hpcc/}.)
+
+In essence, HPC~Challange consists of a number of subbenchmarks each
+of which tests different aspect of the system.
+
+If you are familiar with the HPL benchmark code (see the HPL web site:
+\texttt{http://www.netlib.org/benchmark/hpl/}) then you can reuse the
+configuration file~(input for \texttt{make(1)} command) and the input
+file that you already have for HPL. The HPC~Challange benchmark
+includes HPL and uses its configuration and input files with only
+slight modifications.
+
+\section{Compiling}
+The first step is to create a configuration file that reflects
+characteristics of your machine. The configuration file should be
+created in the \texttt{hpl} directory. This directory contains
+instructions (the files \texttt{README} and \texttt{INSTALL}) on how
+to create the configuration file. This file is reused by all the
+components of the HPC~Challange suite.
+
+When configuration is done, a file should exist in the \texttt{hpl}
+directory whose name starts with \texttt{Make.} and ends with the name
+for the system used for tests. For example, if the name for the system
+is \texttt{Unix}, the file should be named \texttt{Make.Unix}.
+
+To build the benchmark executable (for the system named \texttt{Unix})
+type: \texttt{make arch=Unix}.  This command should be run in the
+current directory (not in the \texttt{hpl} directory). It will look in
+the \texttt{hpl} directory for the configuration file and use it to
+build the benchmark executable.
+
+\section{Configuration}
+The HPC~Challange is drivien by a short input file named
+\texttt{hpccinf.txt} that is almost the same as the input file for
+HPL~(customarily called \texttt{HPL.dat}). Refer to the directory
+\texttt{hpl/www/tuning.html} for details about the input file for
+HPL. A sample input file is included with the HPC~Challange
+distribution.
+
+The differences between HPL's input file and HPC~Challange's input file can
+be summarized as follows:
+
+\begin{itemize}
+\item Lines 3 and 4 are ignored. The output always goes to the file named \texttt{hpccoutf.txt}.
+\item There are additional lines (starting with line 33) that may (but
+do not have to) be used to customize the HPC~Challenge benchmark. They
+are described below.
+\end{itemize}
+
+The additional lines in the HPC~Challenge input file (compared to the
+HPL input file) are:
+
+\begin{itemize}
+\item Lines 33 and 34 describe additional matrix sizes to be used for
+running the PTRANS benchmark (one of the components of the
+HPC~Challange benchmark).
+\item Lines 35 and 36 describe additional blocking factors to be used
+for running the PTRANS benchmark.
+\end{itemize}
+
+Just for completeness, here is the list of lines of the HPC
+Challenge's input file and brief description of their meaning:
+\begin{itemize}
+\item Line 1: ignored
+\item Line 2: ignored
+\item Line 3: ignored
+\item Line 4: ignored
+\item Line 5: number of matrix sizes for HPL (and PTRANS)
+\item Line 6: matrix sizes for HPL (and PTRANS)
+\item Line 7: number of blocking factors for HPL (and PTRANS)
+\item Line 8: blocking factors for HPL (and PTRANS)
+\item Line 9: type of process ordering for HPL
+\item Line 10: number of process grids for HPL (and PTRANS)
+\item Line 11: numbers of process rows of each process grid for HPL (and PTRANS)
+\item Line 12: numbers of process columns of each process grid for HPL (and PTRANS)
+\item Line 13: threshold value not to be exceeded by scaled residual for HPL (and PTRANS)
+\item Line 14: number of panel factorization methods for HPL
+\item Line 15: panel factorization methods for HPL
+\item Line 16: number of recursive stopping criteria for HPL
+\item Line 17: recursive stopping criteria for HPL
+\item Line 18: number of recursion panel counts for HPL
+\item Line 19: recursion panel counts for HPL
+\item Line 20: number of recursive panel factorization methods for HPL
+\item Line 21: recursive panel factorization methods for HPL
+\item Line 22: number of broadcast methods for HPL
+\item Line 23: broadcast methods for HPL
+\item Line 24: number of look-ahead depths for HPL
+\item Line 25: look-ahead depths for HPL
+\item Line 26: swap methods for HPL
+\item Line 27: swapping threshold for HPL
+\item Line 28: form of L1 for HPL
+\item Line 29: form of U for HPL
+\item Line 30: value that specifies whether equilibration should be used by HPL
+\item Line 31: memory alignment for HPL
+\item Line 32: ignored
+\item Line 33: number of additional problem sizes for PTRANS
+\item Line 34: additional problem sizes for PTRANS
+\item Line 35: number of additional blocking factors for PTRANS
+\item Line 36: additional blocking factors for PTRANS
+\end{itemize}
+
+\section{Running}
+It is hard to describe all the possible ways that the HPC~Challange
+benchmark should be run on various systems.  An example command to run
+the benchmark could like like this: \texttt{mpirun -np 4 hpcc}. The
+meaning of the command's components is as follows:
+\begin{itemize}
+\item \texttt{mpirun} is the command that starts execution of an MPI
+code. Depending on the system, it might also be \texttt{aprun},
+\texttt{mpiexec}, \texttt{mprun}, \texttt{poe}, or something
+appropriate for your computer.
+
+\item \texttt{-np 4} is the argument that specifies that 4 MPI
+processes should be started. The number of MPI processes should be
+large enough to accomodate all the process grids specified in the
+\texttt{hpccinf.txt} file.
+
+\item \texttt{hpcc} is the name of the HPC~Challange executable to
+run.
+\end{itemize}
+
+\end{document}
