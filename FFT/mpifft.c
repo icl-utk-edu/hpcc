@@ -93,6 +93,7 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
   if (maxErr / log(n) / deps < HPLthshr) failure = 0;
 
   if (doIO) {
+    fprintf( outFile, "Number of nodes: %d\n", commSize );
     fprintf( outFile, "Vector size: %d\n", n );
     fprintf( outFile, "Generation time: %9.3f\n", t0 );
     fprintf( outFile, "Tuning: %9.3f\n", t1 );
