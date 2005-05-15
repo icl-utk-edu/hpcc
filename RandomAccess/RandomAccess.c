@@ -50,9 +50,6 @@
 /* Number of updates to table (suggested: 4x number of table entries) */
 #define NUPDATE (4 * TableSize)
 
-/* Allocate main table (in global memory) */
-;
-
 void
 RandomAccessUpdate(u64Int TableSize, u64Int *Table) {
   s64Int i;
@@ -93,7 +90,7 @@ RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
   double cputime;               /* CPU time to update table */
   double realtime;              /* Real time to update table */
   double totalMem;
-  u64Int *Table
+  u64Int *Table;
   u64Int logTableSize, TableSize;
   FILE *outFile;
 
