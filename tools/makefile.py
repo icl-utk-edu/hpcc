@@ -86,7 +86,7 @@ allDeps = (
      ("tstdgemm",  "onecpu"), "-I../../../../include $(CCFLAGS)"),
 
     ("../FFT/", (hhpcc, hhpl, "../../../../FFT/hpccfft.h", "../../../../FFT/wrapfftw.h", "../../../../FFT/wrapmpifftw.h"),
-     ("bcnrand", "kernel1", "kernel2", "zfft1d", "pzfft1d", "pzb2c", "pzc2b", "pztrans", "ztrans", "onecpu", "tstfft", "wrapfftw", "wrapmpifftw", "mpifft"), "-I../../../../include $(CCFLAGS)")
+     ("bcnrand", "fft235", "zfft1d", "pzfft1d", "onecpu", "tstfft", "wrapfftw", "wrapmpifftw", "mpifft"), "-I../../../../include $(CCFLAGS)")
 
     )
 
