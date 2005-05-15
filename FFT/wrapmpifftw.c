@@ -6,9 +6,8 @@
 #include "wrapmpifftw.h"
 
 hpcc_fftw_mpi_plan
-hpcc_fftw_mpi_create_plan(MPI_Comm comm, s64Int_t n, fftw_direction dir, int flags) {
+HPCC_fftw_mpi_create_plan(MPI_Comm comm, s64Int_t n, fftw_direction dir, int flags) {
   hpcc_fftw_mpi_plan p;
-  int zero = 0;
   fftw_complex *a = NULL, *b = NULL;
   int rank, size;
 
@@ -17,18 +16,14 @@ hpcc_fftw_mpi_create_plan(MPI_Comm comm, s64Int_t n, fftw_direction dir, int fla
 
   p = fftw_malloc( sizeof *p );
 
-  p->n0 = 0;
+  p->wx = fftw_malloc( (FFTE_NDA3/2 + FFTE_NP) * (sizeof *p->wx) );
+  p->wy = fftw_malloc( (FFTE_NDA3/2 + FFTE_NP) * (sizeof *p->wy) );
+  p->wz = fftw_malloc( (FFTE_NDA3/2 + FFTE_NP) * (sizeof *p->wz) );
+  p->c = fftw_malloc( ((FFTE_NDA3+FFTE_NP) * (FFTE_NBLK + 1) + FFTE_NP) * (sizeof *p->c) );
+  p->work = fftw_malloc( n / size * 3 / 2 * (sizeof *p->work) );
+
   p->n = n;
   p->comm = comm;
-
-  p->c = fftw_malloc( ((NDA3+NP)*NBLK+NP) * sizeof(fftw_complex) );
-  p->d = fftw_malloc( (NDA3+NP) * sizeof(fftw_complex) );
-  p->wx = fftw_malloc( (NDA3/2+NP) * sizeof(fftw_complex) );
-  p->wy = fftw_malloc( (NDA3/2+NP) * sizeof(fftw_complex) );
-  p->wz = fftw_malloc( (NDA3/2+NP) * sizeof(fftw_complex) );
-  p->ww = fftw_malloc( (NDA3*NDA3) * sizeof(fftw_complex) );
-  p->www = fftw_malloc( (n/size) * sizeof(fftw_complex) );
-
   p->dir = dir;
   p->flags = flags;
 
@@ -40,32 +35,30 @@ hpcc_fftw_mpi_create_plan(MPI_Comm comm, s64Int_t n, fftw_direction dir, int fla
   else
     p->timings = HPCC_fft_timings_backward;
 
-  pzfft1d_( a, b, p->ww, p->www, &n, &rank, &size, &zero, p, &p->n0 );
+  HPCC_pzfft1d( n, a, b, p->work, rank, size, 0, p );
 
   return p;
 }
 
 void
-hpcc_fftw_mpi_destroy_plan(hpcc_fftw_mpi_plan p) {
+HPCC_fftw_mpi_destroy_plan(hpcc_fftw_mpi_plan p) {
   if (!p) return;
 
   MPI_Type_free( &p->cmplx );
 
-  fftw_free( p->www );
-  fftw_free( p->ww );
+  fftw_free( p->work );
+  fftw_free( p->c );
   fftw_free( p->wz );
   fftw_free( p->wy );
   fftw_free( p->wx );
-  fftw_free( p->d );
-  fftw_free( p->c );
   fftw_free( p );
 }
 
 void
-hpcc_fftw_mpi(hpcc_fftw_mpi_plan p, int n_fields, fftw_complex *local_data, fftw_complex *work){
-  int one = 1, two = 2;
+HPCC_fftw_mpi(hpcc_fftw_mpi_plan p, int n_fields, fftw_complex *local_data, fftw_complex *work){
   int rank, size;
   s64Int_t n;
+  int i, ln;
 
   MPI_Comm_size( p->comm, &size );
   MPI_Comm_rank( p->comm, &rank );
@@ -73,13 +66,18 @@ hpcc_fftw_mpi(hpcc_fftw_mpi_plan p, int n_fields, fftw_complex *local_data, fftw
   n = p->n;
 
   if (FFTW_FORWARD == p->dir)
-    pzfft1d_( local_data, work, p->ww, p->www, &n, &rank, &size, &one, p, &p->n0 );
+    HPCC_pzfft1d( n, local_data, work, p->work, rank, size, -1, p );
   else
-    pzfft1d_( local_data, work, p->ww, p->www, &n, &rank, &size, &two, p, &p->n0 );
+    HPCC_pzfft1d( n, local_data, work, p->work, rank, size, +1, p );
+
+  ln = n / size;
+  for (i = 0; i < ln; ++i) {
+    c_assgn( local_data[i], work[i] );
+  }
 }
 
 void
-hpcc_fftw_mpi_local_sizes(hpcc_fftw_mpi_plan p, s64Int_t *local_n, s64Int_t *local_start,
+HPCC_fftw_mpi_local_sizes(hpcc_fftw_mpi_plan p, s64Int_t *local_n, s64Int_t *local_start,
   s64Int_t *local_n_after_transform, s64Int_t *local_start_after_transform, s64Int_t *total_local_size) {
   int rank, size;
   s64Int_t n;

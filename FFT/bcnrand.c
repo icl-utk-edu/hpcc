@@ -198,7 +198,7 @@ expm2(u64Int_t p, u64Int_t am) {
   will be fullfilled internally.
  */
 int
-bcnrand(u64Int_t n, u64Int_t a, void *vx) {
+HPCC_bcnrand(u64Int_t n, u64Int_t a, void *vx) {
   u64Int_t d1, d2, d3, t53, p3i, ui, minA;
   s64Int_t sd1, sp3i;
   Big dd1, dd2;
