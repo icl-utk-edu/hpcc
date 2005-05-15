@@ -166,11 +166,11 @@ HPL_DEFS     = $(F2CDEFS) $(HPL_OPTS) $(HPL_INCLUDES)
 # - Compilers / linkers - Optimization flags ---------------------------
 # ----------------------------------------------------------------------
 #
-CC           = /usr/vac/bin/xlc
+CC           = mpcc
 CCNOOPT      = $(HPL_DEFS)
 CCFLAGS      = $(HPL_DEFS) -qtune=pwr3 -qarch=pwr3 -O3 -qmaxmem=-1 -qfloat=hsflt
 #
-LINKER       = /usr/bin/xlf
+LINKER       = mpxlf
 LINKFLAGS    = -bmaxdata:0x70000000 $(CCFLAGS)
 #
 ARCHIVER     = ar
