@@ -197,11 +197,11 @@ HPCC_Init(HPCC_Params *params) {
   FPRINTF( myRank, outputFile,
             "########################################################################%s", "" );
   FPRINTF3( myRank, outputFile,
-            "This is the DARPA/DOE HPC Challange Benchmark version %d.%d%c October 2003",
-            HPCC_VERSION_MAJOR, HPCC_VERSION_MINOR, HPCC_VERSION_RELEASE );
+            "This is the DARPA/DOE HPC Challange Benchmark version %d.%d.%d October 2003",
+            HPCC_VERSION_MAJOR, HPCC_VERSION_MINOR, HPCC_VERSION_MICRO );
   FPRINTF( myRank, outputFile, "Produced by Jack Dongarra and Piotr Luszczek%s", "" );
   FPRINTF( myRank, outputFile, "Innovative Computing Laboratory%s", "" );
-  FPRINTF( myRank, outputFile, "University of Tennessee and Oak Ridge National Laboratory%s", "" );
+  FPRINTF( myRank, outputFile, "University of Tennessee Knoxville and Oak Ridge National Laboratory%s", "" );
   FPRINTF( myRank, outputFile, "%s", "" );
   FPRINTF( myRank, outputFile, "See the source files for authors of specific codes. %s", "" );
   FPRINTF( myRank, outputFile, "Compiled on " __DATE__ " at %s", __TIME__ );
@@ -220,7 +220,7 @@ HPCC_Init(HPCC_Params *params) {
   params->RunStarDGEMM = 0;
   params->RunSingleDGEMM = 0;
   params->RunPTRANS = 0;
-  params->RunStarStream = 1;
+  params->RunStarStream = 0;
   params->RunSingleStream = 0;
   params->RunMPIRandomAccess = 0;
   params->RunStarRandomAccess = 0;
@@ -251,7 +251,7 @@ HPCC_Init(HPCC_Params *params) {
 
   params->PTRANSrdata.GBs = params->PTRANSrdata.time = params->PTRANSrdata.residual = -1.0;
   params->PTRANSrdata.n = params->PTRANSrdata.nb = params->PTRANSrdata.nprow =
-    params->PTRANSrdata.npcol = -1;
+  params->PTRANSrdata.npcol = -1;
 
   params->RandomAccess_N =
   params->MPIRandomAccess_Errors =
@@ -303,6 +303,7 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "Begin of Summary section.%s", "" );
   FPRINTF( myRank, outputFile, "VersionMajor=%d", HPCC_VERSION_MAJOR );
   FPRINTF( myRank, outputFile, "VersionMinor=%d", HPCC_VERSION_MINOR );
+  FPRINTF( myRank, outputFile, "VersionMicro=%d", HPCC_VERSION_MICRO );
   FPRINTF( myRank, outputFile, "VersionRelease=%c", HPCC_VERSION_RELEASE );
   FPRINTF( myRank, outputFile, "LANG=%s", "C" );
   FPRINTF( myRank, outputFile, "Success=%d", params->Failure ? 0 : 1 );
