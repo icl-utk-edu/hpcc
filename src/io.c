@@ -233,7 +233,7 @@ HPCC_Init(HPCC_Params *params) {
   params->RunMPIFFT = params->RunStarFFT = params->RunSingleFFT = 
   params->RunLatencyBandwidth = 1;
 
-   params->MPIGUPs = params->StarGUPs = params->SingleGUPs =
+  params->MPIGUPs = params->StarGUPs = params->SingleGUPs =
   params->StarDGEMMGflops = params->SingleDGEMMGflops = -1.0;
   params->StarStreamCopyGBs = params->StarStreamScaleGBs = params->StarStreamAddGBs =
   params->StarStreamTriadGBs = params->SingleStreamCopyGBs = params->SingleStreamScaleGBs =
@@ -306,15 +306,16 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "VersionRelease=%c", HPCC_VERSION_RELEASE );
   FPRINTF( myRank, outputFile, "LANG=%s", "C" );
   FPRINTF( myRank, outputFile, "Success=%d", params->Failure ? 0 : 1 );
-  FPRINTF( myRank, outputFile, "sizeof(char)=%d", (int)sizeof(char) );
-  FPRINTF( myRank, outputFile, "sizeof(short)=%d", (int)sizeof(short) );
-  FPRINTF( myRank, outputFile, "sizeof(int)=%d", (int)sizeof(int) );
-  FPRINTF( myRank, outputFile, "sizeof(long)=%d", (int)sizeof(long) );
-  FPRINTF( myRank, outputFile, "sizeof(void*)=%d", (int)sizeof(void*) );
-  FPRINTF( myRank, outputFile, "sizeof(float)=%d", (int)sizeof(float) );
-  FPRINTF( myRank, outputFile, "sizeof(double)=%d", (int)sizeof(double) );
+  FPRINTF( myRank, outputFile, "sizeof_char=%d", (int)sizeof(char) );
+  FPRINTF( myRank, outputFile, "sizeof_short=%d", (int)sizeof(short) );
+  FPRINTF( myRank, outputFile, "sizeof_int=%d", (int)sizeof(int) );
+  FPRINTF( myRank, outputFile, "sizeof_long=%d", (int)sizeof(long) );
+  FPRINTF( myRank, outputFile, "sizeof_void_ptr=%d", (int)sizeof(void*) );
+  FPRINTF( myRank, outputFile, "sizeof_size_t=%d", (int)sizeof(size_t) );
+  FPRINTF( myRank, outputFile, "sizeof_float=%d", (int)sizeof(float) );
+  FPRINTF( myRank, outputFile, "sizeof_double=%d", (int)sizeof(double) );
   FPRINTF( myRank, outputFile, "CommWorldProcs=%d", commSize );
-  FPRINTF( myRank, outputFile, "MPI_Wtick()=%e", MPI_Wtick() );
+  FPRINTF( myRank, outputFile, "MPI_Wtick=%e", MPI_Wtick() );
   FPRINTF( myRank, outputFile, "HPL_Tflops=%g", params->HPLrdata.Gflops * 1e-3 );
   FPRINTF( myRank, outputFile, "HPL_time=%g", params->HPLrdata.time );
   FPRINTF( myRank, outputFile, "HPL_eps=%g", params->HPLrdata.eps );
