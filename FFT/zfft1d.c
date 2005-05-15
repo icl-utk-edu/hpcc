@@ -63,7 +63,7 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 
 /*     WRITTEN BY DAISUKE TAKAHASHI */
 
-/* Subroutine */ int zfft1d_(void *a_, void *b_, integer *n, 
+/* Subroutine */ int hpcc_zfft1d_(void *a_, void *b_, integer *n, 
 	integer *iopt, hpcc_fftw_plan p, integer *n0)
 {
     /* System generated locals */
@@ -240,7 +240,7 @@ d_cnjg(doublecomplex *r, doublecomplex *v) {
 	}
     }
     return 0;
-} /* zfft1d_ */
+} /* hpcc_zfft1d_ */
 
 /* Subroutine */ int zfft1d0_(doublecomplex *a, doublecomplex *b, 
 	doublecomplex *c__, doublecomplex *d__, doublecomplex *w1, 

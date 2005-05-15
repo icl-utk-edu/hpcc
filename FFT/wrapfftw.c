@@ -23,7 +23,7 @@ hpcc_fftw_create_plan(int n, fftw_direction dir, int flags) {
   p->ww3 = fftw_malloc( (NDA2+NDA4*NP+NP) * sizeof(fftw_complex) );
   p->ww4 = fftw_malloc( (NDA2+NDA4*NP+NP) * sizeof(fftw_complex) );
 
-  zfft1d_( a, b, &n, &zero, p, &p->n0 );
+  hpcc_zfft1d_( a, b, &n, &zero, p, &p->n0 );
 
   p->dir = dir;
   p->flags = flags;
@@ -49,7 +49,7 @@ hpcc_fftw_one(hpcc_fftw_plan p, fftw_complex *in, fftw_complex *out) {
   int one = 1, two = 2;
 
   if (FFTW_FORWARD == p->dir)
-    zfft1d_( in, out, &p->n0, &one, p, &p->n0 );
+    hpcc_zfft1d_( in, out, &p->n0, &one, p, &p->n0 );
   else
-    zfft1d_( in, out, &p->n0, &two, p, &p->n0 );
+    hpcc_zfft1d_( in, out, &p->n0, &two, p, &p->n0 );
 }

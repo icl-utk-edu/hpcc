@@ -42,6 +42,6 @@ extern void Cfft5b(fftw_complex *a,fftw_complex *b,fftw_complex *w, int m, int l
 extern void Cfft8a(fftw_complex *a,fftw_complex *b,fftw_complex *w, int l);
 extern void Cfft8b(fftw_complex *a,fftw_complex *b,fftw_complex *w, int m, int l);
 */
-extern int zfft1d_(void *a, void *b, integer *n, integer *iopt, hpcc_fftw_plan p, integer *n0);
+extern int hpcc_zfft1d_(void *a, void *b, integer *n, integer *iopt, hpcc_fftw_plan p, integer *n0);
 
 extern int bcnrand(u64Int_t n, u64Int_t a, void *x);

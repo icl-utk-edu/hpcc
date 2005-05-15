@@ -528,4 +528,4 @@ L10:
 	goto L10;
     }
     return 0;
-} /* factor_ */
+} /* factor8_ */

@@ -44,14 +44,18 @@ static void
 MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm comm,
         double *UGflops, s64Int_t *Un, double *UmaxErr, int *Ufailure) {
   int commRank, commSize;
-  int failure = 1;
+  int failure;
   s64Int_t i, n;
   s64Int_t locn, loc0, alocn, aloc0, tls;
-  double maxErr, tmp1, tmp2, tmp3, t0, t1, t2, t3, Gflops = -1.0;
-  double deps = HPL_dlamch( HPL_MACH_EPS );
+  double maxErr, tmp1, tmp2, tmp3, t0, t1, t2, t3, Gflops;
+  double deps;
   fftw_complex *inout, *work;
   fftw_mpi_plan p;
   hpcc_fftw_mpi_plan ip;
+
+  failure = 1;
+  Gflops = -1.0;
+  deps = HPL_dlamch( HPL_MACH_EPS );
 
   MPI_Comm_size( comm, &commSize );
   MPI_Comm_rank( comm, &commRank );
