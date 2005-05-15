@@ -51,10 +51,10 @@
 #define NUPDATE (4 * TableSize)
 
 /* Allocate main table (in global memory) */
-u64Int *Table;
+;
 
 void
-RandomAccessUpdate(u64Int TableSize) {
+RandomAccessUpdate(u64Int TableSize, u64Int *Table) {
   s64Int i;
   u64Int ran[128];              /* Current random numbers */
   int j;
@@ -76,24 +76,14 @@ RandomAccessUpdate(u64Int TableSize) {
 
   for (i=0; i<NUPDATE/128; i++) {
 /* #pragma ivdep */
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
     for (j=0; j<128; j++) {
       ran[j] = (ran[j] << 1) ^ ((s64Int) ran[j] < 0 ? POLY : 0);
       Table[ran[j] & (TableSize-1)] ^= ran[j];
     }
   }
-
-#if 0
-  {
-    char foo[200];
-    snprintf(foo, 200, "table");
-    FILE *fp;
-    fp = fopen(foo, "w");
-    for (j = 0 ; j < TableSize ; ++j) {
-      fprintf(fp, "%lld\n", Table[j]);
-    }
-    fclose(fp);
-  }
-#endif
 }
 
 int
@@ -103,6 +93,7 @@ RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
   double cputime;               /* CPU time to update table */
   double realtime;              /* Real time to update table */
   double totalMem;
+  u64Int *Table
   u64Int logTableSize, TableSize;
   FILE *outFile;
 
@@ -145,7 +136,7 @@ RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
   cputime = -CPUSEC();
   realtime = -RTSEC();
 
-  RandomAccessUpdate( TableSize );
+  RandomAccessUpdate( TableSize, Table );
 
   /* End timed section */
   cputime += CPUSEC();
