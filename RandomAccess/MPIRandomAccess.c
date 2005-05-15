@@ -105,11 +105,13 @@ u64Int *Table;
 #define UPDATE_TAG   2
 #define USE_NONBLOCKING_SEND 1
 
+#ifndef LONG_IS_64BITS
 void
 Sum64(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
   int i, n = *len; s64Int *invec64 = invec, *inoutvec64 = inoutvec;
   for (i = n; i; i--, invec64++, inoutvec64++) *inoutvec64 += *invec64;
 }
+#endif
 
 void
 AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
@@ -250,6 +252,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 
    /* Be nice and clean up after ourselves */
    MPI_Cancel(&inreq);
+   MPI_Wait(&inreq, &ignoredStatus);
 
 /* end multiprocessor code */
 }
@@ -388,6 +391,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 
    /* Be nice and clean up after ourselves */
    MPI_Cancel(&inreq);
+   MPI_Wait(&inreq, &ignoredStatus);
 
 /* end multiprocessor code */
 }
