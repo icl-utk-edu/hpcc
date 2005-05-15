@@ -86,10 +86,13 @@ SingleStream(HPCC_Params *params) {
   srand(time(NULL));
   scl *= commSize;
 
-  /* select a node at random, but not node 0 */
-  for (rank = 0; ; rank = (int)(scl * rand())) {
-    if (rank > 0 && rank < commSize) break;
-  }
+  /* select a node at random, but not node 0 (unless there is just one node) */
+  if (1 == commSize)
+    rank = 0;
+  else
+    for (rank = 0; ; rank = (int)(scl * rand())) {
+      if (rank > 0 && rank < commSize) break;
+    }
 
   MPI_Bcast( &rank, 1, MPI_INT, 0, comm ); /* broadcast the rank selected on node 0 */
 
