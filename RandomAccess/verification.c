@@ -61,15 +61,15 @@ HPCC_Power2NodesMPIRandomAccessCheck(u64Int logTableSize,
   PeCheckDone = XMALLOC ( s64Int, NumProcs);
  
   for (i=0; i<NumProcs; i++)
-    PeCheckDone[i] = FALSE;
+    PeCheckDone[i] = HPCC_FALSE;
   
-  while(LocalAllDone == FALSE){
+  while(LocalAllDone == HPCC_FALSE){
     if (SendCnt > 0) {
       /* Initalize local buckets */
       for (i=0; i<NumProcs; i++){
         PeBucketBase = i * (BUCKET_SIZE+FIRST_SLOT);
         LocalBuckets[PeBucketBase+SLOT_CNT] = FIRST_SLOT;
-        LocalBuckets[PeBucketBase+DONE] = FALSE;
+        LocalBuckets[PeBucketBase+HPCC_DONE] = HPCC_FALSE;
       }
 
       /* Fill local buckets until one is full or out of data */
@@ -86,7 +86,7 @@ HPCC_Power2NodesMPIRandomAccessCheck(u64Int logTableSize,
 
       if (SendCnt == 0)
         for (i=0; i<NumProcs; i++)
-          LocalBuckets[i*(BUCKET_SIZE+FIRST_SLOT)+DONE] = TRUE;
+          LocalBuckets[i*(BUCKET_SIZE+FIRST_SLOT)+HPCC_DONE] = HPCC_TRUE;
       
     } /* End of sending loop */
 
@@ -100,9 +100,9 @@ HPCC_Power2NodesMPIRandomAccessCheck(u64Int logTableSize,
                  MPI_COMM_WORLD);
     
     for (i = 0; i < NumProcs; i ++) {
-      if(PeCheckDone[i] == FALSE) {
+      if(PeCheckDone[i] == HPCC_FALSE) {
         PeBucketBase = i * (BUCKET_SIZE+FIRST_SLOT); 
-        PeCheckDone[i] = GlobalBuckets[PeBucketBase+DONE];
+        PeCheckDone[i] = GlobalBuckets[PeBucketBase+HPCC_DONE];
         for (j = FIRST_SLOT; j < GlobalBuckets[PeBucketBase+SLOT_CNT]; j ++) {
           RanTmp = GlobalBuckets[PeBucketBase+j];
           Table[RanTmp & (LocalTableSize-1)] ^= RanTmp; 
@@ -156,7 +156,7 @@ HPCC_AnyNodesMPIRandomAccessCheck(u64Int logTableSize,
   int i;
   int j;
   s64Int *PeCheckDone;
-  int LocalAllDone =  FALSE;
+  int LocalAllDone =  HPCC_FALSE;
   int sAbort, rAbort;
 
   u64Int *LocalBuckets;     /* buckets used in verification phase */
@@ -191,7 +191,7 @@ HPCC_AnyNodesMPIRandomAccessCheck(u64Int logTableSize,
       for (i=0; i<NumProcs; i++){
         PeBucketBase = i * (BUCKET_SIZE+FIRST_SLOT);
         LocalBuckets[PeBucketBase+SLOT_CNT] = FIRST_SLOT;
-        LocalBuckets[PeBucketBase+DONE] = FALSE;
+        LocalBuckets[PeBucketBase+HPCC_DONE] = HPCC_FALSE;
       }
 
       /* Fill local buckets until one is full or out of data */
@@ -212,7 +212,7 @@ HPCC_AnyNodesMPIRandomAccessCheck(u64Int logTableSize,
       
       if (SendCnt == 0)
         for (i=0; i<NumProcs; i++)
-          LocalBuckets[i*(BUCKET_SIZE+FIRST_SLOT)+DONE] = HPCC_TRUE;
+          LocalBuckets[i*(BUCKET_SIZE+FIRST_SLOT)+HPCC_DONE] = HPCC_TRUE;
       
     } /* End of sending loop */
     
@@ -226,9 +226,9 @@ HPCC_AnyNodesMPIRandomAccessCheck(u64Int logTableSize,
                  MPI_COMM_WORLD);
     
     for (i = 0; i < NumProcs; i ++) {
-      if(PeCheckDone[i] == FALSE) {
+      if(PeCheckDone[i] == HPCC_FALSE) {
         PeBucketBase = i * (BUCKET_SIZE+FIRST_SLOT);
-        PeCheckDone[i] = GlobalBuckets[PeBucketBase+DONE];
+        PeCheckDone[i] = GlobalBuckets[PeBucketBase+HPCC_DONE];
         for (j = FIRST_SLOT; j < GlobalBuckets[PeBucketBase+SLOT_CNT]; j ++) {
           RanTmp = GlobalBuckets[PeBucketBase+j];
           GlobalOffset = RanTmp & (TableSize - 1);

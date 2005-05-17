@@ -38,10 +38,10 @@ Bucket_Ptr HPCC_InitBuckets(int numPEs, int maxNumUpdates)
   }
   
   /* initialize memory pool for updates */
-  Update_Pool = PoolInit (maxNumUpdates, sizeof(Update_T));
+  Update_Pool = HPCC_PoolInit (maxNumUpdates, sizeof(Update_T));
 
   /* initialize heap of PE's with pending updates */ 
-  _ra_Heap_Init(numPEs);
+  HPCC_ra_Heap_Init(numPEs);
   
   return(Buckets);
 }
@@ -55,7 +55,7 @@ void HPCC_InsertUpdate(u64Int ran, int pe, Bucket_Ptr Buckets)
   int numUpdates;
 
   bucket = Buckets + pe; /* bucket = &(Buckets[pe]); */
-  update = (Update_T*) PoolGetObj(Update_Pool); 
+  update = (Update_T*) HPCC_PoolGetObj(Update_Pool); 
   update->value = ran;
   update->forward = bucket->updateList;
   bucket->updateList = update;
@@ -63,10 +63,10 @@ void HPCC_InsertUpdate(u64Int ran, int pe, Bucket_Ptr Buckets)
 
   numUpdates = bucket->numUpdates;
   if (numUpdates == 1) {  /* this is the first update for this PE since last send */
-    _ra_Heap_Insert (pe, numUpdates);   
+    HPCC_ra_Heap_Insert (pe, numUpdates);   
   }
   else { /* PE already in heap, just increment number of updates */
-    _ra_Heap_IncrementKey(pe, numUpdates);
+    HPCC_ra_Heap_IncrementKey(pe, numUpdates);
   }    
   
 }
@@ -81,7 +81,7 @@ int HPCC_GetUpdates(Bucket_Ptr Buckets, u64Int *bufferPtr, int bufferSize, int *
   Update_Ptr update, tmp;
   u64Int *buffer;
 
-  _ra_Heap_ExtractMax (&pe, peUpdates);
+  HPCC_ra_Heap_ExtractMax (&pe, peUpdates);
   bucket = Buckets + pe; /* bucket = &(Buckets[pe]); */
 
   /* copy updates to buffer */ 
@@ -92,7 +92,7 @@ int HPCC_GetUpdates(Bucket_Ptr Buckets, u64Int *bufferPtr, int bufferSize, int *
     buffer ++;
     tmp = update;
     update = update->forward;
-    PoolReturnObj(Update_Pool, tmp);
+    HPCC_PoolReturnObj(Update_Pool, tmp);
   }
 
   *peUpdates = bucket->numUpdates;
@@ -110,18 +110,18 @@ void HPCC_FreeBuckets (Bucket_Ptr Buckets, int numPEs)
   Update_Ptr ptr1, ptr2;
   int i;
 
-  _ra_Heap_Free(); 
+  HPCC_ra_Heap_Free(); 
 
   for (i = 0; i < numPEs; i ++) {
     ptr1 = Buckets[i].updateList;
     while (ptr1 != NULL_UPDATE_PTR) {
       ptr2 = ptr1;
       ptr1 = ptr1->forward;
-      PoolReturnObj(Update_Pool, ptr2);
+      HPCC_PoolReturnObj(Update_Pool, ptr2);
     }
   }
 
-  PoolFree(Update_Pool);
+  HPCC_PoolFree(Update_Pool);
   free(Update_Pool);
   free (Buckets);
   

@@ -180,7 +180,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   pendingUpdates = 0;
   maxPendingUpdates = MAX_TOTAL_PENDING_UPDATES;
   localBufferSize = LOCAL_BUFFER_SIZE;
-  Buckets = InitBuckets(NumProcs, maxPendingUpdates);  
+  Buckets = HPCC_InitBuckets(NumProcs, maxPendingUpdates);  
 
 
   /* Initialize main table */
@@ -268,7 +268,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
         Table[LocalOffset] ^= Ran;
       } 
       else {
-        InsertUpdate(Ran, WhichPe, Buckets);
+        HPCC_InsertUpdate(Ran, WhichPe, Buckets);
         pendingUpdates++;
       }
       i++;
@@ -278,7 +278,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
       MPI_Test(&outreq, &have_done, MPI_STATUS_IGNORE);
       if (have_done) {
         outreq = MPI_REQUEST_NULL;
-        pe = GetUpdates(Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
+        pe = HPCC_GetUpdates(Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
         MPI_Isend(&LocalSendBuffer, peUpdates, INT64_DT, (int)pe, UPDATE_TAG, 
                   MPI_COMM_WORLD, &outreq);
         pendingUpdates -= peUpdates;
@@ -332,7 +332,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
     MPI_Test(&outreq, &have_done, MPI_STATUS_IGNORE);
     if (have_done) {
       outreq = MPI_REQUEST_NULL;
-      pe = GetUpdates(Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
+      pe = HPCC_GetUpdates(Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
       MPI_Isend(&LocalSendBuffer, peUpdates, INT64_DT, (int)pe, UPDATE_TAG, 
                 MPI_COMM_WORLD, &outreq);
       pendingUpdates -= peUpdates; 
@@ -386,7 +386,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   
   
   /* Be nice and clean up after ourselves */
-  FreeBuckets(Buckets, NumProcs);
+  HPCC_FreeBuckets(Buckets, NumProcs);
 #ifdef USE_MULTIPLE_RECV
   for (j = 0; j < NumRecvs; j++) {
     MPI_Cancel(&inreq[j]);
@@ -449,7 +449,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
   pendingUpdates = 0;
   maxPendingUpdates = MAX_TOTAL_PENDING_UPDATES;
   localBufferSize = LOCAL_BUFFER_SIZE;
-  Buckets = InitBuckets(NumProcs, maxPendingUpdates);  
+  Buckets = HPCC_InitBuckets(NumProcs, maxPendingUpdates);  
 
   /* Initialize main table */
   for (i=0; i<LocalTableSize; i++)
@@ -530,7 +530,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
         Table[LocalOffset] ^= Ran;
       } 
       else {
-        InsertUpdate(Ran, WhichPe, Buckets);
+        HPCC_InsertUpdate(Ran, WhichPe, Buckets);
         pendingUpdates++;
       }
       i++;
@@ -540,7 +540,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
       MPI_Test(&outreq, &have_done, MPI_STATUS_IGNORE);
       if (have_done) {
         outreq = MPI_REQUEST_NULL;
-        pe = GetUpdates(Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
+        pe = HPCC_GetUpdates(Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
         MPI_Isend(&LocalSendBuffer, peUpdates, INT64_DT, (int)pe, UPDATE_TAG, 
                   MPI_COMM_WORLD, &outreq);
         pendingUpdates -= peUpdates;
@@ -593,7 +593,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
     MPI_Test(&outreq, &have_done, MPI_STATUS_IGNORE);
     if (have_done) {
       outreq = MPI_REQUEST_NULL;
-      pe = GetUpdates(Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
+      pe = HPCC_GetUpdates(Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
       MPI_Isend(&LocalSendBuffer, peUpdates, INT64_DT, (int)pe, UPDATE_TAG, 
                 MPI_COMM_WORLD, &outreq);
       pendingUpdates -= peUpdates; 
@@ -645,7 +645,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
   }
 
   /* Be nice and clean up after ourselves */
-  FreeBuckets(Buckets, NumProcs);
+  HPCC_FreeBuckets(Buckets, NumProcs);
 #ifdef USE_MULTIPLE_RECV
   for (j = 0; j < NumRecvs; j++) {
     MPI_Cancel(&inreq[j]);
@@ -733,7 +733,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   /* determine whether the number of processors is a power of 2 */
   for (i = 1, logNumProcs = 0; ; logNumProcs++, i <<= 1) {
     if (i == NumProcs) { 
-      PowerofTwo = TRUE;
+      PowerofTwo = HPCC_TRUE;
       Remainder = 0;
       Top = 0;
       MinLocalTableSize = (TableSize / NumProcs);
@@ -745,7 +745,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
 
     } 
     else if (i > NumProcs || i <= 0) {
-      PowerofTwo = FALSE;
+      PowerofTwo = HPCC_FALSE;
       /* Minimum local table size --- some processors have an additional entry */
       MinLocalTableSize = (TableSize / NumProcs);
       /* Number of processors with (LocalTableSize + 1) entries */

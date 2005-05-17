@@ -26,8 +26,6 @@ static POOL *Heap_Pool;       /* memory for heap records */
 
 void HPCC_ra_Heap_Init (int size)
 {
-  int index;
-  int key;
   int i;
 
   heap = (Heap_Record_Ptr *) malloc (size * sizeof (Heap_Record_Ptr));
@@ -39,7 +37,7 @@ void HPCC_ra_Heap_Init (int size)
   }
 
   /* initialize memory pool for heap nodes */
-  Heap_Pool = PoolInit (size, sizeof(Heap_Record));
+  Heap_Pool = HPCC_PoolInit (size, sizeof(Heap_Record));
   
 }
 
@@ -50,7 +48,7 @@ void HPCC_ra_Heap_Insert (int index, int key)
   Heap_Record_Ptr newNode;
   int node, parent;
 
-  newNode = (Heap_Record*) PoolGetObj(Heap_Pool); 
+  newNode = (Heap_Record*) HPCC_PoolGetObj(Heap_Pool); 
   newNode->index  = index;
   newNode->key = key;
   
@@ -73,7 +71,6 @@ void HPCC_ra_Heap_IncrementKey (int index, int key)
 {
   
   int node;
-  int root = 0;
   
   int parent;
   int child;
@@ -114,7 +111,7 @@ void HPCC_ra_Heap_ExtractMax (int *index, int *key)
   nodePtr = heap[HEAP_ROOT];
   *index = nodePtr->index;
   *key = nodePtr->key;
-  PoolReturnObj(Heap_Pool, nodePtr);
+  HPCC_PoolReturnObj(Heap_Pool, nodePtr);
  
   heapNodes --;
   nodePtr = heap[heapNodes];
@@ -179,7 +176,7 @@ void HPCC_ra_Heapify_r(int node)
       heap[parent] = tmp;
       MAP_INDEX_TO_HEAP_NODE(parent);
       child = parent;
-      _ra_Heapify(child);
+      HPCC_ra_Heapify(child);
     }
   }
 }
@@ -187,7 +184,7 @@ void HPCC_ra_Heapify_r(int node)
 
 void HPCC_ra_Heap_Free() {
 
-  PoolFree(Heap_Pool);
+  HPCC_PoolFree(Heap_Pool);
 
   free(Heap_Pool);
 

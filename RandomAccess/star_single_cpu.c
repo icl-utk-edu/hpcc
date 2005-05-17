@@ -12,7 +12,7 @@
 #include "RandomAccess.h"
 
 int
-StarRandomAccess(HPCC_Params *params)
+HPCC_StarRandomAccess(HPCC_Params *params)
 {
   int myRank, commSize;
   int rv, errCount, failure = 0, failureAll = 0;

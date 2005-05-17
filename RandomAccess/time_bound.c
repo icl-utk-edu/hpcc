@@ -70,7 +70,7 @@ void Power2NodesTime(u64Int logTableSize,
   pendingUpdates = 0;
   maxPendingUpdates = MAX_TOTAL_PENDING_UPDATES;
   localBufferSize = LOCAL_BUFFER_SIZE;
-  Buckets = InitBuckets(NumProcs, maxPendingUpdates);  
+  Buckets = HPCC_InitBuckets(NumProcs, maxPendingUpdates);  
 
   /* Initialize main table */
   for (i=0; i<LocalTableSize; i++)
@@ -130,7 +130,7 @@ void Power2NodesTime(u64Int logTableSize,
          Table[LocalOffset] ^= Ran;
        } 
        else {
-         InsertUpdate(Ran, WhichPe, Buckets);
+         HPCC_InsertUpdate(Ran, WhichPe, Buckets);
          pendingUpdates++;
        }
        i++;
@@ -140,7 +140,7 @@ void Power2NodesTime(u64Int logTableSize,
        MPI_Test(&outreq, &have_done, MPI_STATUS_IGNORE);
        if (have_done) {
          outreq = MPI_REQUEST_NULL;
-         pe = GetUpdates (Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
+         pe = HPCC_GetUpdates (Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
          MPI_Isend(&LocalSendBuffer, peUpdates, INT64_DT, (int)pe, UPDATE_TAG, 
                    MPI_COMM_WORLD, &outreq);
          pendingUpdates -= peUpdates;
@@ -179,7 +179,7 @@ void Power2NodesTime(u64Int logTableSize,
      MPI_Test(&outreq, &have_done, MPI_STATUS_IGNORE);
      if (have_done) {
        outreq = MPI_REQUEST_NULL;
-       pe = GetUpdates(Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
+       pe = HPCC_GetUpdates(Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
        MPI_Isend(&LocalSendBuffer, peUpdates, INT64_DT, (int)pe, UPDATE_TAG, 
                  MPI_COMM_WORLD, &outreq);
        pendingUpdates -= peUpdates; 
@@ -227,7 +227,7 @@ void Power2NodesTime(u64Int logTableSize,
 #endif
    
    /* Be nice and clean up after ourselves */
-   FreeBuckets(Buckets, NumProcs);
+   HPCC_FreeBuckets(Buckets, NumProcs);
    MPI_Cancel(&inreq);
    MPI_Wait(&inreq, &ignoredStatus); 
 
@@ -278,7 +278,7 @@ void AnyNodesTime(u64Int logTableSize,
   pendingUpdates = 0;
   maxPendingUpdates = MAX_TOTAL_PENDING_UPDATES;
   localBufferSize = LOCAL_BUFFER_SIZE;
-  Buckets = InitBuckets(NumProcs, maxPendingUpdates);  
+  Buckets = HPCC_InitBuckets(NumProcs, maxPendingUpdates);  
 
   /* Initialize main table */
   for (i=0; i<LocalTableSize; i++)
@@ -344,7 +344,7 @@ void AnyNodesTime(u64Int logTableSize,
 	Table[LocalOffset] ^= Ran;
       } 
       else {
-	InsertUpdate(Ran, WhichPe, Buckets);
+	HPCC_InsertUpdate(Ran, WhichPe, Buckets);
 	pendingUpdates++;
       }
       i++;
@@ -354,7 +354,7 @@ void AnyNodesTime(u64Int logTableSize,
       MPI_Test(&outreq, &have_done, MPI_STATUS_IGNORE);
       if (have_done) {
 	outreq = MPI_REQUEST_NULL;
-	pe = GetUpdates (Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
+	pe = HPCC_GetUpdates (Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
 	MPI_Isend(&LocalSendBuffer, peUpdates, INT64_DT, (int)pe, UPDATE_TAG, 
 		  MPI_COMM_WORLD, &outreq);
 	pendingUpdates -= peUpdates;
@@ -395,7 +395,7 @@ void AnyNodesTime(u64Int logTableSize,
     MPI_Test(&outreq, &have_done, MPI_STATUS_IGNORE);
     if (have_done) {
       outreq = MPI_REQUEST_NULL;
-      pe = GetUpdates (Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
+      pe = HPCC_GetUpdates (Buckets, LocalSendBuffer, localBufferSize, &peUpdates);         
       MPI_Isend(&LocalSendBuffer, peUpdates, INT64_DT, (int)pe, UPDATE_TAG, 
 		MPI_COMM_WORLD, &outreq);
       pendingUpdates -= peUpdates; 
@@ -444,7 +444,7 @@ void AnyNodesTime(u64Int logTableSize,
 #endif
   
   /* Be nice and clean up after ourselves */
-  FreeBuckets(Buckets, NumProcs);
+  HPCC_FreeBuckets(Buckets, NumProcs);
   MPI_Cancel(&inreq);
   MPI_Wait(&inreq, &ignoredStatus);
   

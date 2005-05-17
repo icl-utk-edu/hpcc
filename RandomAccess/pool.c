@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "pool.h"
 
 /* PoolInit: create a pool of objects */
