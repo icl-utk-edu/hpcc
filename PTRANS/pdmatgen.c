@@ -570,7 +570,7 @@ L300:
 	    return 0;
 	}
 
-	maxmn = MAX(*m,*n);
+	maxmn = Mmax(*m,*n);
 	jk = 1;
 	i__1 = nend;
 	for (ic = noff + 1; ic <= i__1; ++ic) {

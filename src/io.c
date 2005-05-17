@@ -104,7 +104,7 @@ HPCC_InputFileInit(HPCC_Params *params) {
       FPRINTF( myRank, outputFile, "Error in line %d of the input file.", line );
       END_IO(  myRank, outputFile );
     }
-    n = MIN( n, HPL_MAX_PARAM );
+    n = Mmin( n, HPL_MAX_PARAM );
 
     line++;
     fgets( buf, nbuf, f );
@@ -138,7 +138,7 @@ HPCC_InputFileInit(HPCC_Params *params) {
       FPRINTF( myRank, outputFile, "Error in line %d of the input file.", line );
       END_IO(  myRank, outputFile );
     }
-    n = MIN( n, HPL_MAX_PARAM );
+    n = Mmin( n, HPL_MAX_PARAM );
 
     line++;
     fgets( buf, nbuf, f );
@@ -184,7 +184,7 @@ HPCC_Init(HPCC_Params *params) {
 
   i = MPI_Get_processor_name( hostname, &hostnameLen );
   if (i) hostname[0] = 0;
-  else hostname[MAX(hostnameLen, MPI_MAX_PROCESSOR_NAME)] = 0;
+  else hostname[Mmax(hostnameLen, MPI_MAX_PROCESSOR_NAME)] = 0;
   time( &currentTime );
 
   MPI_Comm_size( comm, &commSize );

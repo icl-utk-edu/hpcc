@@ -78,7 +78,7 @@ dtr2mx_(double *a, int *lda, double *beta, double *t, int *ldt, int *nrow, int *
 
 	    jrm = *jlt - ja;
 	    if (jrm > 0) {
-		i__2 = MIN(*nb,jrm);
+		i__2 = Mmin(*nb,jrm);
 		for (jj = 1; jj <= i__2; ++jj) {
 		    i__4 = *mb;
 		    for (k = 1; k <= i__4; ++k) {
@@ -96,7 +96,7 @@ dtr2mx_(double *a, int *lda, double *beta, double *t, int *ldt, int *nrow, int *
 	if (irm > 0) {
 	    ja = 0;
 	    it = 0;
-	    mr = MIN(irm,*mb);
+	    mr = Mmin(irm,*mb);
 	    i__1 = *ncol - 2;
 	    for (kj = 0; kj <= i__1; ++kj) {
 		i__4 = *nb;
@@ -114,7 +114,7 @@ dtr2mx_(double *a, int *lda, double *beta, double *t, int *ldt, int *nrow, int *
 
 	    jrm = *jlt - ja;
 	    if (jrm > 0) {
-		i__1 = MIN(*nb,jrm);
+		i__1 = Mmin(*nb,jrm);
 		for (jj = 1; jj <= i__1; ++jj) {
 		    i__2 = mr;
 		    for (k = 1; k <= i__2; ++k) {
@@ -150,7 +150,7 @@ dtr2mx_(double *a, int *lda, double *beta, double *t, int *ldt, int *nrow, int *
 
 	    jrm = *jlt - ja;
 	    if (jrm > 0) {
-		i__1 = MIN(*nb,jrm);
+		i__1 = Mmin(*nb,jrm);
 		for (jj = 1; jj <= i__1; ++jj) {
 		    i__3 = *mb;
 		    for (k = 1; k <= i__3; ++k) {
@@ -168,7 +168,7 @@ dtr2mx_(double *a, int *lda, double *beta, double *t, int *ldt, int *nrow, int *
 	if (irm > 0) {
 	    ja = 0;
 	    it = 0;
-	    mr = MIN(irm,*mb);
+	    mr = Mmin(irm,*mb);
 	    i__2 = *ncol - 2;
 	    for (kj = 0; kj <= i__2; ++kj) {
 		i__3 = *nb;
@@ -186,7 +186,7 @@ dtr2mx_(double *a, int *lda, double *beta, double *t, int *ldt, int *nrow, int *
 
 	    jrm = *jlt - ja;
 	    if (jrm > 0) {
-		i__2 = MIN(*nb,jrm);
+		i__2 = Mmin(*nb,jrm);
 		for (jj = 1; jj <= i__2; ++jj) {
 		    i__1 = mr;
 		    for (k = 1; k <= i__1; ++k) {
@@ -255,7 +255,7 @@ dtr2bf_(double *a, int *lda, double *t, int *ldt, int *nrow, int *ncol, int *mb,
 
 	jrm = *jlt - ja;
 	if (jrm > 0) {
-	    i__2 = MIN(*nb,jrm);
+	    i__2 = Mmin(*nb,jrm);
 	    for (jj = 1; jj <= i__2; ++jj) {
 		i__4 = *mb;
 		for (k = 1; k <= i__4; ++k) {
@@ -273,7 +273,7 @@ dtr2bf_(double *a, int *lda, double *t, int *ldt, int *nrow, int *ncol, int *mb,
     if (irm > 0) {
 	ja = 0;
 	it = 0;
-	mr = MIN(*mb,irm);
+	mr = Mmin(*mb,irm);
 	i__1 = *ncol - 2;
 	for (kj = 0; kj <= i__1; ++kj) {
 	    i__4 = *nb;
@@ -291,7 +291,7 @@ dtr2bf_(double *a, int *lda, double *t, int *ldt, int *nrow, int *ncol, int *mb,
 
 	jrm = *jlt - ja;
 	if (jrm > 0) {
-	    i__1 = MIN(*nb,jrm);
+	    i__1 = Mmin(*nb,jrm);
 	    for (jj = 1; jj <= i__1; ++jj) {
 		i__2 = mr;
 		for (k = 1; k <= i__2; ++k) {
@@ -353,7 +353,7 @@ dmv2mx_(double *t, int *ldt, double *beta, double *a, int *lda, int *nrow, int *
 	    for (kj = 0; kj <= i__1; ++kj) {
 		i__2 = *nb;
 		for (jj = 1; jj <= i__2; ++jj) {
-		    i__3 = MIN(*mb,*ilt);
+		    i__3 = Mmin(*mb,*ilt);
 		    HPL_dcopy(i__3, &t[(jt + jj) * t_dim1 + 1], 1, &a[(ja + jj) * a_dim1 + 1], 1);
 /* L10: */
 		}
@@ -364,9 +364,9 @@ dmv2mx_(double *t, int *ldt, double *beta, double *a, int *lda, int *nrow, int *
 
 	    jrm = *jlt - ja;
 	    if (jrm > 0) {
-		i__1 = MIN(*nb,jrm);
+		i__1 = Mmin(*nb,jrm);
 		for (jj = 1; jj <= i__1; ++jj) {
-		    i__2 = MIN(*mb,*ilt);
+		    i__2 = Mmin(*mb,*ilt);
 		    HPL_dcopy(i__2, &t[(jt + jj) * t_dim1 + 1], 1, &a[(ja + jj) * a_dim1 + 1], 1);
 /* L30: */
 		}
@@ -395,7 +395,7 @@ dmv2mx_(double *t, int *ldt, double *beta, double *a, int *lda, int *nrow, int *
 
 		jrm = *jlt - ja;
 		if (jrm > 0) {
-		    i__2 = MIN(*nb,jrm);
+		    i__2 = Mmin(*nb,jrm);
 		    for (jj = 1; jj <= i__2; ++jj) {
 			i__4 = *mb;
 			for (k = 1; k <= i__4; ++k) {
@@ -413,7 +413,7 @@ dmv2mx_(double *t, int *ldt, double *beta, double *a, int *lda, int *nrow, int *
 	    if (irm > 0) {
 		jt = 0;
 		ja = 0;
-		mr = MIN(*mb,irm);
+		mr = Mmin(*mb,irm);
 		i__1 = *ncol - 2;
 		for (kj = 0; kj <= i__1; ++kj) {
 		    i__4 = *nb;
@@ -431,7 +431,7 @@ dmv2mx_(double *t, int *ldt, double *beta, double *a, int *lda, int *nrow, int *
 
 		jrm = *jlt - ja;
 		if (jrm > 0) {
-		    i__1 = MIN(*nb,jrm);
+		    i__1 = Mmin(*nb,jrm);
 		    for (jj = 1; jj <= i__1; ++jj) {
 			i__2 = mr;
 			for (k = 1; k <= i__2; ++k) {
@@ -456,7 +456,7 @@ dmv2mx_(double *t, int *ldt, double *beta, double *a, int *lda, int *nrow, int *
 	    for (kj = 0; kj <= i__2; ++kj) {
 		i__1 = *nb;
 		for (jj = 1; jj <= i__1; ++jj) {
-		    i__4 = MIN(*mb,*ilt);
+		    i__4 = Mmin(*mb,*ilt);
 		    HPL_daxpy(i__4, 1.0, &t[(jt + jj) * t_dim1 + 1], 1, &a[(ja + jj) * a_dim1 + 1], 1);
 /* L110: */
 		}
@@ -467,9 +467,9 @@ dmv2mx_(double *t, int *ldt, double *beta, double *a, int *lda, int *nrow, int *
 
 	    jrm = *jlt - ja;
 	    if (jrm > 0) {
-		i__2 = MIN(*nb,jrm);
+		i__2 = Mmin(*nb,jrm);
 		for (jj = 1; jj <= i__2; ++jj) {
-		    i__1 = MIN(*mb,*ilt);
+		    i__1 = Mmin(*mb,*ilt);
 		    HPL_daxpy(i__1, 1.0, &t[(jt + jj) * t_dim1 + 1], 1, & a[(ja + jj) * a_dim1 + 1], 1);
 /* L130: */
 		}
@@ -497,7 +497,7 @@ dmv2mx_(double *t, int *ldt, double *beta, double *a, int *lda, int *nrow, int *
 
 		jrm = *jlt - ja;
 		if (jrm > 0) {
-		    i__1 = MIN(*nb,jrm);
+		    i__1 = Mmin(*nb,jrm);
 		    for (jj = 1; jj <= i__1; ++jj) {
 			i__3 = *mb;
 			for (k = 1; k <= i__3; ++k) {
@@ -515,7 +515,7 @@ dmv2mx_(double *t, int *ldt, double *beta, double *a, int *lda, int *nrow, int *
 	    if (irm > 0) {
 		jt = 0;
 		ja = 0;
-		mr = MIN(*mb,irm);
+		mr = Mmin(*mb,irm);
 		i__2 = *ncol - 2;
 		for (kj = 0; kj <= i__2; ++kj) {
 		    i__3 = *nb;
@@ -533,7 +533,7 @@ dmv2mx_(double *t, int *ldt, double *beta, double *a, int *lda, int *nrow, int *
 
 		jrm = *jlt - ja;
 		if (jrm > 0) {
-		    i__2 = MIN(*nb,jrm);
+		    i__2 = Mmin(*nb,jrm);
 		    for (jj = 1; jj <= i__2; ++jj) {
 			i__1 = mr;
 			for (k = 1; k <= i__1; ++k) {

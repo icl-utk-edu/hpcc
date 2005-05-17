@@ -309,7 +309,7 @@ PTRANS(HPCC_Params *params) {
 
 /*              Generate matrix A */
 
-        lda = MAX(1,mp);
+        lda = Mmax(1,mp);
         /* A = rand(m, n, iaseed) */
         pdmatgen(&context_1.ictxt, "N", "N", &m, &n, &mb, &nb, &mem[ipa - 1], &lda, &imrow, &imcol,
                  &iaseed, &c__0, &mp, &c__0, &nq, &myrow, &mycol, &nprow, &npcol, 0.0);
@@ -323,7 +323,7 @@ PTRANS(HPCC_Params *params) {
 
 /*              Perform the matrix transpose */
 
-        ldc = MAX(1,np);
+        ldc = Mmax(1,np);
         /* C := A' + d_One * C */
         pdtrans( "T", &m, &n, &mb, &nb, &mem[ipa - 1], &lda, &d_One, &mem[ipc - 1], &ldc, &imrow,
                  &imcol, &mem[ipw - 1], imem );
@@ -334,7 +334,7 @@ PTRANS(HPCC_Params *params) {
 
 /*                  Regenerate matrix A in transpose form (A') */
 
-          lda = MAX(1,np);
+          lda = Mmax(1,np);
           /* A = rand(n, m, icseed) */
           pdmatgen(&context_1.ictxt, "T", "N", &n, &m, &nb, &mb, &
                    mem[ipa - 1], &lda, &imrow, &imcol, &icseed, &
@@ -348,7 +348,7 @@ PTRANS(HPCC_Params *params) {
           pdmatcmp(&context_1.ictxt, &np, &mq, &mem[ipa - 1], &lda, &mem[ipc - 1], &ldc, &resid);
           resid0 = resid;
 
-          resid /= eps * MAX( m, n );
+          resid /= eps * Mmax( m, n );
           if (resid <= thresh && resid - resid == 0.0) { /* if `resid' is small and is not NaN */
             ++kpass;
             passed = "PASSED";

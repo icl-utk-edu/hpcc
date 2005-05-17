@@ -171,8 +171,6 @@ extern void Cblacs_dSendrecv(int ctxt, int mSrc, int nSrc, double *Asrc, int lda
   int cdest, int mDest, int nDest, double *Adest, int ldaDest, int rsrc, int csrc);
 /* ---------------------------------------------------------------------- */
 
-#define MAX(x,y) ((x)>(y)?(x):(y))
-#define MIN(x,y) ((x)<(y)?(x):(y))
 #define DPRN(i,v) do{printf(__FILE__ "(%d)@%d:" #v "=%g\n",__LINE__,i,(double)(v));fflush(stdout);}while(0)
 
 #define FPRINTF(r,f,s,v) do{if(0==r){fprintf(f,s "\n",v);fflush(f);}}while(0)

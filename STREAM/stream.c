@@ -84,13 +84,6 @@ static int VectorSize;
 
 # define HLINE "-------------------------------------------------------------\n"
 
-# ifndef MIN
-# define MIN(x,y) ((x)<(y)?(x):(y))
-# endif
-# ifndef MAX
-# define MAX(x,y) ((x)>(y)?(x):(y))
-# endif
-
 static double *a, *b, *c;
 
 static double avgtime[4] = {0}, maxtime[4] = {0},
@@ -304,8 +297,8 @@ Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, double 
       for (j=0; j<4; j++)
       {
         avgtime[j] = avgtime[j] + times[j][k];
-        mintime[j] = MIN(mintime[j], times[j][k]);
-        maxtime[j] = MAX(maxtime[j], times[j][k]);
+        mintime[j] = Mmin(mintime[j], times[j][k]);
+        maxtime[j] = Mmax(maxtime[j], times[j][k]);
       }
     }
  
@@ -374,7 +367,7 @@ checktick()
     minDelta = 1000000;
     for (i = 1; i < M; i++) {
       Delta = (int)( 1.0E6 * (timesfound[i]-timesfound[i-1]));
-      minDelta = MIN(minDelta, MAX(Delta,0));
+      minDelta = Mmin(minDelta, Mmax(Delta,0));
     }
 
    return(minDelta);
