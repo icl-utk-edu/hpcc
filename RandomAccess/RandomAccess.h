@@ -1,12 +1,5 @@
 /* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*- */
 
-#if 0
-static FILE *LogFile;
-static void LogBegin(int p) {char fname[100]; sprintf(fname, "%d.log", p); LogFile = fopen(fname, "a");}
-static void LogEnd() {if(LogFile) fclose(LogFile);}
-#define DLOG(i,v) do{if(LogFile){fprintf(LogFile,__FILE__ "(%d)@%d:" #v "=%g\n",__LINE__,i,(double)(v));fflush(LogFile);}}while(0)
-#endif
-
 /* Types used by program (should be 64 bits) */
 #ifdef LONG_IS_64BITS
 typedef unsigned long u64Int;
@@ -34,3 +27,25 @@ typedef long long s64Int;
 #define RTSEC() (MPI_Wtime())
 
 extern u64Int starts (s64Int);
+
+#define WANT_MPI2_TEST 0
+
+
+#define HPCC_TRUE 1
+#define HPCC_FALSE 0
+#define HPCC_DONE 0
+
+#define FINISHED_TAG 1
+#define UPDATE_TAG   2
+#define USE_NONBLOCKING_SEND 1
+
+#define MAX_TOTAL_PENDING_UPDATES 1024
+#define LOCAL_BUFFER_SIZE MAX_TOTAL_PENDING_UPDATES
+
+#define USE_MULTIPLE_RECV 1
+
+#if USE_MULTIPLE_RECV
+#define MAX_RECV					16
+#else
+#define MAX_RECV					1
+#endif

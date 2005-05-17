@@ -50,7 +50,7 @@
 /* Number of updates to table (suggested: 4x number of table entries) */
 #define NUPDATE (4 * TableSize)
 
-void
+static void
 RandomAccessUpdate(u64Int TableSize, u64Int *Table) {
   s64Int i;
   u64Int ran[128];              /* Current random numbers */
@@ -84,7 +84,7 @@ RandomAccessUpdate(u64Int TableSize, u64Int *Table) {
 }
 
 int
-RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
+HPCC_RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
   s64Int i;
   u64Int temp;
   double cputime;               /* CPU time to update table */
@@ -92,7 +92,7 @@ RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
   double totalMem;
   u64Int *Table;
   u64Int logTableSize, TableSize;
-  FILE *outFile;
+  FILE *outFile = NULL;
 
   if (doIO) {
     outFile = fopen( params->outFname, "a" );
@@ -150,7 +150,6 @@ RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
   }
 
   /* Verification of results (in serial or "safe" mode; optional) */
-#if 1
   temp = 0x1;
   for (i=0; i<NUPDATE; i++) {
     temp = (temp << 1) ^ (((s64Int) temp < 0) ? POLY : 0);
@@ -164,11 +163,10 @@ RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
 
   if (doIO) {
   fprintf( outFile, "Found " FSTR64 " errors in " FSTR64 " locations (%s).\n",
-    temp, TableSize, (temp <= 0.01*TableSize) ? "passed" : "failed");
+           temp, TableSize, (temp <= 0.01*TableSize) ? "passed" : "failed");
   }
   if (temp <= 0.01*TableSize) *failure = 0;
   else *failure = 1;
-#endif
 
   free( Table );
 
@@ -178,42 +176,4 @@ RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
   }
 
   return 0;
-}
-
-/* Utility routine to start random number generator at Nth step */
-u64Int
-starts(s64Int n)
-{
-  int i, j;
-  u64Int m2[64];
-  u64Int temp, ran;
-
-  while (n < 0) n += PERIOD;
-  while (n > PERIOD) n -= PERIOD;
-  if (n == 0) return 0x1;
-
-  temp = 0x1;
-  for (i=0; i<64; i++) {
-    m2[i] = temp;
-    temp = (temp << 1) ^ ((s64Int) temp < 0 ? POLY : 0);
-    temp = (temp << 1) ^ ((s64Int) temp < 0 ? POLY : 0);
-  }
-
-  for (i=62; i>=0; i--)
-    if ((n >> i) & 1)
-      break;
-
-  ran = 0x2;
-  while (i > 0) {
-    temp = 0;
-    for (j=0; j<64; j++)
-      if ((ran >> j) & 1)
-        temp ^= m2[j];
-    ran = temp;
-    i -= 1;
-    if ((n >> i) & 1)
-      ran = (ran << 1) ^ ((s64Int) ran < 0 ? POLY : 0);
-  }
-
-  return ran;
 }
