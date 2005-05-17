@@ -70,8 +70,12 @@ allDeps = (
     ("testing/ptest/HPL_", (hmisc, hblas, hauxil, hgesv, hpmisc, hpauxil, hpanel, hpmatgen, hpgesv, hptimer, hptest),
      ("pddriver", "pdinfo", "pdtest"), ""),
 
-    ("../RandomAccess/", (hhpcc, hhpl, "../../../../RandomAccess/RandomAccess.h"),
-     ("MPIRandomAccess", "RandomAccess", "onecpu"), "-I../../../../include $(CCFLAGS)"),
+    ("../RandomAccess/", (hhpcc, hhpl, "../../../../RandomAccess/RandomAccess.h",
+                          "../../../../RandomAccess/buckets.h", "../../../../RandomAccess/heap.h",
+                          "../../../../RandomAccess/pool.h", "../../../../RandomAccess/time_bound.h",
+                          "../../../../RandomAccess/verification.h"),
+     ("MPIRandomAccess", "buckets", "core_single_cpu", "heap", "pool", "single_cpu", "star_single_cpu",
+      "time_bound", "utility", "verification"), "-I../../../../include $(CCFLAGS)"),
 
     ("../STREAM/", (hhpcc, hhpl),
      ("onecpu", "stream"), "-I../../../../include $(CCFLAGS)"),
