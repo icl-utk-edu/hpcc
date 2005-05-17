@@ -60,8 +60,8 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
   MPI_Comm_size( comm, &commSize );
   MPI_Comm_rank( comm, &commRank );
 
-  /* there are three vectors of size 'n'/'commSize': inout, work, and internal work */
-  n = LocalVectorSize( HPLMaxProcMem / 3 / sizeof(fftw_complex) );
+  /* there are two vectors of size 'n'/'commSize': inout, work, and internal work: 2*'n'/'commSize' */
+  n = LocalVectorSize( HPLMaxProcMem / 4 / sizeof(fftw_complex) );
 
   n *= commSize;
 
