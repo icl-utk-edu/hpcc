@@ -18,6 +18,7 @@ HPCC_fftw_create_plan(int n, fftw_direction dir, int flags) {
 
   HPCC_zfft1d( n, a, b, 0, p );
 
+  p->n = n;
   p->dir = dir;
   p->flags = flags;
 
