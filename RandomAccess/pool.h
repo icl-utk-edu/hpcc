@@ -1,7 +1,5 @@
 
-#ifndef NULL_PTR
-#define NULL_PTR ((char *)0)
-#endif
+#define HPCC_NULL_PTR ((char *)0)
 
 typedef struct Pool_s {        /* used to minimize the use of malloc */
   char *head;                  /* pointer to the first element of the pool */

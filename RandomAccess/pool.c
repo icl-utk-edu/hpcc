@@ -20,14 +20,14 @@ POOL* HPCC_PoolInit(int numObjects, int objSize)
   
   poolPtr = (POOL *) malloc (1 * sizeof (POOL));
 			     
-  poolPtr->head = NULL_PTR;                 /* Points to unallocated objects    */
-  poolPtr->tail = NULL_PTR;                 /* Points to unallocated objects    */
+  poolPtr->head = HPCC_NULL_PTR;                 /* Points to unallocated objects    */
+  poolPtr->tail = HPCC_NULL_PTR;                 /* Points to unallocated objects    */
   poolPtr->numObjs = numObjects+1;          /* Number of objects to allocate */
   poolPtr->objSize = objSize;               /* Size of each object              */
  
   ptr = (char*)malloc((poolPtr->numObjs)*(poolPtr->objSize)); /* Get a block of objects */
      
-  if (ptr == NULL_PTR) { 
+  if (ptr == HPCC_NULL_PTR) { 
     fprintf(stdout,"Malloc fails in PoolInit\n");
     abort();
   }
@@ -40,7 +40,7 @@ POOL* HPCC_PoolInit(int numObjects, int objSize)
 
   poolPtr->head = ptr;
   poolPtr->tail = ptr + (poolPtr->numObjs - 1)*(poolPtr->objSize);  /* adjust tail pointer  */
-  *((char**)(poolPtr->tail)) = NULL_PTR; /* last object has no next object */
+  *((char**)(poolPtr->tail)) = HPCC_NULL_PTR; /* last object has no next object */
 
   return (poolPtr);
 			     
@@ -51,7 +51,7 @@ char *HPCC_PoolGetObj(POOL* poolPtr)
 {
    char *ptr;
 
-   if (poolPtr->head == NULL_PTR) {  
+   if (poolPtr->head == HPCC_NULL_PTR) {  
      fprintf(stdout,"No unallocated objects in pool\n");
      abort();
    }   
@@ -66,13 +66,13 @@ void HPCC_PoolReturnObj(POOL *poolPtr,void *optr)
    
    if (poolPtr->tail) {
      *((char **) (poolPtr->tail)) = (char*)optr;
-     *((char **) ((char *)optr)) = NULL_PTR;
+     *((char **) ((char *)optr)) = HPCC_NULL_PTR;
      poolPtr->tail = (char*)optr;
    }
    else {
      poolPtr->head = (char*)optr;
      poolPtr->tail = (char*)optr;
-     *((char **) ((char *)optr)) = NULL_PTR;
+     *((char **) ((char *)optr)) = HPCC_NULL_PTR;
    }
 
 }

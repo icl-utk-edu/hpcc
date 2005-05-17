@@ -821,7 +821,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
                  logTableSize, NumProcs, LocalTableSize);
    
     fprintf( outFile, "Default number of updates (RECOMMENDED) = " FSTR64 "\n", NumUpdates_Default);
-#if RA_TIME_BOUND
+#ifdef RA_TIME_BOUND
     fprintf( outFile, "Number of updates EXECUTED = " FSTR64 " (for a TIME BOUND of %.2f secs)\n", 
              NumUpdates, timeBound);
 #endif 

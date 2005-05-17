@@ -44,7 +44,7 @@ extern u64Int starts (s64Int);
 
 #define USE_MULTIPLE_RECV 1
 
-#if USE_MULTIPLE_RECV
+#ifdef USE_MULTIPLE_RECV
 #define MAX_RECV					16
 #else
 #define MAX_RECV					1
