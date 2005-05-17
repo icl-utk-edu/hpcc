@@ -5,10 +5,36 @@
 #include "hpccfft.h"
 #include "wrapmpifftw.h"
 
+#define    Mmax3( a_, b_, c_ )      ( (a_) > (b_) ?  ((a_) > (c_) ? (a_) : (c_)) : ((b_) > (c_) ? (b_) : (c_)) )
+
+static int
+GetNXYZ(s64Int_t n, int npu) {
+  int ip[3], lnx[3], lny[3], lnz[3], lnpu[3];
+  int i, nx, ny, nz, nxyz;
+
+  HPCC_factor( npu, lnpu );
+  HPCC_factor8( n, ip );
+
+  for (i = 0; i < 3; ++i) {
+    EMAX( lnz[i], lnpu[i], (ip[i]+1)/3 );
+    EMAX( lnx[i], lnpu[i], (ip[i]-lnz[i]+1)/2 );
+    lny[i] = ip[i] - lnx[i] - lnz[i];
+  }
+
+  nx = HPCC_ipow( 2, lnx[0] ) * HPCC_ipow( 3, lnx[1] ) * HPCC_ipow( 5, lnx[2] );
+  ny = HPCC_ipow( 2, lny[0] ) * HPCC_ipow( 3, lny[1] ) * HPCC_ipow( 5, lny[2] );
+  nz = HPCC_ipow( 2, lnz[0] ) * HPCC_ipow( 3, lnz[1] ) * HPCC_ipow( 5, lnz[2] );
+
+  nxyz = Mmax3( nx, ny, nz );
+
+  return nxyz;
+}
+
 hpcc_fftw_mpi_plan
 HPCC_fftw_mpi_create_plan(MPI_Comm comm, s64Int_t n, fftw_direction dir, int flags) {
   hpcc_fftw_mpi_plan p;
   fftw_complex *a = NULL, *b = NULL;
+  int nxyz;
   int rank, size;
 
   MPI_Comm_size( comm, &size );
@@ -16,10 +42,12 @@ HPCC_fftw_mpi_create_plan(MPI_Comm comm, s64Int_t n, fftw_direction dir, int fla
 
   p = fftw_malloc( sizeof *p );
 
-  p->wx = fftw_malloc( (FFTE_NDA3/2 + FFTE_NP) * (sizeof *p->wx) );
-  p->wy = fftw_malloc( (FFTE_NDA3/2 + FFTE_NP) * (sizeof *p->wy) );
-  p->wz = fftw_malloc( (FFTE_NDA3/2 + FFTE_NP) * (sizeof *p->wz) );
-  p->c = fftw_malloc( ((FFTE_NDA3+FFTE_NP) * (FFTE_NBLK + 1) + FFTE_NP) * (sizeof *p->c) );
+  nxyz = GetNXYZ( n, size );
+
+  p->wx = fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wx) );
+  p->wy = fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wy) );
+  p->wz = fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wz) );
+  p->c = fftw_malloc( ((nxyz+FFTE_NP) * (FFTE_NBLK + 1) + FFTE_NP) * (sizeof *p->c) );
   p->work = fftw_malloc( n / size * 3 / 2 * (sizeof *p->work) );
 
   p->n = n;
