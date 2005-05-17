@@ -137,7 +137,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of MPIRandomAccess section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunMPIRandomAccess) MPIRandomAccess( &params );
+  if (params.RunMPIRandomAccess) HPCC_MPIRandomAccess( &params );
 
   time( &currentTime );
   BEGIN_IO(myRank, outFname, outputFile);
@@ -155,7 +155,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of StarRandomAccess section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunStarRandomAccess) StarRandomAccess( &params );
+  if (params.RunStarRandomAccess) HPCC_StarRandomAccess( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
@@ -173,7 +173,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of SingleRandomAccess section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunSingleRandomAccess) SingleRandomAccess( &params );
+  if (params.RunSingleRandomAccess) HPCC_SingleRandomAccess( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
