@@ -166,6 +166,9 @@ MPIFFT(HPCC_Params *params) {
   if (isComputing)
     MPIFFT0( params->HPLMaxProcMem, params->test.thrsh, doIO, outFile, comm, &Gflops, &n, &maxErr, &failure );
 
+  if (commSize != procPow2 && isComputing && comm != MPI_COMM_NULL)
+    MPI_Comm_free( comm );
+
   params->MPIFFT_N = (double)n;
   params->MPIFFT_maxErr = maxErr;
 
