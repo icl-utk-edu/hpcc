@@ -35,10 +35,22 @@ HPCC_fftw_destroy_plan(hpcc_fftw_plan p) {
   fftw_free( p );
 }
 
+/* Without additional storage of size p->n there is no way to preserve FFTW 2
+   semantics (the `in' vector is not modified). But it doesn't matter for the
+   calling code: it doesn't rely on this semantics. The change in semantics
+   occured while going from FFTE 3.3 to FFTE 4.0. */
 void
 HPCC_fftw_one(hpcc_fftw_plan p, fftw_complex *in, fftw_complex *out) {
+  int i, n;
+
   if (FFTW_FORWARD == p->dir)
     HPCC_zfft1d( p->n, in, out, -1, p );
   else
     HPCC_zfft1d( p->n, in, out, +1, p );
+
+  n = p->n;
+  /* Copy the transform to `out' vector. */
+  for (i = 0; i < n; ++i) {
+    c_assgn( out[i], in[i] );
+  }
 }
