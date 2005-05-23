@@ -25,7 +25,7 @@ HPCC_StarRandomAccess(HPCC_Params *params)
   MPI_Comm_size( comm, &commSize );
   MPI_Comm_rank( comm, &myRank );
 
-  rv = RandomAccess( params, 0 == myRank, &localGUPs, &failure );
+  rv = HPCC_RandomAccess( params, 0 == myRank, &localGUPs, &failure );
   MPI_Reduce( &rv, &errCount, 1, MPI_INT, MPI_SUM, 0, comm );
   MPI_Allreduce( &failure, &failureAll, 1, MPI_INT, MPI_MAX, comm );
   if (failureAll) params->Failure = 1;

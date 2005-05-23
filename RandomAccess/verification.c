@@ -1,8 +1,6 @@
 #include <hpcc.h>
 #include "RandomAccess.h"
 
-extern u64Int *Table;
-
 /* Verification phase: local buckets to sort into */
 #define BUCKET_SIZE 1024
 #define SLOT_CNT 1
@@ -105,7 +103,7 @@ HPCC_Power2NodesMPIRandomAccessCheck(u64Int logTableSize,
         PeCheckDone[i] = GlobalBuckets[PeBucketBase+HPCC_DONE];
         for (j = FIRST_SLOT; j < GlobalBuckets[PeBucketBase+SLOT_CNT]; j ++) {
           RanTmp = GlobalBuckets[PeBucketBase+j];
-          Table[RanTmp & (LocalTableSize-1)] ^= RanTmp; 
+          HPCC_Table[RanTmp & (LocalTableSize-1)] ^= RanTmp; 
         }
         LocalAllDone &= PeCheckDone[i];      
       }
@@ -114,7 +112,7 @@ HPCC_Power2NodesMPIRandomAccessCheck(u64Int logTableSize,
   
   errors = 0;
   for (i=0; i<LocalTableSize; i++)
-    if (Table[i] != i + GlobalStartMyProc)
+    if (HPCC_Table[i] != i + GlobalStartMyProc)
       errors++;
 
   *NumErrors = errors;
@@ -233,7 +231,7 @@ HPCC_AnyNodesMPIRandomAccessCheck(u64Int logTableSize,
           RanTmp = GlobalBuckets[PeBucketBase+j];
           GlobalOffset = RanTmp & (TableSize - 1);
           LocalOffset = GlobalOffset - GlobalStartMyProc;
-          Table[LocalOffset] ^= RanTmp;
+          HPCC_Table[LocalOffset] ^= RanTmp;
         }
         LocalAllDone &= PeCheckDone[i];      
       }
@@ -243,7 +241,7 @@ HPCC_AnyNodesMPIRandomAccessCheck(u64Int logTableSize,
   
   errors  = 0;
   for (i=0; i<LocalTableSize; i++)
-    if (Table[i] != i + GlobalStartMyProc)
+    if (HPCC_Table[i] != i + GlobalStartMyProc)
       errors++;
   
   *NumErrors = errors;

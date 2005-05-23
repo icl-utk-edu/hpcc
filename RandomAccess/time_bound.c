@@ -21,10 +21,6 @@
 #include "time_bound.h"
 #include "buckets.h"
 
-extern u64Int *Table;
-extern u64Int LocalSendBuffer[LOCAL_BUFFER_SIZE];
-extern u64Int LocalRecvBuffer[LOCAL_BUFFER_SIZE];
-
 
 void Power2NodesTime(u64Int logTableSize,
 		     u64Int TableSize,
@@ -74,7 +70,7 @@ void Power2NodesTime(u64Int logTableSize,
 
   /* Initialize main table */
   for (i=0; i<LocalTableSize; i++)
-    Table[i] = i + GlobalStartMyProc;
+    HPCC_Table[i] = i + GlobalStartMyProc;
 
   /* Perform updates to main table.  The scalar equivalent is:
    *
@@ -107,7 +103,7 @@ void Power2NodesTime(u64Int logTableSize,
 	   inmsgPtr = LocalRecvBuffer;
            for (j=0; j < recvUpdates; j ++) {
 	     inmsg = *inmsgPtr; /* inmsg = LocalRecvBuffer[j]; */
-             Table[inmsg & (LocalTableSize - 1)] ^= inmsg;
+             HPCC_Table[inmsg & (LocalTableSize - 1)] ^= inmsg;
 	     inmsgPtr ++;
            }
          } else if (status.MPI_TAG == FINISHED_TAG) {
@@ -127,7 +123,7 @@ void Power2NodesTime(u64Int logTableSize,
        WhichPe = (Ran >> logLocalTableSize) & (NumProcs - 1);       
        if (WhichPe == MyProc) {
          LocalOffset = (Ran & (TableSize - 1)) - GlobalStartMyProc;
-         Table[LocalOffset] ^= Ran;
+         HPCC_Table[LocalOffset] ^= Ran;
        } 
        else {
          HPCC_InsertUpdate(Ran, WhichPe, Buckets);
@@ -161,7 +157,7 @@ void Power2NodesTime(u64Int logTableSize,
 	   inmsgPtr = LocalRecvBuffer;
            for (j=0; j < recvUpdates; j ++) {
 	     inmsg = *inmsgPtr; /* inmsg = LocalRecvBuffer[j]; */
-             Table[inmsg & (LocalTableSize - 1)] ^= inmsg;
+             HPCC_Table[inmsg & (LocalTableSize - 1)] ^= inmsg;
 	     inmsgPtr++;
            }
          } else if (status.MPI_TAG == FINISHED_TAG) {
@@ -202,7 +198,7 @@ void Power2NodesTime(u64Int logTableSize,
        inmsgPtr = LocalRecvBuffer;
        for (j=0; j <recvUpdates; j ++) {
          inmsg = *inmsgPtr; /* inmsg = LocalRecvBuffer[j]; */
-         Table[inmsg & (LocalTableSize - 1)] ^= inmsg;
+         HPCC_Table[inmsg & (LocalTableSize - 1)] ^= inmsg;
 	 inmsgPtr++;
        }    
      } else if (status.MPI_TAG == FINISHED_TAG) {
@@ -282,7 +278,7 @@ void AnyNodesTime(u64Int logTableSize,
 
   /* Initialize main table */
   for (i=0; i<LocalTableSize; i++)
-    Table[i] = i + GlobalStartMyProc;
+    HPCC_Table[i] = i + GlobalStartMyProc;
   
   /* Perform updates to main table.  The scalar equivalent is:
    *
@@ -316,7 +312,7 @@ void AnyNodesTime(u64Int logTableSize,
 	  for (j=0; j < recvUpdates; j ++) {
 	    inmsg = *inmsgPtr; /* inmsg = LocalRecvBuffer[j]; */
 	    LocalOffset = (inmsg & (TableSize - 1)) - GlobalStartMyProc;
-	    Table[LocalOffset] ^= inmsg;
+	    HPCC_Table[LocalOffset] ^= inmsg;
 	    inmsgPtr++;
 	  }
 	} else if (status.MPI_TAG == FINISHED_TAG) {
@@ -341,7 +337,7 @@ void AnyNodesTime(u64Int logTableSize,
       
       if (WhichPe == MyProc) {
 	LocalOffset = (Ran & (TableSize - 1)) - GlobalStartMyProc;
-	Table[LocalOffset] ^= Ran;
+	HPCC_Table[LocalOffset] ^= Ran;
       } 
       else {
 	HPCC_InsertUpdate(Ran, WhichPe, Buckets);
@@ -377,7 +373,7 @@ void AnyNodesTime(u64Int logTableSize,
 	  for (j=0; j < recvUpdates; j ++) {
 	    inmsg = *inmsgPtr; /* inmsg = LocalRecvBuffer[j]; */
 	    LocalOffset = (inmsg & (TableSize - 1)) - GlobalStartMyProc;
-	    Table[LocalOffset] ^= inmsg;
+	    HPCC_Table[LocalOffset] ^= inmsg;
 	    inmsgPtr ++;
 	  }
 	} else if (status.MPI_TAG == FINISHED_TAG) {
@@ -420,7 +416,7 @@ void AnyNodesTime(u64Int logTableSize,
       for (j=0; j <recvUpdates; j ++) {
 	inmsg = *inmsgPtr; /* inmsg = LocalRecvBuffer[j]); */
 	LocalOffset = (inmsg & (TableSize - 1)) - GlobalStartMyProc;
-	Table[LocalOffset] ^= inmsg;
+	HPCC_Table[LocalOffset] ^= inmsg;
 	inmsgPtr++;
       }    
     } else if (status.MPI_TAG == FINISHED_TAG) {

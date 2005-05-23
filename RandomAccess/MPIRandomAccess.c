@@ -119,8 +119,7 @@
 #include "verification.h"
 
 /* Allocate main table (in global memory) */
-/*unsigned long *Table;*/
-u64Int *Table;
+u64Int *HPCC_Table;
 
 u64Int LocalSendBuffer[LOCAL_BUFFER_SIZE];
 u64Int LocalRecvBuffer[MAX_RECV*LOCAL_BUFFER_SIZE];
@@ -166,7 +165,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   int bufferBase;
 
   MPI_Status status;
-  MPI_Status ignoredStatus;
+  MPI_Status ignoredStatus; /* Cray X1 doesn't have MPI_STATUS_IGNORE */
   int have_done;
 
   int pe;
@@ -185,7 +184,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 
   /* Initialize main table */
   for (i=0; i<LocalTableSize; i++)
-    Table[i] = i + GlobalStartMyProc;
+    HPCC_Table[i] = i + GlobalStartMyProc;
 
   /* Perform updates to main table.  The scalar equivalent is:
    *
@@ -234,7 +233,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
           for (j=0; j < recvUpdates; j ++) {
             inmsg = LocalRecvBuffer[bufferBase+j];
             LocalOffset = (inmsg & (TableSize - 1)) - GlobalStartMyProc;
-            Table[LocalOffset] ^= inmsg;
+            HPCC_Table[LocalOffset] ^= inmsg;
           }          
 
         } else if (status.MPI_TAG == FINISHED_TAG) {
@@ -265,7 +264,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
       
       if (WhichPe == MyProc) {
         LocalOffset = (Ran & (TableSize - 1)) - GlobalStartMyProc;
-        Table[LocalOffset] ^= Ran;
+        HPCC_Table[LocalOffset] ^= Ran;
       } 
       else {
         HPCC_InsertUpdate(Ran, WhichPe, Buckets);
@@ -308,7 +307,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
           for (j=0; j < recvUpdates; j ++) {
             inmsg = LocalRecvBuffer[bufferBase+j];
             LocalOffset = (inmsg & (TableSize - 1)) - GlobalStartMyProc;
-            Table[LocalOffset] ^= inmsg;
+            HPCC_Table[LocalOffset] ^= inmsg;
           }
 
         } else if (status.MPI_TAG == FINISHED_TAG) {
@@ -365,7 +364,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
       for (j=0; j < recvUpdates; j ++) {
         inmsg = LocalRecvBuffer[bufferBase+j];
         LocalOffset = (inmsg & (TableSize - 1)) - GlobalStartMyProc;
-        Table[LocalOffset] ^= inmsg;
+        HPCC_Table[LocalOffset] ^= inmsg;
       }
 
     } else if (status.MPI_TAG == FINISHED_TAG) {
@@ -435,7 +434,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
   int bufferBase;
 
   MPI_Status status;
-  MPI_Status ignoredStatus;
+  MPI_Status ignoredStatus; /* Cray X1 doesn't have MPI_STATUS_IGNORE */
   int have_done;
 
   int pe;
@@ -453,7 +452,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 
   /* Initialize main table */
   for (i=0; i<LocalTableSize; i++)
-    Table[i] = i + GlobalStartMyProc;
+    HPCC_Table[i] = i + GlobalStartMyProc;
 
   /* Perform updates to main table.  The scalar equivalent is:
    *
@@ -501,7 +500,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 #endif
           for (j=0; j < recvUpdates; j ++) {
             inmsg = LocalRecvBuffer[bufferBase+j];
-            Table[inmsg & (LocalTableSize-1)] ^= inmsg;
+            HPCC_Table[inmsg & (LocalTableSize-1)] ^= inmsg;
           }
           
         } else if (status.MPI_TAG == FINISHED_TAG) {
@@ -527,7 +526,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
       WhichPe = (Ran >> logLocalTableSize) & (NumProcs - 1);       
       if (WhichPe == MyProc) {
         LocalOffset = (Ran & (TableSize - 1)) - GlobalStartMyProc;
-        Table[LocalOffset] ^= Ran;
+        HPCC_Table[LocalOffset] ^= Ran;
       } 
       else {
         HPCC_InsertUpdate(Ran, WhichPe, Buckets);
@@ -570,7 +569,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 #endif
           for (j=0; j < recvUpdates; j ++) {
             inmsg = LocalRecvBuffer[bufferBase+j];
-            Table[inmsg & (LocalTableSize-1)] ^= inmsg;
+            HPCC_Table[inmsg & (LocalTableSize-1)] ^= inmsg;
           }
         } else if (status.MPI_TAG == FINISHED_TAG) {
           /* we got a done message.  Thanks for playing... */
@@ -625,7 +624,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 #endif
       for (j=0; j < recvUpdates; j ++) {
         inmsg = LocalRecvBuffer[bufferBase+j];
-        Table[inmsg & (LocalTableSize-1)] ^= inmsg;
+        HPCC_Table[inmsg & (LocalTableSize-1)] ^= inmsg;
       }
 
     } else if (status.MPI_TAG == FINISHED_TAG) {
@@ -691,14 +690,11 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   double *GUPs;
 
   MPI_Datatype INT64_DT;
-  MPI_Datatype UINT64_DT;
 
 #ifdef LONG_IS_64BITS
   INT64_DT = MPI_LONG;
-  UINT64_DT = MPI_UNSIGNED_LONG;
 #else
   INT64_DT = MPI_LONG_LONG_INT;
-  UINT64_DT = MPI_UNSIGNED_LONG_LONG;
 #endif
 
   GUPs = &params->MPIGUPs;
@@ -767,14 +763,16 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   } /* end for i */
 
 
-  Table = XMALLOC( u64Int, LocalTableSize);
-  sAbort = 0; if (! Table) sAbort = 1;
+  HPCC_Table = XMALLOC( u64Int, LocalTableSize);
+  sAbort = 0; if (! HPCC_Table) sAbort = 1;
 
   MPI_Allreduce( &sAbort, &rAbort, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD );
   if (rAbort > 0) {
     if (MyProc == 0) fprintf(outFile, "Failed to allocate memory for the main table.\n");
     goto failed_table;
   }
+
+  params->MPIRandomAccess_N = (double)TableSize;
 
   /* Default number of global updates to table: 4x number of table entries */
   NumUpdates_Default = 4 * TableSize;
@@ -853,6 +851,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
 
   /* Print timing results */
   if (MyProc == 0){
+    params->MPIRandomAccess_time = RealTime;
     *GUPs = 1e-9*NumUpdates / RealTime;
     fprintf( outFile, "CPU time used = %.6f seconds\n", CPUTime );
     fprintf( outFile, "Real time used = %.6f seconds\n", RealTime );
@@ -878,14 +877,14 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
                                     GlobalStartMyProc,  
                                     logNumProcs, NumProcs, 
                                     MyProc, ProcNumUpdates, 
-                                    UINT64_DT, &NumErrors);
+                                    INT64_DT, &NumErrors);
   } 
   else {
     HPCC_AnyNodesMPIRandomAccessCheck(logTableSize, TableSize, LocalTableSize, 
                                  MinLocalTableSize, GlobalStartMyProc, Top, 
                                  logNumProcs, NumProcs, Remainder, 
                                  MyProc, ProcNumUpdates, 
-                                 UINT64_DT, &NumErrors);
+                                 INT64_DT, &NumErrors);
   }
 
 
@@ -902,7 +901,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
     http://www.mpi-forum.org/docs/mpi-20-html/node84.htm So I need to
     create a trivial summation operation. */
   MPI_Op_create( Sum64, 1, &sum64 );
-  MPI_Reduce( &NumErrors, &GlbNumErrors, 1, UINT64_DT, sum64, 0, MPI_COMM_WORLD );
+  MPI_Reduce( &NumErrors, &GlbNumErrors, 1, INT64_DT, sum64, 0, MPI_COMM_WORLD );
   MPI_Op_free( &sum64 );
 #endif
   
@@ -911,6 +910,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   RealTime += RTSEC();
 
   if(MyProc == 0){
+    params->MPIRandomAccess_CheckTime = RealTime;
     fprintf( outFile, "Verification:  CPU time used = %.6f seconds\n", CPUTime);
     fprintf( outFile, "Verification:  Real time used = %.6f seconds\n", RealTime);
     fprintf( outFile, "Found " FSTR64 " errors in " FSTR64 " locations (%s).\n",
@@ -926,7 +926,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   /* Deallocate memory (in reverse order of allocation which should
      help fragmentation) */
   
-  free( Table );
+  free( HPCC_Table );
   
   failed_table:
   comp_end:

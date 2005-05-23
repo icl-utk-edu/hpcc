@@ -41,7 +41,7 @@ HPCC_SingleRandomAccess(HPCC_Params *params)
   MPI_Bcast( &rank, 1, MPI_INT, 0, comm ); /* broadcast the rank selected on node 0 */
 
   if (myRank == rank) /* if this node has been selected */
-    rv = RandomAccess( params, 0 == myRank, &localGUPs, &failure );
+    rv = HPCC_RandomAccess( params, 0 == myRank, &localGUPs, &failure );
 
   MPI_Bcast( &rv, 1, MPI_INT, rank, comm ); /* broadcast error code */
   MPI_Bcast( &localGUPs, 1, MPI_DOUBLE, rank, comm ); /* broadcast GUPs */
