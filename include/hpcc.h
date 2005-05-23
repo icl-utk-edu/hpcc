@@ -98,9 +98,9 @@ extern int HPL_main(int ARGC, char **ARGV, HPL_RuntimeData *rdata, int *failure)
 extern int StarDGEMM(HPCC_Params *params);
 extern int SingleDGEMM(HPCC_Params *params);
 extern int PTRANS(HPCC_Params *params);
-extern int MPIRandomAccess(HPCC_Params *params);
-extern int SingleRandomAccess(HPCC_Params *params);
-extern int StarRandomAccess(HPCC_Params *params);
+extern int HPCC_MPIRandomAccess(HPCC_Params *params);
+extern int HPCC_SingleRandomAccess(HPCC_Params *params);
+extern int HPCC_StarRandomAccess(HPCC_Params *params);
 extern int SingleStream(HPCC_Params *params);
 extern int StarStream(HPCC_Params *params);
 extern int StarFFT(HPCC_Params *params);
@@ -111,7 +111,7 @@ extern int TestFFT(HPCC_Params *params, int doIO, double *UGflops, int *Un, int 
 extern int TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure);
 extern int MaxMem(int nprocs, int imrow, int imcol, int nmat, int *mval, int *nval, int nbmat,
   int *mbval, int *nbval, int ngrids, int *npval, int *nqval, long *maxMem);
-extern int RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure);
+extern int HPCC_RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure);
 extern int Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs,
   double *addGBs, double *triadGBs, int *failure);
 extern void main_bench_lat_bw(HPCC_Params *params);
