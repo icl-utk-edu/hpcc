@@ -215,7 +215,7 @@ void Power2NodesTime(u64Int logTableSize,
 
    /* estimate largest number of iterations that satisfy time bound */
    iterTime = (double)(_ra_LoopRealTime/SendCnt);
-   *EstimatedNumIter = (int)(timeBound/iterTime);   
+   *EstimatedNumIter = timeBound/iterTime;   
 #ifdef DEBUG_TIME_BOUND
    fprintf (stdout, "MyProc: %4d SampledNumIter: %8d ", MyProc, SendCnt);
    fprintf (stdout, "LoopRealTime: %.8f IterTime: %.8f EstimatedNumIter: %8d\n", 
