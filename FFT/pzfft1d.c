@@ -12,6 +12,9 @@ ztrans(fftw_complex *a, fftw_complex *b, int n1, int n2) {
   lda = n1;
   ldb = n2;
 
+#ifdef _OPENMP
+#pragma omp parallel for private(i,j,jj,tmin1,tmin2)
+#endif
   for (ii = 0; ii < n1; ii += FFTE_NBLK)
     for (jj = 0; jj < n2; jj += FFTE_NBLK) {
 
@@ -80,6 +83,9 @@ pzfft1d0(fftw_complex *a, fftw_complex *a2, fftw_complex *apxyz, fftw_complex *a
   nnz = nz / npu;
   nn = (s64Int_t)nx * ny * nz / npu;
 
+#ifdef _OPENMP
+#pragma omp for private(i,k,l,ii,kk,tmin1,tmin2)
+#endif
   for (j = 0; j < ny; ++j) {
     for (ii = 0; ii < nnx; ii += FFTE_NBLK) {
       for (kk = 0; kk < nz; kk += FFTE_NBLK) {
@@ -111,8 +117,22 @@ pzfft1d0(fftw_complex *a, fftw_complex *a2, fftw_complex *apxyz, fftw_complex *a
     }
   }
 
+#ifdef _OPENMP
+#pragma omp single
+  {
+#endif
+  p->timings[3] = MPI_Wtime();
+
   pztrans( a, b, nn, p, npu );
 
+  p->timings[4] = MPI_Wtime();
+#ifdef _OPENMP
+  }
+#endif
+
+#ifdef _OPENMP
+#pragma omp for private(i,j,l,ii,jj,kk,tmin1,tmin2)
+#endif
   for (k = 0; k < nnz; ++k) {
     for (l = 0; l < npu; ++l) {
       for (ii = 0; ii < nnx; ii += FFTE_NBLK) {
@@ -151,6 +171,9 @@ pzfft1d0(fftw_complex *a, fftw_complex *a2, fftw_complex *apxyz, fftw_complex *a
       HPCC_fft235( PTR3D( a, 0, j, k, lda1, lda2 ), d, wx, nx, lnx );
   }
 
+#ifdef _OPENMP
+#pragma omp for private(i,j,k,jj,kk,tmin1,tmin2,tmin3)
+#endif
   for (ii = 0; ii < nx; ii += FFTE_NBLK) {
     for (jj = 0; jj < ny; jj += FFTE_NBLK) {
       for (kk = 0; kk < nnz; kk += FFTE_NBLK) {
@@ -185,6 +208,9 @@ psettbl2(fftw_complex *w, int ny, int nz, int me, int npu) {
   px = -pi2 / ((double)ny * nz);
 
   tmin1 = nz / npu;
+#ifdef _OPENMP
+#pragma omp parallel for private(j)
+#endif
   for (k = 0; k < tmin1; ++k)
     for (j = 0; j < ny; ++j) {
       c_re( ARR2D( w, j, k, ldw ) ) = cos(px * j * (me + (double)k * npu));
@@ -206,6 +232,9 @@ psettbl3(fftw_complex *w, int nx, int ny, int nz, int me, int npu) {
   px = -pi2 / ((double)nx * ny * nz);
 
   tmin1 = nz / npu;
+#ifdef _OPENMP
+#pragma omp parallel for private(i,j)
+#endif
   for (k = 0; k < tmin1; ++k)
     for (j = 0; j < ny; ++j)
       for (i = 0; i < nx; ++i) {
@@ -223,6 +252,8 @@ HPCC_pzfft1d(s64Int_t n, fftw_complex *a, fftw_complex *b, fftw_complex *w, int 
   int i, inn, nn2, nd, nx, ny, nz;
   fftw_complex *wx, *wy, *wz, *c;
   double dn;
+
+  p->timings[0] = MPI_Wtime();
 
   wx = p->wx;
   wy = p->wy;
@@ -260,19 +291,38 @@ HPCC_pzfft1d(s64Int_t n, fftw_complex *a, fftw_complex *b, fftw_complex *w, int 
     }
   }
 
+  p->timings[1] = MPI_Wtime();
+
   if (-1 == iopt || 1 == iopt || -2 == iopt) {
     ztrans( a, b, npu, nn2 );
     pztrans( b, a, nn, p, npu );
   }
 
+  p->timings[2] = MPI_Wtime();
+
   nd = ((ny > nz ? ny : nz) + FFTE_NP) * FFTE_NBLK + FFTE_NP;
 
+#ifdef _OPENMP
+#pragma omp parallel private(c,i)
+   {
+    i = omp_get_thread_num();
+    c = p->c + i*p->c_size;
+#endif
+
   pzfft1d0( a, a, a, a, b, b, b, c, c, c + nd, wx, wy, wz, w, w + ny*(nz/npu), nx, ny, nz, p, npu, lnx, lny, lnz );
+
+#ifdef _OPENMP
+   }
+#endif
+
+  p->timings[5] = MPI_Wtime();
 
   if (-1 == iopt || 1 == iopt || 2 == iopt) {
     pztrans( b, a, nn, p, npu );
     ztrans( a, b, nn2, npu );
   }
+
+  p->timings[6] = MPI_Wtime();
 
   if (1 == iopt || 2 == iopt) {
     dn = 1.0 / n;
@@ -281,6 +331,8 @@ HPCC_pzfft1d(s64Int_t n, fftw_complex *a, fftw_complex *b, fftw_complex *w, int 
       c_im( b[i] ) *= -dn;
     }
   }
+
+  p->timings[7] = MPI_Wtime();
 
   return 0;
 }	/* HPCC_pzfft1d */

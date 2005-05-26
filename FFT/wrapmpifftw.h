@@ -14,7 +14,7 @@ struct hpcc_fftw_mpi_plan_struct {
   MPI_Datatype cmplx;
   fftw_complex *wx, *wy, *wz, *c, *work;
   s64Int_t n;
-  int flags;
+  int flags, c_size;
   fftw_direction dir;
   double *timings;
 };

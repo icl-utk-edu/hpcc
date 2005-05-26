@@ -4,6 +4,10 @@
 
 #include "hpccfft.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 hpcc_fftw_plan
 HPCC_fftw_create_plan(int n, fftw_direction dir, int flags) {
   hpcc_fftw_plan p;
@@ -14,7 +18,21 @@ HPCC_fftw_create_plan(int n, fftw_direction dir, int flags) {
   p->w1 = malloc( (FFTE_NDA2/2 + FFTE_NP) * (sizeof *p->w1) );
   p->w2 = malloc( (FFTE_NDA2/2 + FFTE_NP) * (sizeof *p->w2) );
   p->ww = malloc( ((FFTE_NDA2+FFTE_NP) * 4 + FFTE_NP) * (sizeof *p->ww) );
-  p->c = malloc( ((FFTE_NDA2+FFTE_NP) * (FFTE_NBLK + 1) + FFTE_NP) * (sizeof *p->c) );
+
+  p->c_size = (FFTE_NDA2+FFTE_NP) * (FFTE_NBLK + 1) + FFTE_NP;
+#ifdef _OPENMP
+#pragma omp parallel
+  {
+#pragma omp single
+    {
+      int i;
+      i = omp_get_num_threads();
+      p->c = malloc( p->c_size * (sizeof *p->c) * i );
+    }
+  }
+#else
+  p->c = malloc( p->c_size * (sizeof *p->c) );
+#endif
 
   HPCC_zfft1d( n, a, b, 0, p );
 

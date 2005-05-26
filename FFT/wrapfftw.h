@@ -19,7 +19,7 @@ typedef enum {
 
 struct hpcc_fftw_plan_struct {
   fftw_complex *w1, *w2, *ww, *c;
-  int n;
+  int n, c_size;
   int flags;
   fftw_direction dir;
 };

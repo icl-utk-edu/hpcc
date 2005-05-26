@@ -47,8 +47,22 @@ HPCC_fftw_mpi_create_plan(MPI_Comm comm, s64Int_t n, fftw_direction dir, int fla
   p->wx = fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wx) );
   p->wy = fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wy) );
   p->wz = fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wz) );
-  p->c = fftw_malloc( ((nxyz+FFTE_NP) * (FFTE_NBLK + 1) + FFTE_NP) * (sizeof *p->c) );
   p->work = fftw_malloc( n / size * 3 / 2 * (sizeof *p->work) );
+
+  p->c_size = (nxyz+FFTE_NP) * (FFTE_NBLK + 1) + FFTE_NP;
+#ifdef _OPENMP
+#pragma omp parallel
+  {
+#pragma omp single
+    {
+      int i;
+      i = omp_get_num_threads();
+      p->c = fftw_malloc( p->c_size * (sizeof *p->c) * i );
+    }
+  }
+#else
+  p->c = fftw_malloc( p->c_size * (sizeof *p->c) );
+#endif
 
   p->n = n;
   p->comm = comm;

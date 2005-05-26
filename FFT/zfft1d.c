@@ -1,6 +1,10 @@
 
 #include "hpccfft.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 int
 HPCC_ipow(int x, int p) {
   int i, r;
@@ -34,6 +38,7 @@ zfft1d0(fftw_complex *a1, fftw_complex *a2, fftw_complex *b, fftw_complex *c, ff
   ldww4 = n1/m1;
 
 #ifdef _OPENMP
+#pragma omp for private(ij,ij0,ir,jj,i,j,ik,is,ztmp1,ztmp2,ztmp3,ztmp4,tmin1,tmin2,itmp1)
 #endif
   for (ii = 0; ii < n1; ii += FFTE_NBLK) {
     for (jj = 0; jj < n2; jj += FFTE_NBLK) {
@@ -120,6 +125,7 @@ zfft1d0(fftw_complex *a1, fftw_complex *a2, fftw_complex *b, fftw_complex *c, ff
   }
 
 #ifdef _OPENMP
+#pragma omp for private(i,j,tmin1)
 #endif
   for (jj = 0; jj < n2; jj += FFTE_NBLK) {
     tmin1 = jj + FFTE_NBLK;
@@ -154,7 +160,9 @@ settbls(fftw_complex *w1, fftw_complex *w2, fftw_complex *w3, fftw_complex *w4,
   ldw4 = n1/m1;
 
 #ifdef _OPENMP
-#pragma omp parallel for
+#pragma omp parallel
+  {
+#pragma omp for private(j, ir)
 #endif
   for (k = 0; k < m2; ++k) {
     for (j = 0; j < m1; ++j) {
@@ -168,6 +176,9 @@ settbls(fftw_complex *w1, fftw_complex *w2, fftw_complex *w3, fftw_complex *w4,
     }
   }
 
+#ifdef _OPENMP
+#pragma omp for private(j, ir)
+#endif
   for (is = 0; is < n2/m2; ++is) {
     for (j = 0; j < m1; ++j) {
       c_re(ARR2D(w2, j, is, ldw2)) = cos(px * j * is * m2);
@@ -179,6 +190,9 @@ settbls(fftw_complex *w1, fftw_complex *w2, fftw_complex *w3, fftw_complex *w4,
       c_im(ARR2D(w4, ir, is, ldw4)) = sin(px * ir * m1 * is * m2);
     }
   }
+#ifdef _OPENMP
+  }
+#endif
 
   return 0;
 }	/* settbls */
@@ -248,9 +262,18 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
     nd = (n2 + FFTE_NP) * FFTE_NBLK + FFTE_NP;
 
 #ifdef _OPENMP
-#pragma omp parallel private(c)
+#pragma omp parallel private(c,i)
+   {
+    i = omp_get_thread_num();
+    c = p->c + i*p->c_size;
 #endif
+
     zfft1d0( a, a, b, c, c + nd, w1, w2, ww, ww + nw2, ww + nw3, ww + nw4, n1, n2, m1, m2, ip1, ip2 );
+
+#ifdef _OPENMP
+   }
+#endif
+
   }
 
   if (1 == iopt) {
