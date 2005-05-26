@@ -187,9 +187,12 @@ Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, double 
     if (doIO) fprintf( outFile, HLINE);
 #pragma omp parallel private(k)
     {
-    k = omp_get_num_threads();
-    if (doIO) fprintf( outFile, "Number of Threads requested = %i\n",k);
-    params->StreamThreads = k;
+#pragma omp single nowait
+      {
+        k = omp_get_num_threads();
+        if (doIO) fprintf( outFile, "Number of Threads requested = %i\n",k);
+        params->StreamThreads = k;
+      }
     }
 #endif
 
