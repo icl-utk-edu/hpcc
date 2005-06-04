@@ -109,7 +109,7 @@ params->Failure.
 
 extern int HPCC_Init(HPCC_Params *params);
 extern int HPCC_Finalize(HPCC_Params *params);
-extern int MinStoreBits(unsigned long x);
+extern int HPCC_LocalVectorSize(HPCC_Params *params, int vecCnt, size_t size, int pow2);
 
 extern int HPL_main(int ARGC, char **ARGV, HPL_RuntimeData *rdata, int *failure);
 extern float HPL_slamch (const HPL_T_MACH);
