@@ -84,8 +84,8 @@ typedef struct {
 
   double MPIFFTtimingsForward[MPIFFT_TIMING_COUNT], MPIFFTtimingsBackward[MPIFFT_TIMING_COUNT];
 
-  unsigned long HPLMaxProcMem;
-  int HPLMaxProc;
+  size_t HPLMaxProcMem;
+  int HPLMaxProc, HPLMinProc;
   int RunHPL, RunStarDGEMM, RunSingleDGEMM, RunPTRANS, RunStarStream,
     RunSingleStream, RunMPIRandomAccess, RunStarRandomAccess,
     RunSingleRandomAccess, RunLatencyBandwidth, RunStarFFT, RunSingleFFT, RunMPIFFT;
