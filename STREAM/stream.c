@@ -222,39 +222,21 @@ HPCC_Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, do
     int   BytesPerWord;
     register int j, k;
     double  scalar, t, times[4][NTIMES];
-    unsigned long vs;
     FILE *outFile;
     double GBs = 1073741824.0, curGBs;
 
-  if (doIO) {
-    outFile = fopen( params->outFname, "a" );
-    if (! outFile) {
-      outFile = stderr;
-      fprintf( outFile, "Cannot open output file.\n" );
-      return 1;
+    if (doIO) {
+      outFile = fopen( params->outFname, "a" );
+      if (! outFile) {
+        outFile = stderr;
+        fprintf( outFile, "Cannot open output file.\n" );
+        return 1;
+      }
     }
-  }
 
-  /* It might be tempting to make `VectorSize' to be of type `long'. On systems where `long' is
-     larger than `int' it might prevent optimizations in STREAM kernels. Hence, the calculation
-     below tries to find the largest vector lengths that fit in memory and not overflow `int'. */
+    VectorSize = HPCC_LocalVectorSize( params, 3, sizeof(double), 0 ); /* Need 3 vectors */
+    params->StreamVectorSize = VectorSize;
 
-    vs = params->HPLMaxProcMem / sizeof(double) / 3; /* 3 vectors should occupy all memory */
-
-    /* how many more bits vs has than VectorSize can store */
-    j = MinStoreBits( vs ) - (sizeof VectorSize) * 8 + 1;
-
-    /* if `int' isn't smaller than `long' or vector size is acceptable */
-    if ((sizeof VectorSize) >= (sizeof params->HPLMaxProcMem) || j <= 0)
-      VectorSize = vs;
-    else
-      VectorSize = vs >> j; /* reduce value of `vs' so it fits in `VectorSize' */
-
-    if (0 == VectorSize) {
-      VectorSize = 16 * 1024 * 1024 / sizeof(double); /* 16MB per vector */
-    printf("%d\n",MinStoreBits( vs ));
-  printf("%ld\n", params->HPLMaxProcMem );
-  }
     a = XMALLOC( double, VectorSize );
     b = XMALLOC( double, VectorSize );
     c = XMALLOC( double, VectorSize );
@@ -270,8 +252,6 @@ HPCC_Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, do
       }
       return 1;
     }
-
-    params->StreamVectorSize = VectorSize;
 
     /* --- SETUP --- determine precision and check timing --- */
 
