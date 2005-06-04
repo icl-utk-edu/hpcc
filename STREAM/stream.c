@@ -100,8 +100,6 @@ static double bytes[4] = {
     };
 
 #define mysecond MPI_Wtime
-/*extern double mysecond();*/
-extern void checkSTREAMresults(FILE *outFile, int doIO, int *failure);
 #ifdef TUNED
 extern void tuned_STREAM_Copy(void);
 extern void tuned_STREAM_Scale(double scalar);
@@ -109,10 +107,118 @@ extern void tuned_STREAM_Add(void);
 extern void tuned_STREAM_Triad(double scalar);
 #endif
 
+static void
+checkSTREAMresults (FILE *outFile, int doIO, int *failure)
+{
+  double aj,bj,cj,scalar;
+  double asum,bsum,csum;
+  double epsilon;
+  int j,k;
+
+    /* reproduce initialization */
+  aj = 1.0;
+  bj = 2.0;
+  cj = 0.0;
+    /* a[] is modified during timing check */
+  aj = 2.0E0 * aj;
+    /* now execute timing loop */
+  scalar = 3.0;
+  for (k=0; k<NTIMES; k++)
+        {
+            cj = aj;
+            bj = scalar*cj;
+            cj = aj+bj;
+            aj = bj+scalar*cj;
+        }
+  aj = aj * (double) VectorSize;
+  bj = bj * (double) VectorSize;
+  cj = cj * (double) VectorSize;
+
+  asum = 0.0;
+  bsum = 0.0;
+  csum = 0.0;
+  for (j=0; j<VectorSize; j++) {
+    asum += a[j];
+    bsum += b[j];
+    csum += c[j];
+  }
+#ifdef VERBOSE
+        if (doIO) {
+          fprintf( outFile, "Results Comparison: \n");
+          fprintf( outFile, "        Expected  : %f %f %f \n",aj,bj,cj);
+          fprintf( outFile, "        Observed  : %f %f %f \n",asum,bsum,csum);
+        }
+#endif
+
+        epsilon = 1.e-8;
+
+        *failure = 1;
+        if (fabs(aj-asum)/asum > epsilon) {
+          if (doIO) {
+            fprintf( outFile, "Failed Validation on array a[]\n");
+            fprintf( outFile, "        Expected  : %f \n",aj);
+            fprintf( outFile, "        Observed  : %f \n",asum);
+          }
+        }
+        else if (fabs(bj-bsum)/bsum > epsilon) {
+          if (doIO) {
+            fprintf( outFile, "Failed Validation on array b[]\n");
+            fprintf( outFile, "        Expected  : %f \n",bj);
+            fprintf( outFile, "        Observed  : %f \n",bsum);
+          }
+        }
+        else if (fabs(cj-csum)/csum > epsilon) {
+          if (doIO) {
+            fprintf( outFile, "Failed Validation on array c[]\n");
+            fprintf( outFile, "        Expected  : %f \n",cj);
+            fprintf( outFile, "        Observed  : %f \n",csum);
+          }
+        }
+        else {
+          *failure = 0;
+          if (doIO) fprintf( outFile, "Solution Validates\n");
+ }
+}
+
+# define M 20
+
+static int
+checktick()
+    {
+    int  i, minDelta, Delta;
+    double t1, t2, timesfound[M];
+
+/*  Collect a sequence of M unique time values from the system. */
+
+    for (i = 0; i < M; i++) {
+      t1 = mysecond();
+      while( ((t2=mysecond()) - t1) < 1.0E-6 )
+        ;
+      timesfound[i] = t1 = t2;
+    }
+
+/*
+ * Determine the minimum difference between these M values.
+ * This result will be our estimate (in microseconds) for the
+ * clock granularity.
+ */
+
+    minDelta = 1000000;
+    for (i = 1; i < M; i++) {
+      Delta = (int)( 1.0E6 * (timesfound[i]-timesfound[i-1]));
+      minDelta = Mmin(minDelta, Mmax(Delta,0));
+    }
+
+   return(minDelta);
+    }
+#undef M
+
+
+
 int
-Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, double *addGBs,
+HPCC_Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, double *addGBs,
   double *triadGBs, int *failure) {
-    int   quantum, checktick(void);
+    int   quantum;
     int   BytesPerWord;
     register int j, k;
     double  scalar, t, times[4][NTIMES];
@@ -342,129 +448,6 @@ Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, double 
     }
 
     return 0;
-}
-
-# define M 20
-
-int
-checktick()
-    {
-    int  i, minDelta, Delta;
-    double t1, t2, timesfound[M];
-
-/*  Collect a sequence of M unique time values from the system. */
-
-    for (i = 0; i < M; i++) {
-      t1 = mysecond();
-      while( ((t2=mysecond()) - t1) < 1.0E-6 )
-        ;
-      timesfound[i] = t1 = t2;
-    }
-
-/*
- * Determine the minimum difference between these M values.
- * This result will be our estimate (in microseconds) for the
- * clock granularity.
- */
-
-    minDelta = 1000000;
-    for (i = 1; i < M; i++) {
-      Delta = (int)( 1.0E6 * (timesfound[i]-timesfound[i-1]));
-      minDelta = Mmin(minDelta, Mmax(Delta,0));
-    }
-
-   return(minDelta);
-    }
-
-
-
-/* A gettimeofday routine to give access to the wall
-   clock timer on most UNIX-like systems.  */
-
-/*
-#include <sys/time.h>
-
-double mysecond()
-{
-        struct timeval tp;
-        struct timezone tzp;
-        int i;
-
-        i = gettimeofday(&tp,&tzp);
-        return ( (double) tp.tv_sec + (double) tp.tv_usec * 1.e-6 );
-}
-*/
-
-void checkSTREAMresults (FILE *outFile, int doIO, int *failure)
-{
-  double aj,bj,cj,scalar;
-  double asum,bsum,csum;
-  double epsilon;
-  int j,k;
-
-    /* reproduce initialization */
-  aj = 1.0;
-  bj = 2.0;
-  cj = 0.0;
-    /* a[] is modified during timing check */
-  aj = 2.0E0 * aj;
-    /* now execute timing loop */
-  scalar = 3.0;
-  for (k=0; k<NTIMES; k++)
-        {
-            cj = aj;
-            bj = scalar*cj;
-            cj = aj+bj;
-            aj = bj+scalar*cj;
-        }
-  aj = aj * (double) VectorSize;
-  bj = bj * (double) VectorSize;
-  cj = cj * (double) VectorSize;
-
-  asum = 0.0;
-  bsum = 0.0;
-  csum = 0.0;
-  for (j=0; j<VectorSize; j++) {
-    asum += a[j];
-    bsum += b[j];
-    csum += c[j];
-  }
-#ifdef VERBOSE
-        if (doIO) {
-          fprintf( outFile, "Results Comparison: \n");
-          fprintf( outFile, "        Expected  : %f %f %f \n",aj,bj,cj);
-          fprintf( outFile, "        Observed  : %f %f %f \n",asum,bsum,csum);
-        }
-#endif
-
-        epsilon = 1.e-8;
-
-        *failure = 1;
-        if (fabs(aj-asum)/asum > epsilon) {
-          if (doIO) {
-            fprintf( outFile, "Failed Validation on array a[]\n");
-            fprintf( outFile, "        Expected  : %f \n",aj);
-            fprintf( outFile, "        Observed  : %f \n",asum);
-          }
-        }
-        else if (fabs(bj-bsum)/bsum > epsilon) {
-          if (doIO) {
-            fprintf( outFile, "Failed Validation on array b[]\n");
-            fprintf( outFile, "        Expected  : %f \n",bj);
-            fprintf( outFile, "        Observed  : %f \n",bsum);
-          }
-        }
-        else if (fabs(cj-csum)/csum > epsilon) {
-          if (doIO) {
-            fprintf( outFile, "Failed Validation on array c[]\n");
-            fprintf( outFile, "        Expected  : %f \n",cj);
-            fprintf( outFile, "        Observed  : %f \n",csum);
-          }
-        }
-        else {
-          *failure = 0;
-          if (doIO) fprintf( outFile, "Solution Validates\n");
- }
 }
 
 void tuned_STREAM_Copy()

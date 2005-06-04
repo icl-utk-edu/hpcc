@@ -4,7 +4,7 @@
 #include <hpcc.h>
 
 int
-StarStream(HPCC_Params *params) {
+HPCC_StarStream(HPCC_Params *params) {
   int myRank, commSize;
   int rv, errCount, failure = 0, failureAll = 0;
   double copyLocalGBs, copyMinGBs, copyMaxGBs, copyAvgGBs;
@@ -22,7 +22,7 @@ StarStream(HPCC_Params *params) {
   MPI_Comm_size( comm, &commSize );
   MPI_Comm_rank( comm, &myRank );
 
-  rv = Stream( params, 0 == myRank, &copyLocalGBs, &scaleLocalGBs, &addLocalGBs, &triadLocalGBs,
+  rv = HPCC_Stream( params, 0 == myRank, &copyLocalGBs, &scaleLocalGBs, &addLocalGBs, &triadLocalGBs,
                &failure );
   MPI_Reduce( &rv, &errCount, 1, MPI_INT, MPI_SUM, 0, comm );
   MPI_Allreduce( &failure, &failureAll, 1, MPI_INT, MPI_MAX, comm );
@@ -70,7 +70,7 @@ StarStream(HPCC_Params *params) {
 }
 
 int
-SingleStream(HPCC_Params *params) {
+HPCC_SingleStream(HPCC_Params *params) {
   int myRank, commSize;
   int rv, errCount, rank, failure = 0;
   double copyLocalGBs, scaleLocalGBs, addLocalGBs, triadLocalGBs;
@@ -97,7 +97,7 @@ SingleStream(HPCC_Params *params) {
   MPI_Bcast( &rank, 1, MPI_INT, 0, comm ); /* broadcast the rank selected on node 0 */
 
   if (myRank == rank) /* if this node has been selected */
-    rv = Stream( params, 0 == myRank, &copyLocalGBs, &scaleLocalGBs, &addLocalGBs,
+    rv = HPCC_Stream( params, 0 == myRank, &copyLocalGBs, &scaleLocalGBs, &addLocalGBs,
                  &triadLocalGBs, &failure );
 
   MPI_Bcast( &rv, 1, MPI_INT, rank, comm ); /* broadcast error code */
