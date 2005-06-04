@@ -196,7 +196,7 @@ ErrorReduce(FILE *f, char *str, int eCode, MPI_Comm comm) {
 int
 HPCC_Init(HPCC_Params *params) {
   int myRank, commSize;
-  int i, nMax, procCur, procMax, errCode;
+  int i, nMax, procCur, procMax, procMin, errCode;
   double totalMem;
   char inFname[] = "hpccinf.txt", outFname[] = "hpccoutf.txt";
   FILE *outputFile;
@@ -303,12 +303,14 @@ HPCC_Init(HPCC_Params *params) {
   params->MPIRandomAccess_Errors =
   params->MPIRandomAccess_ExeUpdates = (s64Int)(-1);
 
-  procMax = 0;
-  for (i = 0; i < params->npqs; i++) {
+  procMax = procMin = params->pval[0] * params->qval[0];
+  for (i = 1; i < params->npqs; ++i) {
     procCur = params->pval[i] * params->qval[i];
     if (procMax < procCur) procMax = procCur;
+    if (procMin > procCur) procMin = procCur;
   }
   params->HPLMaxProc = procMax;
+  params->HPLMinProc = procMin;
 
   nMax = params->nval[iiamax( params->ns, params->nval, 1 )];
 
@@ -316,7 +318,7 @@ HPCC_Init(HPCC_Params *params) {
   totalMem = nMax;
   totalMem *= nMax;
   totalMem *= sizeof(double);
-  params->HPLMaxProcMem = totalMem / procMax;
+  params->HPLMaxProcMem = totalMem / procMin;
 
   for (i = 0; i < MPIFFT_TIMING_COUNT; i++)
     params->MPIFFTtimingsForward[i] = 0.0;
@@ -427,6 +429,7 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "dweps=%e", HPCC_dweps() );
   FPRINTF( myRank, outputFile, "sweps=%e", (double)HPCC_sweps() );
   FPRINTF( myRank, outputFile, "HPLMaxProcs=%d", params->HPLMaxProc );
+  FPRINTF( myRank, outputFile, "HPLMinProcs=%d", params->HPLMinProc );
   FPRINTF( myRank, outputFile, "DGEMM_N=%d", params->DGEMM_N );
   FPRINTF( myRank, outputFile, "StarDGEMM_Gflops=%g",   params->StarDGEMMGflops );
   FPRINTF( myRank, outputFile, "SingleDGEMM_Gflops=%g", params->SingleDGEMMGflops );
@@ -518,6 +521,29 @@ MinStoreBits(unsigned long x) {
     ; /* EMPTY */
 
   return i;
+}
+
+int
+HPCC_LocalVectorSize(HPCC_Params *params, int vecCnt, size_t size, int pow2) {
+  int flg2, maxIntBits2;
+
+  /* this is the maximum power of 2 that that can be held in a signed integer (for a 4-byte
+     integer, 2**31-1 is the maximum integer, so the maximum power of 2 is 30) */
+  maxIntBits2 = sizeof(int) * 8 - 2;
+
+  /* flg2 = floor(log2(params->HPLMaxProcMem / size / vecCnt)) */
+  for (flg2 = 1; params->HPLMaxProcMem / size / vecCnt >> 1; ++flg2)
+    ; /* EMPTY */
+  --flg2;
+
+  if (flg2 <= maxIntBits2) {
+    if (pow2)
+      return 1 << flg2;
+
+    return params->HPLMaxProcMem / size / vecCnt;
+  }
+
+  return 1 << maxIntBits2;
 }
 
 #ifdef XERBLA_MISSING
