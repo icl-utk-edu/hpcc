@@ -86,7 +86,7 @@ tst_dgemm(int m_, int n_, int k_, double alpha, double *a, int lda, double *b, i
 }
 
 int
-TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure) {
+HPCC_TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure) {
   int n, failure = 1;
   double *a, *b, *c0, *c1, alpha, beta, sres;
   double Gflops = 0.0, dn, t0, t1;
@@ -159,32 +159,3 @@ TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure
 
   return 0;
 }
-
-#ifdef TSTDGEMMMAIN
-void xerbla_(char *r, int *v) {
-  printf("%c%c%c%c%c%c%c() -> %d\n", r[0], r[1], r[2], r[3], r[4], r[5], r[6], *v );
-}
-double
-MPI_Wtime() {
-  time_t tt;
-  return (double)time( &tt );
-  return (double)clock();
-}
-int
-main(int argc, char *argv[]) {
-  HPCC_Params params;
-  int i, n;
-  double Gflops, thrsh;
-
-  if (argc <= 1 || sscanf( argv[1], "%d", &n ) != 1 || n < 10) n = 100;
-  if (argc <= 2 || sscanf( argv[2], "%lf", &thrsh ) != 1) thrsh = 16;
-
-  params.HPLMaxProcMem = 4 * n * n * sizeof(double);
-  params.test.thrsh = thrsh;
-
-  TestDGEMM( &params, &Gflops, &n, &i );
-  printf( "%g %d %d\n", Gflops, n, i );
-
-  return 0;
-}
-#endif
