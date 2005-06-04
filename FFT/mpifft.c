@@ -9,40 +9,9 @@
 
 double *HPCC_fft_timings_forward, *HPCC_fft_timings_backward;
 
-/*
-static int
-ilog2u(unsigned long x) {
-  int l;
-  for (l = 0; x; x >>= 1, l++)
-    ;
-  return l-1;
-}
-*/
-
-static int
-LocalVectorSize(long maxCount) {
-  long ln;
-  int n, maxIntBits;
-
-  /* this is the maximum power of 2 that that can be held in a signed integer (for a 4-byte
-     integer, 2**31-1 is the maximum integer, so the maximum power of 2 is 30) */
-  maxIntBits = sizeof(int) * 8 - 2;
-  ln = 1L << maxIntBits;
-
-  /* Find the largest size of a vector. The size of the vector has to be:  a power 2, fit in
-     an integer, and small enough to fit in maxCount. */
-
-  while (ln > maxCount)
-    ln >>= 1;
-
-  n = (int)ln;
-
-  return n;
-}
-
 static void
-MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm comm,
-        double *UGflops, s64Int_t *Un, double *UmaxErr, int *Ufailure) {
+MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, double *UGflops, s64Int_t *Un,
+        double *UmaxErr, int *Ufailure) {
   int commRank, commSize;
   int failure;
   s64Int_t i, n;
@@ -61,7 +30,7 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
   MPI_Comm_rank( comm, &commRank );
 
   /* there are two vectors of size 'n'/'commSize': inout, work, and internal work: 2*'n'/'commSize' */
-  n = LocalVectorSize( HPLMaxProcMem / 4 / sizeof(fftw_complex) );
+  n = HPCC_LocalVectorSize( params, 4, sizeof(fftw_complex), 1 );
 
   /* make sure that the size of the vector size is greater than number of processes squared */
   if (n < commSize)
@@ -69,9 +38,9 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
 
   n *= commSize; /* global vector size */
 
-  t1 = MPI_Wtime();
+  t1 = -MPI_Wtime();
   p = fftw_mpi_create_plan( comm, n, FFTW_FORWARD, FFTW_MEASURE );
-  t1 = MPI_Wtime() - t1;
+  t1 += MPI_Wtime();
 
   fftw_mpi_local_sizes( p, &locn, &loc0, &alocn, &aloc0, &tls );
 
@@ -80,20 +49,20 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
 
   if (! inout || ! work) goto comp_end;
 
-  t0 = MPI_Wtime();
+  t0 = -MPI_Wtime();
   HPCC_bcnrand( 2 * tls, 53 * commRank * 2 * tls, inout );
-  t0 = MPI_Wtime() - t0;
+  t0 += MPI_Wtime();
 
-  t2 = MPI_Wtime();
+  t2 = -MPI_Wtime();
   fftw_mpi( p, 1, inout, work );
-  t2 = MPI_Wtime() - t2;
+  t2 += MPI_Wtime();
 
   fftw_mpi_destroy_plan( p );
 
   ip = HPCC_fftw_mpi_create_plan( comm, n, FFTW_BACKWARD, FFTW_ESTIMATE );
-  t3 = MPI_Wtime();
+  t3 = -MPI_Wtime();
   HPCC_fftw_mpi( ip, 1, inout, work );
-  t3 = MPI_Wtime() - t3;
+  t3 += MPI_Wtime();
   HPCC_fftw_mpi_destroy_plan( ip );
 
   HPCC_bcnrand( 2 * tls, 53 * commRank * 2 * tls, work ); /* regenerate data */
@@ -105,7 +74,7 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
     tmp3 = sqrt( tmp1*tmp1 + tmp2*tmp2 );
     maxErr = maxErr >= tmp3 ? maxErr : tmp3;
   }
-  if (maxErr / log(n) / deps < HPLthshr) failure = 0;
+  if (maxErr / log(n) / deps < params->test.thrsh) failure = 0;
 
   if (doIO) {
     fprintf( outFile, "Number of nodes: %d\n", commSize );
@@ -168,7 +137,7 @@ HPCC_MPIFFT(HPCC_Params *params) {
     MPI_Comm_split( MPI_COMM_WORLD, isComputing ? 0 : MPI_UNDEFINED, commRank, &comm );
 
   if (isComputing)
-    MPIFFT0( params->HPLMaxProcMem, params->test.thrsh, doIO, outFile, comm, &Gflops, &n, &maxErr, &failure );
+    MPIFFT0( params, doIO, outFile, comm, &Gflops, &n, &maxErr, &failure );
 
   if (commSize != procPow2 && isComputing && comm != MPI_COMM_NULL)
     MPI_Comm_free( &comm );

@@ -7,31 +7,16 @@
 #include "hpccfft.h"
 
 static int
-TestFFT1(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile,
-         double *UGflops, int *Un, int *Ufailure) {
+TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un, int *Ufailure) {
   fftw_complex *in, *out;
   fftw_plan p;
   hpcc_fftw_plan ip;
   double Gflops = -1.0;
   double maxErr, tmp1, tmp2, tmp3, t0, t1, t2, t3;
-  int i, n, maxIntBits, failure = 1;
-  long ln, maxCount = HPLMaxProcMem/2/sizeof(fftw_complex);
+  int i, n, failure = 1;
   double deps = HPL_dlamch( HPL_MACH_EPS );
 
-  /* this is the maximum power of 2 that that can be held in a signed integer (for a 4-byte
-     integer, 2**31-1 is the maximum integer, so the maximum power of 2 is 30) */
-  maxIntBits = sizeof(int) * 8 - 2;
-
-  /* Find the largest size of two (same length) complex vectors. The size of each vector has
-     to be:  a power 2 and fit in an integer. Combined size of the vectors has to be small
-     enough to fit in main memory (taken from HPL). */
-
-  for (i = 0, ln = 1; ln <= maxCount; i++, ln <<= 1)
-    ;
-  ln >>= 1; /* there was one shift too much */
-
-  if (i <= maxIntBits) n = ln;
-  else n = 1 << maxIntBits;
+  n = HPCC_LocalVectorSize( params, 2, sizeof(fftw_complex), 1 ); /* Need 2 vectors and power of 2 */
 
   /* need to use fftw_malloc() so that the returned pointers will be aligned properly for SSE
      instructions on Intel/AMD systems */
@@ -69,7 +54,7 @@ TestFFT1(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile,
     maxErr = maxErr >= tmp3 ? maxErr : tmp3;
   }
 
-  if (maxErr / log(n) / deps < HPLthshr) failure = 0;
+  if (maxErr / log(n) / deps < params->test.thrsh) failure = 0;
 
   if (doIO) {
     fprintf( outFile, "Vector size: %d\n", n );
@@ -111,8 +96,7 @@ HPCC_TestFFT(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufail
 
   n = 0;
   Gflops = -1.0;
-  rv = TestFFT1( params->HPLMaxProcMem, params->test.thrsh, doIO, outFile,
-                 &Gflops, &n, &failure );
+  rv = TestFFT1( params, doIO, outFile, &Gflops, &n, &failure );
 
   if (doIO) {
     fflush( outFile );
