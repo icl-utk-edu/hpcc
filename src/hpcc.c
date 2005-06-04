@@ -15,10 +15,13 @@ main(int argc, char *argv[]) {
   time_t currentTime;
 
   MPI_Init( &argc, &argv );
+
+  if (HPCC_Init( &params ))
+    goto hpcc_end;
+
   MPI_Comm_size( MPI_COMM_WORLD, &commSize );
   MPI_Comm_rank( MPI_COMM_WORLD, &myRank );
 
-  HPCC_Init( &params );
   outFname = params.outFname;
 
   /* -------------------------------------------------- */
@@ -65,7 +68,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of StarDGEMM section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunStarDGEMM) StarDGEMM( &params );
+  if (params.RunStarDGEMM) HPCC_StarDGEMM( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
@@ -83,7 +86,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of SingleDGEMM section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunSingleDGEMM) SingleDGEMM( &params );
+  if (params.RunSingleDGEMM) HPCC_SingleDGEMM( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
@@ -101,7 +104,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of StarSTREAM section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunStarStream) StarStream( &params );
+  if (params.RunStarStream) HPCC_StarStream( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
@@ -119,7 +122,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of SingleSTREAM section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunSingleStream) SingleStream( &params );
+  if (params.RunSingleStream) HPCC_SingleStream( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
@@ -191,7 +194,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of MPIFFT section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunMPIFFT) MPIFFT( &params );
+  if (params.RunMPIFFT) HPCC_MPIFFT( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
@@ -209,7 +212,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of StarFFT section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunStarFFT) StarFFT( &params );
+  if (params.RunStarFFT) HPCC_StarFFT( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
@@ -227,7 +230,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "Begin of SingleFFT section.%s", "" );
   END_IO(   myRank, outputFile );
 
-  if (params.RunSingleFFT) SingleFFT( &params );
+  if (params.RunSingleFFT) HPCC_SingleFFT( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
@@ -253,6 +256,7 @@ main(int argc, char *argv[]) {
   FPRINTF(  myRank, outputFile, "End of LatencyBandwidth section.%s", "" );
   END_IO(   myRank, outputFile );
 
+  hpcc_end:
 
   HPCC_Finalize( &params );
 
