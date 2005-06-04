@@ -40,24 +40,24 @@ TestFFT1(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile,
 
   if (! in || ! out) goto comp_end;
 
-  t0 = MPI_Wtime();
+  t0 = -MPI_Wtime();
   HPCC_bcnrand( 2*n, 0, in );
-  t0 = MPI_Wtime() - t0;
+  t0 += MPI_Wtime();
 
-  t1 = MPI_Wtime();
+  t1 = -MPI_Wtime();
   p = fftw_create_plan( n, FFTW_FORWARD, FFTW_MEASURE );
-  t1 = MPI_Wtime() - t1;
+  t1 += MPI_Wtime();
 
-  t2 = MPI_Wtime();
+  t2 = -MPI_Wtime();
   fftw_one( p, in, out );
-  t2 = MPI_Wtime() - t2;
+  t2 += MPI_Wtime();
 
   fftw_destroy_plan(p);
 
   ip = HPCC_fftw_create_plan( n, FFTW_BACKWARD, FFTW_ESTIMATE );
-  t3 = MPI_Wtime();
+  t3 = -MPI_Wtime();
   HPCC_fftw_one( ip, out, in );
-  t3 = MPI_Wtime() - t3;
+  t3 += MPI_Wtime();
   HPCC_fftw_destroy_plan( ip );
 
   HPCC_bcnrand( 2*n, 0, out ); /* regenerate data */
