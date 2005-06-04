@@ -209,7 +209,7 @@ void HPL_pdpanel_init
       if( nprow > 1 )                                 /* space for U */
       { nu = nq - JB; lwork += JB * Mmax( 0, nu ); }
 
-      if( !( PANEL->WORK = (void *)malloc( lwork * sizeof( double ) ) ) )
+      if( !( PANEL->WORK = (double *)malloc( lwork * sizeof( double ) ) ) )
       {
          HPL_pabort( __LINE__, "HPL_pdpanel_init",
                      "Memory allocation failed" );
@@ -240,7 +240,7 @@ void HPL_pdpanel_init
          lwork += JB * Mmax( 0, nu );
       }
 
-      if( !( PANEL->WORK = (void *)malloc( lwork * sizeof( double ) ) ) )
+      if( !( PANEL->WORK = (double *)malloc( lwork * sizeof( double ) ) ) )
       {
          HPL_pabort( __LINE__, "HPL_pdpanel_init",
                      "Memory allocation failed" );

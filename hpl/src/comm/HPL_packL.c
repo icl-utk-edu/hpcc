@@ -165,7 +165,7 @@ int HPL_packL
          m1 = m - ( i1 = ibuf - ( j1 = ibuf / m ) * m );
          m1 = Mmin( len, m1 );
  
-         bufs[nbufs] = (void *)(Mptr( A, i1, j1, lda ));
+         bufs[nbufs] = (void **)(Mptr( A, i1, j1, lda ));
          type[nbufs] = MPI_DOUBLE;
          blen[nbufs] = m1;
          if( ierr == MPI_SUCCESS )
@@ -179,7 +179,7 @@ int HPL_packL
          {
             m1 = Mmin( len, m );
  
-            bufs[nbufs] = (void*)(Mptr( A, 0, j1, lda ));
+            bufs[nbufs] = (void**)(Mptr( A, 0, j1, lda ));
             type[nbufs] = MPI_DOUBLE;
             blen[nbufs] = m1;
             if( ierr == MPI_SUCCESS )
@@ -193,7 +193,7 @@ int HPL_packL
  */
       if( len > 0 )
       {                                            /* L1, DPIV, DINFO */
-         bufs[nbufs] = (void *)(PANEL->L1 + ibuf - jbm);
+         bufs[nbufs] = (void **)(PANEL->L1 + ibuf - jbm);
          type[nbufs] = MPI_DOUBLE;
          blen[nbufs] = len;
          if( ierr == MPI_SUCCESS )
@@ -203,7 +203,7 @@ int HPL_packL
  
       for( i = 1; i < nbufs; i++ ) disp[i] -= disp[0]; disp[0] = 0;
  
-      PANEL->buffers[IBUF] = (void *)(bufs[0]); PANEL->counts [IBUF] = 1;
+      PANEL->buffers[IBUF] = (void ***)(bufs[0]); PANEL->counts [IBUF] = 1;
 /*
  * construct the struct type 
  */
