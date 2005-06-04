@@ -514,16 +514,6 @@ HPCC_Finalize(HPCC_Params *params) {
 }
 
 int
-MinStoreBits(unsigned long x) {
-  int i;
-
-  for (i = 0; x; i++, x >>= 1)
-    ; /* EMPTY */
-
-  return i;
-}
-
-int
 HPCC_LocalVectorSize(HPCC_Params *params, int vecCnt, size_t size, int pow2) {
   int flg2, maxIntBits2;
 
@@ -532,7 +522,7 @@ HPCC_LocalVectorSize(HPCC_Params *params, int vecCnt, size_t size, int pow2) {
   maxIntBits2 = sizeof(int) * 8 - 2;
 
   /* flg2 = floor(log2(params->HPLMaxProcMem / size / vecCnt)) */
-  for (flg2 = 1; params->HPLMaxProcMem / size / vecCnt >> 1; ++flg2)
+  for (flg2 = 1; params->HPLMaxProcMem / size / vecCnt >> flg2; ++flg2)
     ; /* EMPTY */
   --flg2;
 
