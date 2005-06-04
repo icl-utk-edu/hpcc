@@ -8,6 +8,10 @@
 #include <ctype.h>
 #include <time.h>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 static int
 ReadInts(char *buf, int n, int *val) {
   int i, j;
@@ -171,10 +175,28 @@ HPCC_InputFileInit(HPCC_Params *params) {
   return 0;
 }
 
+static int
+ErrorReduce(FILE *f, char *str, int eCode, MPI_Comm comm) {
+  int rCode;
+
+  if (eCode) eCode = 1; /* make sure error is indicated with 1 */
+
+  MPI_Allreduce( &eCode, &rCode, 1, MPI_INT, MPI_SUM, comm );
+
+  if (rCode) {
+    if (f)
+      fprintf( f, str );
+
+    return -1;
+  }
+
+  return 0;
+}
+
 int
 HPCC_Init(HPCC_Params *params) {
   int myRank, commSize;
-  int i, nMax, procCur, procMax;
+  int i, nMax, procCur, procMax, errCode;
   double totalMem;
   char inFname[] = "hpccinf.txt", outFname[] = "hpccoutf.txt";
   FILE *outputFile;
@@ -182,16 +204,26 @@ HPCC_Init(HPCC_Params *params) {
   time_t currentTime;
   char hostname[MPI_MAX_PROCESSOR_NAME + 1]; int hostnameLen;
 
-  i = MPI_Get_processor_name( hostname, &hostnameLen );
-  if (i) hostname[0] = 0;
-  else hostname[Mmax(hostnameLen, MPI_MAX_PROCESSOR_NAME)] = 0;
-  time( &currentTime );
+  outputFile = NULL;
 
   MPI_Comm_size( comm, &commSize );
   MPI_Comm_rank( comm, &myRank );
 
   strcpy( params->inFname, inFname );
   strcpy( params->outFname, outFname );
+
+  if (0 == myRank)
+    outputFile = fopen( params->outFname, "a" );
+
+  errCode = 0;
+  if (sizeof(u64Int) < 8 || sizeof(s64Int) < 8) errCode = 1;
+  if (ErrorReduce( outputFile, "No 64-bit integer type available.", errCode, comm ))
+    return -1;
+
+  i = MPI_Get_processor_name( hostname, &hostnameLen );
+  if (i) hostname[0] = 0;
+  else hostname[Mmax(hostnameLen, MPI_MAX_PROCESSOR_NAME)] = 0;
+  time( &currentTime );
 
   BEGIN_IO(myRank, params->outFname, outputFile);
   FPRINTF( myRank, outputFile,
@@ -253,17 +285,23 @@ HPCC_Init(HPCC_Params *params) {
   params->PTRANSrdata.n = params->PTRANSrdata.nb = params->PTRANSrdata.nprow =
   params->PTRANSrdata.npcol = -1;
 
-  params->RandomAccess_N =
-  params->MPIRandomAccess_Errors =
   params->MPIRandomAccess_ErrorsFraction =
-  params->MPIRandomAccess_N =
   params->MPIRandomAccess_time = params->MPIRandomAccess_CheckTime =
-  params->MPIFFT_N = -1.0;
+  params->MPIRandomAccess_TimeBound = -1;
 
   params->DGEMM_N =
   params->FFT_N =
   params->StreamVectorSize = -1;
+
   params->StreamThreads = 1;
+
+  params->FFTEnblk = params->FFTEnp = params->FFTEl2size = -1;
+
+  params->MPIFFT_N =
+  params->RandomAccess_N =
+  params->MPIRandomAccess_N =
+  params->MPIRandomAccess_Errors =
+  params->MPIRandomAccess_ExeUpdates = (s64Int)(-1);
 
   procMax = 0;
   for (i = 0; i < params->npqs; i++) {
@@ -284,6 +322,34 @@ HPCC_Init(HPCC_Params *params) {
     params->MPIFFTtimingsForward[i] = 0.0;
 
   return 0;
+}
+
+double
+HPCC_dweps() {
+  double eps, one, half;
+
+  one = 1.0;
+  half = one / 2.0;
+  eps = one;
+
+  while (one + eps != one)
+    eps *= half;
+
+  return eps;
+}
+
+float
+HPCC_sweps() {
+  float eps, one, half;
+
+  one = 1.0f;
+  half = one / 2.0f;
+  eps = one;
+
+  while (one + eps != one)
+    eps *= half;
+
+  return eps;
 }
 
 int
@@ -315,6 +381,8 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "sizeof_size_t=%d", (int)sizeof(size_t) );
   FPRINTF( myRank, outputFile, "sizeof_float=%d", (int)sizeof(float) );
   FPRINTF( myRank, outputFile, "sizeof_double=%d", (int)sizeof(double) );
+  FPRINTF( myRank, outputFile, "sizeof_s64Int=%d", (int)sizeof(s64Int) );
+  FPRINTF( myRank, outputFile, "sizeof_u64Int=%d", (int)sizeof(u64Int) );
   FPRINTF( myRank, outputFile, "CommWorldProcs=%d", commSize );
   FPRINTF( myRank, outputFile, "MPI_Wtick=%e", MPI_Wtick() );
   FPRINTF( myRank, outputFile, "HPL_Tflops=%g", params->HPLrdata.Gflops * 1e-3 );
@@ -336,6 +404,28 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "HPL_crfact=%c", params->HPLrdata.crfact );
   FPRINTF( myRank, outputFile, "HPL_ctop=%c", params->HPLrdata.ctop );
   FPRINTF( myRank, outputFile, "HPL_order=%c", params->HPLrdata.order );
+  FPRINTF( myRank, outputFile, "HPL_dMACH_EPS=%e",  HPL_dlamch( HPL_MACH_EPS ) );
+  FPRINTF( myRank, outputFile, "HPL_dMACH_SFMIN=%e",HPL_dlamch( HPL_MACH_SFMIN ) );
+  FPRINTF( myRank, outputFile, "HPL_dMACH_BASE=%e", HPL_dlamch( HPL_MACH_BASE ) );
+  FPRINTF( myRank, outputFile, "HPL_dMACH_PREC=%e", HPL_dlamch( HPL_MACH_PREC ) );
+  FPRINTF( myRank, outputFile, "HPL_dMACH_MLEN=%e", HPL_dlamch( HPL_MACH_MLEN ) );
+  FPRINTF( myRank, outputFile, "HPL_dMACH_RND=%e",  HPL_dlamch( HPL_MACH_RND ) );
+  FPRINTF( myRank, outputFile, "HPL_dMACH_EMIN=%e", HPL_dlamch( HPL_MACH_EMIN ) );
+  FPRINTF( myRank, outputFile, "HPL_dMACH_RMIN=%e", HPL_dlamch( HPL_MACH_RMIN ) );
+  FPRINTF( myRank, outputFile, "HPL_dMACH_EMAX=%e", HPL_dlamch( HPL_MACH_EMAX ) );
+  FPRINTF( myRank, outputFile, "HPL_dMACH_RMAX=%e", HPL_dlamch( HPL_MACH_RMAX ) );
+  FPRINTF( myRank, outputFile, "HPL_sMACH_EPS=%e",  (double)HPL_slamch( HPL_MACH_EPS ) );
+  FPRINTF( myRank, outputFile, "HPL_sMACH_SFMIN=%e",(double)HPL_slamch( HPL_MACH_SFMIN ) );
+  FPRINTF( myRank, outputFile, "HPL_sMACH_BASE=%e", (double)HPL_slamch( HPL_MACH_BASE ) );
+  FPRINTF( myRank, outputFile, "HPL_sMACH_PREC=%e", (double)HPL_slamch( HPL_MACH_PREC ) );
+  FPRINTF( myRank, outputFile, "HPL_sMACH_MLEN=%e", (double)HPL_slamch( HPL_MACH_MLEN ) );
+  FPRINTF( myRank, outputFile, "HPL_sMACH_RND=%e",  (double)HPL_slamch( HPL_MACH_RND ) );
+  FPRINTF( myRank, outputFile, "HPL_sMACH_EMIN=%e", (double)HPL_slamch( HPL_MACH_EMIN ) );
+  FPRINTF( myRank, outputFile, "HPL_sMACH_RMIN=%e", (double)HPL_slamch( HPL_MACH_RMIN ) );
+  FPRINTF( myRank, outputFile, "HPL_sMACH_EMAX=%e", (double)HPL_slamch( HPL_MACH_EMAX ) );
+  FPRINTF( myRank, outputFile, "HPL_sMACH_RMAX=%e", (double)HPL_slamch( HPL_MACH_RMAX ) );
+  FPRINTF( myRank, outputFile, "dweps=%e", HPCC_dweps() );
+  FPRINTF( myRank, outputFile, "sweps=%e", (double)HPCC_sweps() );
   FPRINTF( myRank, outputFile, "HPLMaxProcs=%d", params->HPLMaxProc );
   FPRINTF( myRank, outputFile, "DGEMM_N=%d", params->DGEMM_N );
   FPRINTF( myRank, outputFile, "StarDGEMM_Gflops=%g",   params->StarDGEMMGflops );
@@ -347,13 +437,14 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "PTRANS_nb=%d", params->PTRANSrdata.nb );
   FPRINTF( myRank, outputFile, "PTRANS_nprow=%d", params->PTRANSrdata.nprow );
   FPRINTF( myRank, outputFile, "PTRANS_npcol=%d", params->PTRANSrdata.npcol );
-  FPRINTF( myRank, outputFile, "MPIRandomAccess_N=%g", params->MPIRandomAccess_N );
+  FPRINTF( myRank, outputFile, "MPIRandomAccess_N=" FSTR64 , params->MPIRandomAccess_N );
   FPRINTF( myRank, outputFile, "MPIRandomAccess_time=%g", params->MPIRandomAccess_time );
   FPRINTF( myRank, outputFile, "MPIRandomAccess_CheckTime=%g", params->MPIRandomAccess_CheckTime );
-  FPRINTF( myRank, outputFile, "MPIRandomAccess_Errors=%g", params->MPIRandomAccess_Errors );
+  FPRINTF( myRank, outputFile, "MPIRandomAccess_Errors=" FSTR64 , params->MPIRandomAccess_Errors );
   FPRINTF( myRank, outputFile, "MPIRandomAccess_ErrorsFraction=%g", params->MPIRandomAccess_ErrorsFraction );
+  FPRINTF( myRank, outputFile, "MPIRandomAccess_ExeUpdates=" FSTR64 , params->MPIRandomAccess_ExeUpdates );
   FPRINTF( myRank, outputFile, "MPIRandomAccess_GUPs=%g", params->MPIGUPs );
-  FPRINTF( myRank, outputFile, "RandomAccess_N=%g", params->RandomAccess_N );
+  FPRINTF( myRank, outputFile, "RandomAccess_N=" FSTR64, params->RandomAccess_N );
   FPRINTF( myRank, outputFile, "StarRandomAccess_GUPs=%g", params->StarGUPs );
   FPRINTF( myRank, outputFile, "SingleRandomAccess_GUPs=%g", params->SingleGUPs );
   FPRINTF( myRank, outputFile, "STREAM_VectorSize=%d", params->StreamVectorSize );
@@ -369,7 +460,7 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "FFT_N=%d", params->FFT_N );
   FPRINTF( myRank, outputFile, "StarFFT_Gflops=%g",   params->StarFFTGflops );
   FPRINTF( myRank, outputFile, "SingleFFT_Gflops=%g", params->SingleFFTGflops );
-  FPRINTF( myRank, outputFile, "MPIFFT_N=%g", params->MPIFFT_N );
+  FPRINTF( myRank, outputFile, "MPIFFT_N=" FSTR64, params->MPIFFT_N );
   FPRINTF( myRank, outputFile, "MPIFFT_Gflops=%g", params->MPIFFTGflops );
   FPRINTF( myRank, outputFile, "MPIFFT_maxErr=%g", params->MPIFFT_maxErr );
   FPRINTF( myRank, outputFile, "MaxPingPongLatency_usec=%g", params->MaxPingPongLatency );
@@ -382,6 +473,29 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "MaxPingPongBandwidth_GBytes=%g", params->MaxPingPongBandwidth );
   FPRINTF( myRank, outputFile, "AvgPingPongBandwidth_GBytes=%g", params->AvgPingPongBandwidth );
   FPRINTF( myRank, outputFile, "NaturallyOrderedRingLatency_usec=%g", params->NaturallyOrderedRingLatency );
+  FPRINTF( myRank, outputFile, "FFTEnblk=%d", params->FFTEnblk );
+  FPRINTF( myRank, outputFile, "FFTEnp=%d", params->FFTEnp );
+  FPRINTF( myRank, outputFile, "FFTEl2size=%d", params->FFTEl2size );
+
+#ifdef _OPENMP
+  FPRINTF( myRank, outputFile, "M_OPENMP=%ld", (long)(_OPENMP) );
+#pragma omp parallel
+  {
+#pragma omp single nowait
+    {
+
+      FPRINTF( myRank, outputFile, "omp_get_num_threads=%d", omp_get_num_threads() );
+      FPRINTF( myRank, outputFile, "omp_get_max_threads=%d", omp_get_max_threads() );
+      FPRINTF( myRank, outputFile, "omp_get_num_procs=%d",   omp_get_num_procs() );
+    }
+  }
+#else
+  FPRINTF( myRank, outputFile, "M_OPENMP=%ld", -1L );
+  FPRINTF( myRank, outputFile, "omp_get_num_threads=%d", 0 );
+  FPRINTF( myRank, outputFile, "omp_get_max_threads=%d", 0 );
+  FPRINTF( myRank, outputFile, "omp_get_num_procs=%d",   0 );
+#endif
+
   for (i = 0; i < MPIFFT_TIMING_COUNT - 1; i++)
     FPRINTF2(myRank,outputFile, "MPIFFT_time%d=%g", i, params->MPIFFTtimingsForward[i+1] - params->MPIFFTtimingsForward[i] );
   FPRINTF( myRank, outputFile, "End of Summary section.%s", "" );
