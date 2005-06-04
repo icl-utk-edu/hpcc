@@ -483,8 +483,8 @@ void
 CblacsAbsMax(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
   int i, n = *len; double *dinvec, *dinoutvec;
   if (MPI_DOUBLE == *datatype) {
-    dinvec = invec;
-    dinoutvec = inoutvec;
+    dinvec = (double *)invec;
+    dinoutvec = (double *)inoutvec;
     for (i = n; i; i--, dinvec++, dinoutvec++)
       if (fabs(*dinvec) > fabs(*dinoutvec)) *dinoutvec = *dinvec;
   } else
@@ -494,8 +494,8 @@ void
 CblacsAbsMin(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
   int i, n = *len; double *dinvec, *dinoutvec;
   if (MPI_DOUBLE == *datatype) {
-    dinvec = invec;
-    dinoutvec = inoutvec;
+    dinvec = (double *)invec;
+    dinoutvec = (double *)inoutvec;
     for (i = n; i; i--, dinvec++, dinoutvec++)
       if (fabs(*dinvec) < fabs(*dinoutvec)) *dinoutvec = *dinvec;
   } else
