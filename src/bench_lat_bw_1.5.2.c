@@ -205,9 +205,9 @@ typedef struct {
 
 /* measurement results, used only on rank 0 */
 
-void
+static void
 SumLongLong(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
-  int i, n = *len; long long *invecll = invec, *inoutvecll = inoutvec;
+  int i, n = *len; long long *invecll = (long long *)invec, *inoutvecll = (long long *)inoutvec;
   for (i = n; i; i--, invecll++, inoutvecll++) *inoutvecll += *invecll;
 }
 
@@ -369,6 +369,7 @@ SumLongLong(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
  *    -----Bcast-    MPI_Bcast(MPI_COMM_WORLD) with root = last client rank 
  * 
  * ----------------------------------------------------------------------- */
+static
 void cross_ping_pong_set(
   int client_rank_low,
   int client_rank_high,
@@ -685,6 +686,7 @@ void cross_ping_pong_set(
  *   - calculating client and server rank_stride to guarantee, that
  *     -  PingPongSet does not need more than max_time sec
  * ----------------------------------------------------------------------- */
+static
 void cross_ping_pong_controlled(
   double max_time, 
   int    msg_length, 
@@ -794,6 +796,7 @@ void cross_ping_pong_controlled(
  * - Compute latencies and bandwidth. For random order the geometric average 
  * of the latency is built.
  * ----------------------------------------------------------------------- */
+static
 void ring_lat_bw_loop( 
   int msglen, 
   int measurements, 
@@ -824,13 +827,13 @@ void ring_lat_bw_loop(
   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
   /* alloc memory and init with 0 */ 
-  latencies     = malloc( measurements * (rand_pattern_count+1) * sizeof( *latencies ) );
-  max_latencies = malloc( measurements * (rand_pattern_count+1) * sizeof( *max_latencies ) );
-  ranks = malloc( size * sizeof( *ranks ) );
-  sndbuf_left  = malloc( msglen );
-  sndbuf_right = malloc( msglen );
-  rcvbuf_left  = malloc( msglen );
-  rcvbuf_right = malloc( msglen );
+  latencies     = (double *)malloc( measurements * (rand_pattern_count+1) * sizeof( *latencies ) );
+  max_latencies = (double *)malloc( measurements * (rand_pattern_count+1) * sizeof( *max_latencies ) );
+  ranks = (int *)malloc( size * sizeof( *ranks ) );
+  sndbuf_left  = (unsigned char *)malloc( msglen );
+  sndbuf_right = (unsigned char *)malloc( msglen );
+  rcvbuf_left  = (unsigned char *)malloc( msglen );
+  rcvbuf_right = (unsigned char *)malloc( msglen );
 
   /* init pseudo-random with time seed */
   seedval=(long)(time((time_t *) 0)); 
@@ -1112,6 +1115,7 @@ void ring_lat_bw_loop(
  *   - use the results from message length 8 byte for latency
  *     and the results from message length 2000000 for bandwidth
  * ----------------------------------------------------------------------- */
+static
 void bench_lat_bw( 
   double max_time_for_latency,   /* for ping pong */ 
   double max_time_for_bandwidth, /* for ping pong */
@@ -1262,6 +1266,7 @@ void bench_lat_bw(
  *     - message lengths
  *     - number of ping pong pairs 
  * ----------------------------------------------------------------------- */
+static
 void bench_lat_bw_print(double *MaxPingPongLatency, double *RandomlyOrderedRingLatency,
   double *MinPingPongBandwidth, double *NaturallyOrderedRingBandwidth,
   double *RandomlyOrderedRingBandwidth,
@@ -1362,16 +1367,6 @@ void bench_lat_bw_print(double *MaxPingPongLatency, double *RandomlyOrderedRingL
       fflush( OutFile ); 
   } 
 }
-
-/*
-int main( int argc, char **argv )
-{
-  MPI_Init( &argc, &argv );
-  bench_lat_bw_print();
-  MPI_Finalize();
-  return 0;
-}
-*/
 
 void
 main_bench_lat_bw(HPCC_Params *params) {
