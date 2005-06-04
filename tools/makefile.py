@@ -84,7 +84,7 @@ allDeps = (
      ("pmatgeninc", "pdmatgen", "pdtransdriver", "pdmatcmp", "pdtrans", "sclapack", "cblacslt", "mem"), "-I../../../../include $(CCFLAGS)"),
 
     ("../src/", (hhpcc, hhpccv, hhpl),
-     ("bench_lat_bw_1.5.2",  "hpcc",  "io"), "-I../../../../include $(CCFLAGS)"),
+     ("bench_lat_bw_1.5.2",  "hpcc",  "io", "HPL_slamch"), "-I../../../../include $(CCFLAGS)"),
 
     ("../DGEMM/", (hhpcc, hhpl),
      ("tstdgemm",  "onecpu"), "-I../../../../include $(CCFLAGS)"),
