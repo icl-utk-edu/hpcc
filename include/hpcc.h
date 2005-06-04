@@ -20,6 +20,19 @@ mpi.h
 
 #define MPIFFT_TIMING_COUNT 8
 
+/* Define 64-bit types and corresponding format strings for printf() and constants */
+#ifdef LONG_IS_64BITS
+typedef unsigned long u64Int;
+typedef long s64Int;
+#define FSTR64 "%ld"
+#define ZERO64B 0L
+#else
+typedef unsigned long long u64Int;
+typedef long long s64Int;
+#define FSTR64 "%lld"
+#define ZERO64B 0LL
+#endif
+
 typedef struct {
   double GBs, time, residual;
   int n, nb, nprow, npcol;
@@ -49,12 +62,12 @@ typedef struct {
   int PTRANSns, PTRANSnval[2 * HPL_MAX_PARAM];
   int PTRANSnbs, PTRANSnbval[2 * HPL_MAX_PARAM];
   int PTRANSnpqs, PTRANSpval[2 * HPL_MAX_PARAM], PTRANSqval[2 * HPL_MAX_PARAM];
-  double MPIGUPs, StarGUPs, SingleGUPs, MPIRandomAccess_N, MPIRandomAccess_Errors,
+  double MPIGUPs, StarGUPs, SingleGUPs,
     MPIRandomAccess_ErrorsFraction, MPIRandomAccess_time, MPIRandomAccess_CheckTime,
-    RandomAccess_N, StarStreamCopyGBs, StarStreamScaleGBs,
+    StarStreamCopyGBs, StarStreamScaleGBs,
     StarStreamAddGBs, StarStreamTriadGBs, SingleStreamCopyGBs, SingleStreamScaleGBs,
     SingleStreamAddGBs, SingleStreamTriadGBs, StarDGEMMGflops, SingleDGEMMGflops;
-  double StarFFTGflops, SingleFFTGflops, MPIFFTGflops, MPIFFT_N, MPIFFT_maxErr;
+  double StarFFTGflops, SingleFFTGflops, MPIFFTGflops, MPIFFT_maxErr;
   double MaxPingPongLatency, RandomlyOrderedRingLatency, MinPingPongBandwidth,
     NaturallyOrderedRingBandwidth, RandomlyOrderedRingBandwidth,
     MinPingPongLatency, AvgPingPongLatency, MaxPingPongBandwidth, AvgPingPongBandwidth,
@@ -62,6 +75,7 @@ typedef struct {
   int DGEMM_N;
   int StreamThreads, StreamVectorSize;
   int FFT_N;
+  int MPIRandomAccess_TimeBound;
 
   HPL_RuntimeData HPLrdata;
   PTRANS_RuntimeData PTRANSrdata;
@@ -75,6 +89,9 @@ typedef struct {
   int RunHPL, RunStarDGEMM, RunSingleDGEMM, RunPTRANS, RunStarStream,
     RunSingleStream, RunMPIRandomAccess, RunStarRandomAccess,
     RunSingleRandomAccess, RunLatencyBandwidth, RunStarFFT, RunSingleFFT, RunMPIFFT;
+
+  int FFTEnblk, FFTEnp, FFTEl2size;
+  s64Int RandomAccess_N, MPIRandomAccess_ExeUpdates, MPIRandomAccess_N, MPIRandomAccess_Errors, MPIFFT_N;
 } HPCC_Params;
 /*
 This is what needs to be done to add a new benchmark:
@@ -95,24 +112,25 @@ extern int HPCC_Finalize(HPCC_Params *params);
 extern int MinStoreBits(unsigned long x);
 
 extern int HPL_main(int ARGC, char **ARGV, HPL_RuntimeData *rdata, int *failure);
-extern int StarDGEMM(HPCC_Params *params);
-extern int SingleDGEMM(HPCC_Params *params);
+extern float HPL_slamch (const HPL_T_MACH);
+extern int HPCC_StarDGEMM(HPCC_Params *params);
+extern int HPCC_SingleDGEMM(HPCC_Params *params);
 extern int PTRANS(HPCC_Params *params);
 extern int HPCC_MPIRandomAccess(HPCC_Params *params);
 extern int HPCC_SingleRandomAccess(HPCC_Params *params);
 extern int HPCC_StarRandomAccess(HPCC_Params *params);
-extern int SingleStream(HPCC_Params *params);
-extern int StarStream(HPCC_Params *params);
-extern int StarFFT(HPCC_Params *params);
-extern int SingleFFT(HPCC_Params *params);
-extern int MPIFFT(HPCC_Params *params);
+extern int HPCC_SingleStream(HPCC_Params *params);
+extern int HPCC_StarStream(HPCC_Params *params);
+extern int HPCC_StarFFT(HPCC_Params *params);
+extern int HPCC_SingleFFT(HPCC_Params *params);
+extern int HPCC_MPIFFT(HPCC_Params *params);
 
-extern int TestFFT(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure);
-extern int TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure);
+extern int HPCC_TestFFT(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure);
+extern int HPCC_TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure);
 extern int MaxMem(int nprocs, int imrow, int imcol, int nmat, int *mval, int *nval, int nbmat,
   int *mbval, int *nbval, int ngrids, int *npval, int *nqval, long *maxMem);
 extern int HPCC_RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure);
-extern int Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs,
+extern int HPCC_Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs,
   double *addGBs, double *triadGBs, int *failure);
 extern void main_bench_lat_bw(HPCC_Params *params);
 
