@@ -54,7 +54,7 @@ HPCC_Power2NodesMPIRandomAccessCheck(u64Int logTableSize,
   
 
   SendCnt = ProcNumUpdates; /*  SendCnt = 4 * LocalTableSize; */
-  Ran = starts (4 * GlobalStartMyProc);
+  Ran = HPCC_starts (4 * GlobalStartMyProc);
   
   PeCheckDone = XMALLOC ( s64Int, NumProcs);
  
@@ -177,7 +177,7 @@ HPCC_AnyNodesMPIRandomAccessCheck(u64Int logTableSize,
   
   
   SendCnt = ProcNumUpdates; /* SendCnt = 4 * LocalTableSize; */
-  Ran = starts (4 * GlobalStartMyProc);
+  Ran = HPCC_starts (4 * GlobalStartMyProc);
 
   PeCheckDone = XMALLOC (s64Int, NumProcs);  
   for (i=0; i<NumProcs; i++)

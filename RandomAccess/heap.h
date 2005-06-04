@@ -8,10 +8,6 @@ typedef struct heap_record {
   int   key;
 } Heap_Record, *Heap_Record_Ptr;
 
-extern Heap_Record_Ptr *heap;
-extern int             heapNodes;
-extern int             *IndexToHeapNode;
-
 extern void HPCC_ra_Heap_Init (int size);
 extern void HPCC_ra_Heap_Insert (int index, int key);
 extern void HPCC_ra_Heap_ExtractMax (int *index, int *key);

@@ -1,7 +1,8 @@
 
 #define RA_TIME_BOUND 1
 
-#define TIME_BOUND 10 /* time bound in seconds */
+/* time bound in seconds */
+#define TIME_BOUND 10
 
 
 /* _RA_SAMPLE_FACTOR determines the fraction of the total number 
@@ -13,9 +14,10 @@
  * since the dafault number of updates depends on the total 
  * memory size. 
  */
-#define _RA_SAMPLE_FACTOR 100 /* 1% of total number of updates */
+/* 1% of total number of updates */
+#define _RA_SAMPLE_FACTOR 100
 
-extern void Power2NodesTime(u64Int logTableSize,
+extern void HPCC_Power2NodesTime(u64Int logTableSize,
 		     u64Int TableSize,
 		     u64Int LocalTableSize,
 		     u64Int MinLocalTableSize,
@@ -30,7 +32,7 @@ extern void Power2NodesTime(u64Int logTableSize,
 		     u64Int* numIter);
 
 
-extern void AnyNodesTime(u64Int logTableSize,
+extern void HPCC_AnyNodesTime(u64Int logTableSize,
 		  u64Int TableSize,
 		  u64Int LocalTableSize,
 		  u64Int MinLocalTableSize,

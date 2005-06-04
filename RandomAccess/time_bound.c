@@ -22,7 +22,7 @@
 #include "buckets.h"
 
 
-void Power2NodesTime(u64Int logTableSize,
+void HPCC_Power2NodesTime(u64Int logTableSize,
 		     u64Int TableSize,
 		     u64Int LocalTableSize,
 		     u64Int MinLocalTableSize,
@@ -83,7 +83,7 @@ void Power2NodesTime(u64Int logTableSize,
    */
   
   SendCnt = 4 * LocalTableSize/_RA_SAMPLE_FACTOR;
-  Ran = starts (4 * GlobalStartMyProc);
+  Ran = HPCC_starts (4 * GlobalStartMyProc);
 
   _ra_LoopRealTime = -RTSEC();
   
@@ -232,7 +232,7 @@ void Power2NodesTime(u64Int logTableSize,
 
 
 
-void AnyNodesTime(u64Int logTableSize,
+void HPCC_AnyNodesTime(u64Int logTableSize,
 		  u64Int TableSize,
 		  u64Int LocalTableSize,
 		  u64Int MinLocalTableSize,
@@ -291,7 +291,7 @@ void AnyNodesTime(u64Int logTableSize,
    */
   
   SendCnt = 4 * LocalTableSize/_RA_SAMPLE_FACTOR;
-  Ran = starts (4 * GlobalStartMyProc);
+  Ran = HPCC_starts (4 * GlobalStartMyProc);
   
   _ra_LoopRealTime = -RTSEC();
   

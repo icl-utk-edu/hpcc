@@ -1,18 +1,5 @@
 /* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*- */
 
-/* Types used by program (should be 64 bits) */
-#ifdef LONG_IS_64BITS
-typedef unsigned long u64Int;
-typedef long s64Int;
-#define FSTR64 "%ld"
-#define ZERO64B 0L
-#else
-typedef unsigned long long u64Int;
-typedef long long s64Int;
-#define FSTR64 "%lld"
-#define ZERO64B 0LL
-#endif
-
 /* Random number generator */
 #ifdef LONG_IS_64BITS
 #define POLY 0x0000000000000007UL
@@ -26,7 +13,7 @@ typedef long long s64Int;
 #define CPUSEC() ((double)clock()/CLOCKS_PER_SEC)
 #define RTSEC() (MPI_Wtime())
 
-extern u64Int starts (s64Int);
+extern u64Int HPCC_starts (s64Int);
 
 #define WANT_MPI2_TEST 0
 

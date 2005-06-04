@@ -69,7 +69,7 @@ RandomAccessUpdate(u64Int TableSize, u64Int *Table) {
    *     }
    */
   for (j=0; j<128; j++)
-    ran[j] = starts ((NUPDATE/128) * j);
+    ran[j] = HPCC_starts ((NUPDATE/128) * j);
 
   for (i=0; i<NUPDATE/128; i++) {
 /* #pragma ivdep */
@@ -121,7 +121,7 @@ HPCC_RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
     }
     return 1;
   }
-  params->RandomAccess_N = (double)TableSize;
+  params->RandomAccess_N = (s64Int)TableSize;
 
   /* Print parameters for run */
   if (doIO) {

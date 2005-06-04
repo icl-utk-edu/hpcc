@@ -127,7 +127,7 @@ u64Int LocalRecvBuffer[MAX_RECV*LOCAL_BUFFER_SIZE];
 #ifndef LONG_IS_64BITS
 static void
 Sum64(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
-  int i, n = *len; s64Int *invec64 = invec, *inoutvec64 = inoutvec;
+  int i, n = *len; s64Int *invec64 = (s64Int *)invec, *inoutvec64 = (s64Int *)inoutvec;
   for (i = n; i; i--, invec64++, inoutvec64++) *inoutvec64 += *invec64;
 }
 #endif
@@ -197,7 +197,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
    */
 
   SendCnt = ProcNumUpdates; /* SendCnt = (4 * LocalTableSize); */
-  Ran = starts (4 * GlobalStartMyProc);
+  Ran = HPCC_starts (4 * GlobalStartMyProc);
   
   pendingUpdates = 0;
   i = 0;  
@@ -465,7 +465,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
    */
 
   SendCnt = ProcNumUpdates; /*  SendCnt = (4 * LocalTableSize); */
-  Ran = starts (4 * GlobalStartMyProc);
+  Ran = HPCC_starts (4 * GlobalStartMyProc);
 
   pendingUpdates = 0;
   i = 0;
@@ -707,14 +707,6 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
     if (! outFile) outFile = stderr;
   }
 
-  sAbort = 0; if (sizeof(u64Int) < 8) sAbort = 1;
-
-  MPI_Allreduce( &sAbort, &rAbort, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD );
-  if (rAbort > 0) {
-    if (MyProc == 0) fprintf( outFile, "No 64-bit integer type available.\n" );
-    goto comp_end;
-  }
-
   TotalMem = params->HPLMaxProcMem; /* max single node memory */
   TotalMem *= NumProcs;             /* max memory in NumProcs nodes */
   TotalMem /= sizeof(u64Int);
@@ -772,7 +764,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
     goto failed_table;
   }
 
-  params->MPIRandomAccess_N = (double)TableSize;
+  params->MPIRandomAccess_N = (s64Int)TableSize;
 
   /* Default number of global updates to table: 4x number of table entries */
   NumUpdates_Default = 4 * TableSize;
@@ -782,16 +774,16 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   /* time_bound should be a parameter */
   timeBound = (double)TIME_BOUND; /* max run time in seconds */
   if (PowerofTwo) {
-    Power2NodesTime(logTableSize, TableSize, LocalTableSize, 
+    HPCC_Power2NodesTime(logTableSize, TableSize, LocalTableSize, 
                     MinLocalTableSize, GlobalStartMyProc, Top, 
                     logNumProcs, NumProcs, Remainder, 
-                    MyProc, INT64_DT, timeBound, &ProcNumUpdates);
+                    MyProc, INT64_DT, timeBound, (u64Int *)&ProcNumUpdates);
 
   } else {
-    AnyNodesTime(logTableSize, TableSize, LocalTableSize, 
+    HPCC_AnyNodesTime(logTableSize, TableSize, LocalTableSize, 
                  MinLocalTableSize, GlobalStartMyProc, Top, 
                  logNumProcs, NumProcs, Remainder, 
-                 MyProc, INT64_DT, timeBound, &ProcNumUpdates);
+                 MyProc, INT64_DT, timeBound, (u64Int *)&ProcNumUpdates);
   }
   /* be conservative: get the smallest number of updates among all procs */
   MPI_Reduce( &ProcNumUpdates, &GlbNumUpdates, 1, INT64_DT, 
@@ -823,6 +815,8 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
     fprintf( outFile, "Number of updates EXECUTED = " FSTR64 " (for a TIME BOUND of %.2f secs)\n", 
              NumUpdates, timeBound);
 #endif 
+    params->MPIRandomAccess_ExeUpdates = NumUpdates;
+    params->MPIRandomAccess_TimeBound = (int)timeBound;
   }
 
   MPI_Barrier( MPI_COMM_WORLD );
@@ -917,7 +911,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
              GlbNumErrors, TableSize, (GlbNumErrors <= 0.01*TableSize) ?
              "passed" : "failed");
     if (GlbNumErrors > 0.01*TableSize) params->Failure = 1;
-    params->MPIRandomAccess_Errors = (double)GlbNumErrors;
+    params->MPIRandomAccess_Errors = (s64Int)GlbNumErrors;
     params->MPIRandomAccess_ErrorsFraction = (double)GlbNumErrors / (double)TableSize;
   }
   /* End verification phase */
@@ -929,7 +923,6 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   free( HPCC_Table );
   
   failed_table:
-  comp_end:
 
   if (0 == MyProc) if (outFile != stderr) fclose( outFile );
 

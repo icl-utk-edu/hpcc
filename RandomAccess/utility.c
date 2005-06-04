@@ -9,7 +9,7 @@
 
 /* Utility routine to start random number generator at Nth step */
 u64Int
-starts(s64Int n)
+HPCC_starts(s64Int n)
 {
   int i, j;
   u64Int m2[64];
