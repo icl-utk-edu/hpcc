@@ -40,14 +40,14 @@ HPCC_fftw_mpi_create_plan(MPI_Comm comm, s64Int_t n, fftw_direction dir, int fla
   MPI_Comm_size( comm, &size );
   MPI_Comm_rank( comm, &rank );
 
-  p = fftw_malloc( sizeof *p );
+  p = (hpcc_fftw_mpi_plan)fftw_malloc( sizeof *p );
 
   nxyz = GetNXYZ( n, size );
 
-  p->wx = fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wx) );
-  p->wy = fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wy) );
-  p->wz = fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wz) );
-  p->work = fftw_malloc( n / size * 3 / 2 * (sizeof *p->work) );
+  p->wx = (fftw_complex *)fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wx) );
+  p->wy = (fftw_complex *)fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wy) );
+  p->wz = (fftw_complex *)fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wz) );
+  p->work = (fftw_complex *)fftw_malloc( n / size * 3 / 2 * (sizeof *p->work) );
 
   p->c_size = (nxyz+FFTE_NP) * (FFTE_NBLK + 1) + FFTE_NP;
 #ifdef _OPENMP
@@ -57,11 +57,11 @@ HPCC_fftw_mpi_create_plan(MPI_Comm comm, s64Int_t n, fftw_direction dir, int fla
     {
       int i;
       i = omp_get_num_threads();
-      p->c = fftw_malloc( p->c_size * (sizeof *p->c) * i );
+      p->c = (fftw_complex *)fftw_malloc( p->c_size * (sizeof *p->c) * i );
     }
   }
 #else
-  p->c = fftw_malloc( p->c_size * (sizeof *p->c) );
+  p->c = (fftw_complex *)fftw_malloc( p->c_size * (sizeof *p->c) );
 #endif
 
   p->n = n;

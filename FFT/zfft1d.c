@@ -1,3 +1,36 @@
+/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; fill-column: 79; coding: iso-latin-1-unix -*- */
+/*
+C
+C     FFTE: A FAST FOURIER TRANSFORM PACKAGE
+C
+C     (C) COPYRIGHT SOFTWARE, 2000-2004, ALL RIGHTS RESERVED
+C                BY
+C         DAISUKE TAKAHASHI
+C         GRADUATE SCHOOL OF SYSTEMS AND INFORMATION ENGINEERING
+C         UNIVERSITY OF TSUKUBA
+C         1-1-1 TENNODAI, TSUKUBA, IBARAKI 305-8573, JAPAN
+C         E-MAIL: daisuke@cs.tsukuba.ac.jp
+C
+C
+C     1-D COMPLEX FFT ROUTINE
+C
+C     FORTRAN77 SOURCE PROGRAM
+C
+C     CALL ZFFT1D(A,N,IOPT,B)
+C
+C     A(N) IS COMPLEX INPUT/OUTPUT VECTOR (COMPLEX*16)
+C     B(N) IS WORK VECTOR (COMPLEX*16)
+C     N IS THE LENGTH OF THE TRANSFORMS (INTEGER*4)
+C       -----------------------------------
+C         N = (2**IP) * (3**IQ) * (5**IR)
+C       -----------------------------------
+C     IOPT = 0 FOR INITIALIZING THE COEFFICIENTS (INTEGER*4)
+C          = -1 FOR FORWARD TRANSFORM
+C          = +1 FOR INVERSE TRANSFORM
+C
+C     WRITTEN BY DAISUKE TAKAHASHI
+C
+*/
 
 #include "hpccfft.h"
 

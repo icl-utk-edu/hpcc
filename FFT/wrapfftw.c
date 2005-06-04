@@ -13,11 +13,11 @@ HPCC_fftw_create_plan(int n, fftw_direction dir, int flags) {
   hpcc_fftw_plan p;
   fftw_complex *a = NULL, *b = NULL;
 
-  p = fftw_malloc( sizeof *p );
+  p = (hpcc_fftw_plan)fftw_malloc( sizeof *p );
 
-  p->w1 = malloc( (FFTE_NDA2/2 + FFTE_NP) * (sizeof *p->w1) );
-  p->w2 = malloc( (FFTE_NDA2/2 + FFTE_NP) * (sizeof *p->w2) );
-  p->ww = malloc( ((FFTE_NDA2+FFTE_NP) * 4 + FFTE_NP) * (sizeof *p->ww) );
+  p->w1 = (fftw_complex *)malloc( (FFTE_NDA2/2 + FFTE_NP) * (sizeof *p->w1) );
+  p->w2 = (fftw_complex *)malloc( (FFTE_NDA2/2 + FFTE_NP) * (sizeof *p->w2) );
+  p->ww = (fftw_complex *)malloc( ((FFTE_NDA2+FFTE_NP) * 4 + FFTE_NP) * (sizeof *p->ww) );
 
   p->c_size = (FFTE_NDA2+FFTE_NP) * (FFTE_NBLK + 1) + FFTE_NP;
 #ifdef _OPENMP
@@ -27,11 +27,11 @@ HPCC_fftw_create_plan(int n, fftw_direction dir, int flags) {
     {
       int i;
       i = omp_get_num_threads();
-      p->c = malloc( p->c_size * (sizeof *p->c) * i );
+      p->c = (fftw_complex *)malloc( p->c_size * (sizeof *p->c) * i );
     }
   }
 #else
-  p->c = malloc( p->c_size * (sizeof *p->c) );
+  p->c = (fftw_complex *)malloc( p->c_size * (sizeof *p->c) );
 #endif
 
   HPCC_zfft1d( n, a, b, 0, p );

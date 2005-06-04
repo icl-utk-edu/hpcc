@@ -1,3 +1,24 @@
+/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; fill-column: 79; coding: iso-latin-1-unix -*- */
+/*
+C
+C     FFTE: A FAST FOURIER TRANSFORM PACKAGE
+C
+C     (C) COPYRIGHT SOFTWARE, 2000-2004, ALL RIGHTS RESERVED
+C                BY
+C         DAISUKE TAKAHASHI
+C         GRADUATE SCHOOL OF SYSTEMS AND INFORMATION ENGINEERING
+C         UNIVERSITY OF TSUKUBA
+C         1-1-1 TENNODAI, TSUKUBA, IBARAKI 305-8573, JAPAN
+C         E-MAIL: daisuke@cs.tsukuba.ac.jp
+C
+C
+C     RADIX-2, 3, 4, 5 AND 8 FFT ROUTINE
+C
+C     FORTRAN77 SOURCE PROGRAM
+C
+C     WRITTEN BY DAISUKE TAKAHASHI
+C
+*/
 
 #include "hpccfft.h"
 

@@ -63,7 +63,11 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
   /* there are two vectors of size 'n'/'commSize': inout, work, and internal work: 2*'n'/'commSize' */
   n = LocalVectorSize( HPLMaxProcMem / 4 / sizeof(fftw_complex) );
 
-  n *= commSize;
+  /* make sure that the size of the vector size is greater than number of processes squared */
+  if (n < commSize)
+    n = 2 * commSize;
+
+  n *= commSize; /* global vector size */
 
   t1 = MPI_Wtime();
   p = fftw_mpi_create_plan( comm, n, FFTW_FORWARD, FFTW_MEASURE );
@@ -71,8 +75,8 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
 
   fftw_mpi_local_sizes( p, &locn, &loc0, &alocn, &aloc0, &tls );
 
-  inout = fftw_malloc( tls * (sizeof *inout) );
-  work  = fftw_malloc( tls * (sizeof *work) );
+  inout = (fftw_complex *)fftw_malloc( tls * (sizeof *inout) );
+  work  = (fftw_complex *)fftw_malloc( tls * (sizeof *work) );
 
   if (! inout || ! work) goto comp_end;
 
@@ -127,7 +131,7 @@ MPIFFT0(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile, MPI_Comm c
 }
 
 int
-MPIFFT(HPCC_Params *params) {
+HPCC_MPIFFT(HPCC_Params *params) {
   int commRank, commSize;
   int i, procPow2, isComputing, doIO, failure;
   s64Int_t n;
@@ -167,14 +171,18 @@ MPIFFT(HPCC_Params *params) {
     MPIFFT0( params->HPLMaxProcMem, params->test.thrsh, doIO, outFile, comm, &Gflops, &n, &maxErr, &failure );
 
   if (commSize != procPow2 && isComputing && comm != MPI_COMM_NULL)
-    MPI_Comm_free( comm );
+    MPI_Comm_free( &comm );
 
-  params->MPIFFT_N = (double)n;
+  params->MPIFFT_N = n;
   params->MPIFFT_maxErr = maxErr;
 
   MPI_Bcast( &Gflops, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD );
 
   params->MPIFFTGflops = Gflops;
+
+  params->FFTEnblk = FFTE_NBLK;
+  params->FFTEnp = FFTE_NP;
+  params->FFTEl2size = FFTE_L2SIZE;
 
   if (doIO) if (outFile != stderr) fclose( outFile );
 

@@ -4,9 +4,33 @@
 #define FFTE_NDA2 65536
 #define FFTE_NDA3 4096
 #define FFTE_NDA4 256
+
+/* Parameters that affect performance */
+
+/*
+  Blocking parameter. Suggested values:
+   8 for Pentium III and Athlon
+  16 for Pentium4, Athlon XP, Opteron, Itanium and Itanium2
+*/
+#ifndef FFTE_NBLK
 #define FFTE_NBLK 16
+#endif
+
+/*
+  Padding parameter to avoid cache conflicts.
+  Suggested values:
+  2 for Pentium III
+  4 for Athlon, Athlon XP, Opteron, Itanium
+  8 for Pentium4 and Itanium2
+*/
+#ifndef FFTE_NP
 #define FFTE_NP 8
+#endif
+
+/* Size of Level 2 cache */
+#ifndef FFTE_L2SIZE
 #define FFTE_L2SIZE 1048576
+#endif
 
 #ifdef LONG_IS_64BITS
 typedef unsigned long u64Int_t;

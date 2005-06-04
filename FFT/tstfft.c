@@ -95,7 +95,7 @@ TestFFT1(long HPLMaxProcMem, double HPLthshr, int doIO, FILE *outFile,
 }
 
 int
-TestFFT(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure) {
+HPCC_TestFFT(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure) {
   int rv, n, failure = 1;
   double Gflops;
   FILE *outFile;

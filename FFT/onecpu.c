@@ -3,7 +3,7 @@
 #include <hpcc.h>
 
 int
-StarFFT(HPCC_Params *params) {
+HPCC_StarFFT(HPCC_Params *params) {
   int commRank, commSize;
   int rv, errCount, failure = 0, failureAll = 0;
   double localGflops, minGflops, maxGflops, avgGflops;
@@ -16,7 +16,7 @@ StarFFT(HPCC_Params *params) {
   MPI_Comm_size( comm, &commSize );
   MPI_Comm_rank( comm, &commRank );
 
-  rv = TestFFT( params, 0 == commRank, &localGflops, &n, &failure );
+  rv = HPCC_TestFFT( params, 0 == commRank, &localGflops, &n, &failure );
   params->FFT_N = n;
 
   MPI_Reduce( &rv, &errCount, 1, MPI_INT, MPI_SUM, 0, comm );
@@ -41,7 +41,7 @@ StarFFT(HPCC_Params *params) {
 }
 
 int
-SingleFFT(HPCC_Params *params) {
+HPCC_SingleFFT(HPCC_Params *params) {
   int commRank, commSize;
   int rv, errCount, rank, failure = 0;
   int n;
@@ -69,7 +69,7 @@ SingleFFT(HPCC_Params *params) {
   MPI_Bcast( &rank, 1, MPI_INT, 0, comm ); /* broadcast the rank selected on node 0 */
 
   if (commRank == rank) /* if this node has been selected */
-    rv = TestFFT( params, 0 == commRank, &localGflops, &n, &failure );
+    rv = HPCC_TestFFT( params, 0 == commRank, &localGflops, &n, &failure );
 
   MPI_Bcast( &rv, 1, MPI_INT, rank, comm ); /* broadcast error code */
   errCount = rv;
