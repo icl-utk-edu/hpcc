@@ -49,6 +49,19 @@
  */
 #include "hpl.h"
 
+extern int
+HPCC_Defaults(HPL_T_test *TEST, int *NS, int *N,
+              int *NBS, int *NB,
+              HPL_T_ORDER *PMAPPIN,
+              int *NPQS, int *P, int *Q,
+              int *NPFS, HPL_T_FACT *PF,
+              int *NBMS, int *NBM,
+              int *NDVS, int *NDV,
+              int *NRFS, HPL_T_FACT *RF,
+              int *NTPS, HPL_T_TOP *TP,
+              int *NDHS, int *DH,
+              HPL_T_SWAP *FSWAP, int *TSWAP, int *L1NOTRAN, int *UNOTRAN, int *EQUIL, int *ALIGN, MPI_Comm comm);
+
 #ifdef HPL_STDC_HEADERS
 void HPL_pdinfo
 (
@@ -299,9 +312,10 @@ void HPL_pdinfo
       { 
          HPL_pwarn( stderr, __LINE__, "HPL_pdinfo",
                     "cannot open file " INFILE );
-         error = 1; goto label_error;
+         error = 1; /* goto label_error; */
       }
 
+      if (infp) {
       (void) fgets( line, HPL_LINE_MAX - 2, infp );
       (void) fgets( auth, HPL_LINE_MAX - 2, infp );
 /*
@@ -312,6 +326,8 @@ void HPL_pdinfo
       (void) fgets( line, HPL_LINE_MAX - 2, infp );
       (void) sscanf( line, "%s", num  );
       fid = atoi( num );
+      }
+
       fid = 8; /* always write to a file */
       strcpy( file, "hpccoutf.txt" );
       if     ( fid == 6 ) TEST->outfp = stdout;
@@ -320,8 +336,10 @@ void HPL_pdinfo
       {
          HPL_pwarn( stderr, __LINE__, "HPL_pdinfo", "cannot open file %s.",
                     file );
+         TEST->outfp = stderr;
          error = 1; goto label_error;
       }
+      if (error == 1) goto label_error;
 /*
  * Read and check the parameter values for the tests.
  *
@@ -610,7 +628,7 @@ void HPL_pdinfo
  * Close input file
  */
 label_error:
-      (void) fclose( infp );
+      if (infp) fclose( infp );
    }
    else { TEST->outfp = NULL; }
 /*
@@ -620,6 +638,7 @@ label_error:
                           MPI_COMM_WORLD );
    if( error )
    {
+     /*
       if( rank == 0 )
          HPL_pwarn( stderr, __LINE__, "HPL_pdinfo",
                     "Illegal input in file " INFILE ". Exiting ..." );
@@ -628,6 +647,25 @@ label_error:
       (void) vsip_finalize( NULL );
 #endif
       exit( 1 );
+      */
+     HPCC_Defaults( TEST, /* use outfp, set threshold */
+                    NS, N,
+                    NBS, NB,
+                    PMAPPIN,
+                    NPQS, P, Q,
+                    NPFS, PF,
+                    NBMS, NBM,
+                    NDVS, NDV,
+                    NRFS, RF,
+                    NTPS, TP,
+                    NDHS, DH,
+                    FSWAP,
+                    TSWAP,
+                    L1NOTRAN,
+                    UNOTRAN,
+                    EQUIL,
+                    ALIGN,
+                    MPI_COMM_WORLD );
    }
 /*
  * Compute and broadcast machine epsilon

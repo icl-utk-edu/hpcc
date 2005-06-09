@@ -6,11 +6,15 @@
 #include <hpcc.h>
 
 #include <ctype.h>
+#include <string.h>
 #include <time.h>
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+
+static double HPCC_MemProc = -1.0, HPCC_MemVal = -1.0;
+static int HPCC_MemSpec = -1;
 
 static int
 ReadInts(char *buf, int n, int *val) {
@@ -157,7 +161,16 @@ HPCC_InputFileInit(HPCC_Params *params) {
   }
 
   MPI_Bcast( &ioErr, 1, MPI_INT, 0, comm );
-  if (ioErr) return ioErr;
+  if (ioErr) {
+    /* copy matrix sizes from HPL, divide by 2 so both PTRANS matrices (plus "work" arrays) occupy
+       as much as HPL's one */
+    for (i = 0; i < params->ns; i++)
+      params->PTRANSnval[i] = params->nval[i] / 2;
+    params->PTRANSns = params->ns;
+
+    icopy( params->nbs, params->nbval, 1, params->PTRANSnbval, 1 );
+    params->PTRANSnbs = params->nbs;
+  }
 
   /* broadcast what's been read on node 0 */
   MPI_Bcast( &params->PTRANSns, 1, MPI_INT, 0, comm );
@@ -172,7 +185,7 @@ HPCC_InputFileInit(HPCC_Params *params) {
   icopy( params->npqs, params->qval, 1, params->PTRANSqval, 1 );
   icopy( params->npqs, params->pval, 1, params->PTRANSpval, 1 );
 
-  return 0;
+  return ioErr;
 }
 
 static int
@@ -198,7 +211,7 @@ HPCC_Init(HPCC_Params *params) {
   int myRank, commSize;
   int i, nMax, procCur, procMax, procMin, errCode;
   double totalMem;
-  char inFname[] = "hpccinf.txt", outFname[] = "hpccoutf.txt";
+  char inFname[12] = "hpccinf.txt", outFname[13] = "hpccoutf.txt";
   FILE *outputFile;
   MPI_Comm comm = MPI_COMM_WORLD;
   time_t currentTime;
@@ -499,6 +512,10 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "omp_get_num_procs=%d",   0 );
 #endif
 
+  FPRINTF( myRank, outputFile, "MemProc=%g", HPCC_MemProc );
+  FPRINTF( myRank, outputFile, "MemSpec=%d", HPCC_MemSpec );
+  FPRINTF( myRank, outputFile, "MemVal=%g", HPCC_MemVal );
+
   for (i = 0; i < MPIFFT_TIMING_COUNT - 1; i++)
     FPRINTF2(myRank,outputFile, "MPIFFT_time%d=%g", i, params->MPIFFTtimingsForward[i+1] - params->MPIFFTtimingsForward[i] );
   FPRINTF( myRank, outputFile, "End of Summary section.%s", "" );
@@ -534,6 +551,164 @@ HPCC_LocalVectorSize(HPCC_Params *params, int vecCnt, size_t size, int pow2) {
   }
 
   return 1 << maxIntBits2;
+}
+
+int
+HPCC_ProcessGrid(int *P, int *Q, MPI_Comm comm) {
+  int myRank, commSize;
+  int i, p, q, nproc;
+
+  MPI_Comm_size( comm, &commSize );
+  MPI_Comm_rank( comm, &myRank );
+
+  for (nproc = commSize; ; --nproc) { /* this loop makes at most two iterations */
+
+    for (i = (int)sqrt( nproc ); i > 1; --i) {
+      q = nproc / i;
+      p = nproc / q;
+      if (p * q == nproc) {
+        *P = p;
+        *Q = q;
+        return 0;
+      }
+    }
+
+    /* if the code gets here `nproc' is small or is a prime */
+
+    if (nproc < 20) { /* do 1D grid for small process counts */
+      *P = 1;
+      *Q = nproc;
+      return 0;
+    }
+  }
+
+  return 0;
+}
+
+size_t
+HPCC_Memory(MPI_Comm comm) {
+  int myRank, commSize;
+  int num_threads;
+  char memFile[13] = "hpccmemf.txt";
+  char buf[HPL_LINE_MAX]; int nbuf = HPL_LINE_MAX;
+  char *sVal;
+  FILE *f;
+  double mult, mval, procMem;
+  size_t rv;
+
+  mult = 1.0;
+  num_threads = 1;
+
+  MPI_Comm_size( comm, &commSize );
+  MPI_Comm_rank( comm, &myRank );
+
+#ifdef _OPENMP
+#pragma omp parallel
+  {
+#pragma omp single nowait
+    {
+      num_threads = omp_get_num_threads();
+    }
+  }
+#endif
+
+  if (myRank == 0) {
+    procMem = 64;
+
+    f = fopen( memFile, "r" );
+    if (f) {
+
+      if (fgets( buf, nbuf, f )) {
+
+        if (strncmp( "Total=", buf, 6 ) == 0) {
+          mult = 1.0 / commSize;
+          sVal = buf + 6;
+          HPCC_MemSpec = 1;
+        } else if (strncmp( "Thread=", buf, 7 ) == 0) {
+          mult = num_threads;
+          sVal = buf + 7;
+          HPCC_MemSpec = 2;
+        } else if (strncmp( "Process=", buf, 8 ) == 0) {
+          mult = 1.0;
+          sVal = buf + 8;
+          HPCC_MemSpec = 3;
+        } else
+          sVal = NULL;
+
+        if (sVal && 1 == sscanf( sVal, "%lf", &mval )) {
+          procMem = mval * mult;
+          HPCC_MemVal = mval;
+        }
+      }
+
+      fclose( f );
+    }
+  }
+
+  MPI_Bcast( &procMem, 1, MPI_DOUBLE, 0, comm );
+
+  rv = procMem;
+  rv *= 1024; rv *= 1024;
+
+  HPCC_MemProc = procMem;
+
+  return rv;
+}
+
+int
+HPCC_Defaults(HPL_T_test *TEST, int *NS, int *N,
+              int *NBS, int *NB,
+              HPL_T_ORDER *PMAPPIN,
+              int *NPQS, int *P, int *Q,
+              int *NPFS, HPL_T_FACT *PF,
+              int *NBMS, int *NBM,
+              int *NDVS, int *NDV,
+              int *NRFS, HPL_T_FACT *RF,
+              int *NTPS, HPL_T_TOP *TP,
+              int *NDHS, int *DH,
+              HPL_T_SWAP *FSWAP, int *TSWAP, int *L1NOTRAN, int *UNOTRAN, int *EQUIL, int *ALIGN, MPI_Comm comm) {
+  int nb = 80;
+  double memFactor = 0.8;
+
+  *NS = *NBS = *NPQS = *NPFS = *NBMS = *NDVS = *NRFS = *NTPS = *NDHS = 1;
+
+  TEST->thrsh = 16.0;
+
+  *NB = nb;
+
+  *PMAPPIN = HPL_COLUMN_MAJOR;
+
+  HPCC_ProcessGrid( P, Q, comm );
+
+  *N = (int)sqrt( memFactor * (double)(*P * *Q) * (double)(HPCC_Memory( comm ) / sizeof(double)) ) / (2 * nb);
+  *N *= 2*nb; /* make N multiple of 2*nb so both HPL and PTRANS see matrix
+                 dimension divisible by nb */
+
+  *PF = HPL_RIGHT_LOOKING;
+
+  *NBM = 4;
+
+  *NDV = 2;
+
+  *RF = HPL_CROUT;
+
+  *TP = HPL_1RING_M;
+
+  *DH = 1;
+
+  *FSWAP = HPL_SW_MIX;
+
+  *TSWAP = 64;
+
+  *L1NOTRAN = 0;
+
+  *UNOTRAN = 0;
+
+  *EQUIL = 1;
+
+  *ALIGN = 8;
+
+  return 0;
 }
 
 #ifdef XERBLA_MISSING

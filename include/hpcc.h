@@ -110,6 +110,18 @@ params->Failure.
 extern int HPCC_Init(HPCC_Params *params);
 extern int HPCC_Finalize(HPCC_Params *params);
 extern int HPCC_LocalVectorSize(HPCC_Params *params, int vecCnt, size_t size, int pow2);
+extern int
+HPCC_Defaults(HPL_T_test *TEST, int *NS, int *N,
+              int *NBS, int *NB,
+              HPL_T_ORDER *PMAPPIN,
+              int *NPQS, int *P, int *Q,
+              int *NPFS, HPL_T_FACT *PF,
+              int *NBMS, int *NBM,
+              int *NDVS, int *NDV,
+              int *NRFS, HPL_T_FACT *RF,
+              int *NTPS, HPL_T_TOP *TP,
+              int *NDHS, int *DH,
+              HPL_T_SWAP *FSWAP, int *TSWAP, int *L1NOTRAN, int *UNOTRAN, int *EQUIL, int *ALIGN, MPI_Comm comm);
 
 extern int HPL_main(int ARGC, char **ARGV, HPL_RuntimeData *rdata, int *failure);
 extern float HPL_slamch (const HPL_T_MACH);
