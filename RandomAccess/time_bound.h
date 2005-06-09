@@ -2,7 +2,7 @@
 #define RA_TIME_BOUND 1
 
 /* time bound in seconds */
-#define TIME_BOUND 10
+#define TIME_BOUND 60
 
 
 /* _RA_SAMPLE_FACTOR determines the fraction of the total number 
