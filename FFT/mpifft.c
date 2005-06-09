@@ -42,12 +42,28 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, double *UGf
   p = fftw_mpi_create_plan( comm, n, FFTW_FORWARD, FFTW_MEASURE );
   t1 += MPI_Wtime();
 
+  if (! p) goto no_plan;
+
   fftw_mpi_local_sizes( p, &locn, &loc0, &alocn, &aloc0, &tls );
 
   inout = (fftw_complex *)fftw_malloc( tls * (sizeof *inout) );
   work  = (fftw_complex *)fftw_malloc( tls * (sizeof *work) );
 
-  if (! inout || ! work) goto comp_end;
+  if (! inout || ! work) {
+    fftw_mpi_destroy_plan( p );
+    goto comp_end;
+  }
+
+  /* Make sure that `inout' and `work' are initialized in parallel if using
+     Open MP: this will ensure better placement of pages if first-touch policy
+     is used by a distrubuted shared memory machine. */
+#ifdef _OPENMP
+#pragma omp parallel for
+  for (i = 0; i < tls; ++i) {
+    c_re( inout[i] ) = c_re( work[i] ) = 0.0;
+    c_re( inout[i] ) = c_im( work[i] ) = 0.0;
+  }
+#endif
 
   t0 = -MPI_Wtime();
   HPCC_bcnrand( 2 * tls, 53 * commRank * 2 * tls, inout );
@@ -60,15 +76,19 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, double *UGf
   fftw_mpi_destroy_plan( p );
 
   ip = HPCC_fftw_mpi_create_plan( comm, n, FFTW_BACKWARD, FFTW_ESTIMATE );
-  t3 = -MPI_Wtime();
-  HPCC_fftw_mpi( ip, 1, inout, work );
-  t3 += MPI_Wtime();
-  HPCC_fftw_mpi_destroy_plan( ip );
+
+  if (ip) {
+    t3 = -MPI_Wtime();
+    HPCC_fftw_mpi( ip, 1, inout, work );
+    t3 += MPI_Wtime();
+
+    HPCC_fftw_mpi_destroy_plan( ip );
+  }
 
   HPCC_bcnrand( 2 * tls, 53 * commRank * 2 * tls, work ); /* regenerate data */
 
   maxErr = 0.0;
-  for (i = 0; i < tls; i++) {
+  for (i = 0; i < tls; ++i) {
     tmp1 = c_re( inout[i] ) - c_re( work[i] );
     tmp2 = c_im( inout[i] ) - c_im( work[i] );
     tmp3 = sqrt( tmp1*tmp1 + tmp2*tmp2 );
@@ -92,6 +112,8 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, double *UGf
 
   if (work) fftw_free( work );
   if (inout) fftw_free( inout );
+
+  no_plan:
 
   *UGflops = Gflops;
   *Un = n;

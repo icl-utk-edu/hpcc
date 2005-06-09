@@ -25,6 +25,17 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
 
   if (! in || ! out) goto comp_end;
 
+  /* Make sure that `inout' and `work' are initialized in parallel if using
+     Open MP: this will ensure better placement of pages if first-touch policy
+     is used by a distrubuted shared memory machine. */
+#ifdef _OPENMP
+#pragma omp parallel for
+  for (i = 0; i < n; ++i) {
+    c_re( in[i] ) = c_re( out[i] ) = 0.0;
+    c_re( in[i] ) = c_im( out[i] ) = 0.0;
+  }
+#endif
+
   t0 = -MPI_Wtime();
   HPCC_bcnrand( 2*n, 0, in );
   t0 += MPI_Wtime();
@@ -33,6 +44,8 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
   p = fftw_create_plan( n, FFTW_FORWARD, FFTW_MEASURE );
   t1 += MPI_Wtime();
 
+  if (! p) goto comp_end;
+
   t2 = -MPI_Wtime();
   fftw_one( p, in, out );
   t2 += MPI_Wtime();
@@ -40,10 +53,14 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
   fftw_destroy_plan(p);
 
   ip = HPCC_fftw_create_plan( n, FFTW_BACKWARD, FFTW_ESTIMATE );
-  t3 = -MPI_Wtime();
-  HPCC_fftw_one( ip, out, in );
-  t3 += MPI_Wtime();
-  HPCC_fftw_destroy_plan( ip );
+
+  if (ip) {
+    t3 = -MPI_Wtime();
+    HPCC_fftw_one( ip, out, in );
+    t3 += MPI_Wtime();
+
+    HPCC_fftw_destroy_plan( ip );
+  }
 
   HPCC_bcnrand( 2*n, 0, out ); /* regenerate data */
   maxErr = 0.0;
