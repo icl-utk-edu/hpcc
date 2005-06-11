@@ -64,6 +64,7 @@ typedef struct {
   int PTRANSnpqs, PTRANSpval[2 * HPL_MAX_PARAM], PTRANSqval[2 * HPL_MAX_PARAM];
   double MPIGUPs, StarGUPs, SingleGUPs,
     MPIRandomAccess_ErrorsFraction, MPIRandomAccess_time, MPIRandomAccess_CheckTime,
+    MPIRandomAccess_TimeBound,
     StarStreamCopyGBs, StarStreamScaleGBs,
     StarStreamAddGBs, StarStreamTriadGBs, SingleStreamCopyGBs, SingleStreamScaleGBs,
     SingleStreamAddGBs, SingleStreamTriadGBs, StarDGEMMGflops, SingleDGEMMGflops;
@@ -75,7 +76,6 @@ typedef struct {
   int DGEMM_N;
   int StreamThreads, StreamVectorSize;
   int FFT_N;
-  int MPIRandomAccess_TimeBound;
 
   HPL_RuntimeData HPLrdata;
   PTRANS_RuntimeData PTRANSrdata;

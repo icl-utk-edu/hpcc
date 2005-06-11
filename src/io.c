@@ -300,7 +300,7 @@ HPCC_Init(HPCC_Params *params) {
 
   params->MPIRandomAccess_ErrorsFraction =
   params->MPIRandomAccess_time = params->MPIRandomAccess_CheckTime =
-  params->MPIRandomAccess_TimeBound = -1;
+  params->MPIRandomAccess_TimeBound = -1.0;
 
   params->DGEMM_N =
   params->FFT_N =
@@ -460,6 +460,7 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "MPIRandomAccess_ErrorsFraction=%g", params->MPIRandomAccess_ErrorsFraction );
   FPRINTF( myRank, outputFile, "MPIRandomAccess_ExeUpdates=" FSTR64 , params->MPIRandomAccess_ExeUpdates );
   FPRINTF( myRank, outputFile, "MPIRandomAccess_GUPs=%g", params->MPIGUPs );
+  FPRINTF( myRank, outputFile, "MPIRandomAccess_TimeBound=%g", params->MPIRandomAccess_TimeBound );
   FPRINTF( myRank, outputFile, "RandomAccess_N=" FSTR64, params->RandomAccess_N );
   FPRINTF( myRank, outputFile, "StarRandomAccess_GUPs=%g", params->StarGUPs );
   FPRINTF( myRank, outputFile, "SingleRandomAccess_GUPs=%g", params->SingleGUPs );
