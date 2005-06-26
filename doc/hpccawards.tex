@@ -1,0 +1,634 @@
+% -*- LaTeX -*-
+\documentclass[twocolumn,draft]{article}
+
+\usepackage{pslatex}
+\usepackage{draftcopy}
+\usepackage{xspace}
+\usepackage[letterpaper,twoside]{geometry}
+\usepackage[letterpaper,backref,colorlinks=true]{hyperref}
+
+\newcommand{\HPCCx}{HPC~Challenge} % raw benchmark name
+\newcommand{\HPCC}{\HPCCx\xspace}
+\newcommand{\DGEMM}{\textsf{DGEMM}\xspace}
+\newcommand{\FFT}{\textsf{FFT}\xspace}
+\newcommand{\HPL}{\textsf{HPL}\xspace}
+\newcommand{\PTRANS}{\textsf{PTRANS}\xspace}
+\newcommand{\RANDA}{\textsf{RandomAccess}\xspace}
+\newcommand{\STREAM}{\textsf{STREAM}\xspace}
+\newcommand{\beff}{\textsf{b\_eff}\xspace}
+\newcommand{\hpl}{\textsf{\scriptsize HPL}\xspace}
+\newcommand{\randa}{\textsf{\scriptsize RandomAcccess}\xspace}
+\newcommand{\fft}{\textsf{\scriptsize FFT}\xspace}
+
+\begin{document}
+\title{HPC Challenge Awards: Class 2 Specification}
+\author{Jack Dongarra \and Piotr Luszczek}
+\date{June 2005}
+\maketitle
+
+\tableofcontents
+
+\section{General Guidelines}
+\begin{enumerate}
+\item The use of high level languages is encouraged.
+\item Calls to tuned library routines could be used in the submission but
+  explicit and ``elegant'' coding of all aspects of the benchmark is preferred.
+\item The entire benchmark could be expressed by using a few built-in operators
+  of an hypothetical programming language. However, such submissions are
+  strongly discouraged as they only show operator overloading and funciton call
+  syntax and say nothing how the language with issues critical to HPC like
+  parallelism expression and latency hiding.
+%  There is a Fine line between terseness and expresiveness: A\textbackslash{}b
+\end{enumerate}
+
+\section{\HPL}
+\HPL~(High Performance Linpack) is an implementation of the Linpack TPP~(Toward
+Peak Performance) variant of the original Linpack benchmark which measures the
+floating point rate of execution for solving a linear system of equations.
+\subsection{Description}
+\HPL solves a linear system of equations of order $n$:
+\begin{equation}
+A x = b;\quad A\in\mathbf{R}^{n\times n};\; x,b\in\mathbf{R}^n
+\label{eqn:axb}
+\end{equation}
+by first computing LU factorization with row partial pivoting of the
+$n$~by~$n+1$ coefficient matrix:
+\begin{equation}
+P [A, b] = [[L,U], y].
+\label{eqn:lu}
+\end{equation}
+Since the row pivoting~(represented by the permutation matrix $P$) and
+the lower triangular factor~$L$ are applied to~$b$ as the factorization
+progresses, the solution~$x$ is obtained in one step by solving the upper
+triangular system:
+\begin{equation}
+  Ux = y.
+\label{eqn:ubsolve}
+\end{equation}
+The lower triangular matrix $L$ is left unpivoted and the array of pivots is
+not returned.
+
+\subsection{Data Size}
+$A$ is~$n$ by~$n$ double precision~(in IEEE 754 sense) matrix, $b$ is $n$-element
+vector. The size of the~$A$ matrix~($8n^2$ bytes) should be at least half of
+the system memory.
+
+\subsection{Initialization}
+$A$ and $b$ should contain values produced by a reasonable pseudo-random
+generator with an expected mean of zero. ``Reasonable'' in this context means
+compact, fast, and producing independent and identically distributed elements.
+
+\subsection{Timed Region}
+The timed portion of the code performs steps given by equations~(\ref{eqn:lu})
+and~(\ref{eqn:ubsolve}).
+
+\subsection{Duration}
+Until solution to~(\ref{eqn:axb}) is obtained.
+
+\subsection{Verification}
+Correctness of the solution is ascertained by calculating the scaled residuals:
+\begin{eqnarray}
+r_1 = & \frac{\|Ax-b\|_{\infty}}{\epsilon \|A\|_1 n} \\
+r_2 = &\frac{\|Ax-b\|_{\infty}}{\epsilon \|A\|_1 \|x\|_1} \\
+r_3 = &\frac{\|Ax-b\|_{\infty}}{\epsilon \|A\|_{\infty} \|x\|_{\infty}}
+\end{eqnarray}
+where $\epsilon$ is machine precision for 64-bit floating-point values and~$n$
+is the size of the problem. The solution is valid if the following holds:
+\begin{equation}
+  \max(r1, r2, r3) < 16
+\end{equation}
+
+\subsection{Performance}
+The operation count for the factorization phase
+is~$\frac{2}{3}n^3-\frac{1}{2}n^2$ and~$2n^2$ for the solve phase thus if the
+time to solution is~$t_S$ the formula for performance~(in Gflop/s) is:
+\begin{equation}
+  p_{\hpl}=\frac{\frac{2}{3}n^3+\frac{3}{2}n^2}{t_S}10^{-9}.
+\end{equation}
+
+\subsection{Alternative Implementations}
+If an alternative algorith is chosen it should be able to deal with zeros on
+the diagonal~(some sort of pivoting needs to be used) and the precision of the
+calculations need to be preserved.
+
+\section{\RANDA}
+\subsection{Description}
+\subsection{Data Size}
+\subsection{Initialization}
+\subsection{Timed Region}
+\subsection{Duration}
+\subsection{Verification}
+\subsection{Performance}
+\subsection{Alternative Implementations}
+
+\section{Global EP-\STREAM{}-Triad}
+\subsection{Description}
+EP-\STREAM{}-Triad is a simple benchmark program that measures sustainable
+memory bandwidth~(in Gbyte/s) and the corresponding computation rate for
+a simple vector kernel operation that scales and adds two vectors:
+\begin{equation}
+a\;\leftarrow b+\alpha\;c
+\label{eqn:striad}
+\end{equation}
+where:
+\[a, b, c\in\mathbf{R}^m; \quad \alpha\in\mathbf{R}.\]
+
+The computation is peformed simultaneously on each computing element on its
+local data set.
+
+\subsection{Data Size}
+$a$, $b$, and~$c$ are $m$-element double precision vectors. The combined size
+of the vectors~($3m$ bytes) should be at least quarter of the system memory.
+
+\subsection{Initialization}
+$b$ and~$c$ should contain values produced by a reasonable pseudo-random number
+generator.
+
+\subsection{Timed Region}
+The timed portion of the code should perform operation given
+by~(\ref{eqn:striad}) at least~$10$ times.
+
+\subsection{Duration}
+The kernel operation should be repeated at least~$10$ times.
+
+\subsection{Verification}
+The norm of the difference between reference and computed vectors is used to
+verify the result: $\|a-\hat{a}\|$. The reference vector~$\hat{a}$ is obtained
+by an alternative implementation.
+
+\subsection{Performance}
+The benchmark measures Gbyte/s and the number of items transferred is $3m$. The
+minimum time~$t_{\min}$ is taken of all the repetitions of the kernel
+operation. Performance is thus defined as:
+\begin{equation}
+  p_{\textrm{\scriptsize{}EP-\STREAM{}-Triad}} = 24\frac{m}{t_{\min}}10^{-9}
+\end{equation}
+
+\subsection{Alternative Implementations}
+
+\section{Global \FFT}
+
+\subsection{Description}
+\FFT measures the floating point rate of execution of double precision
+complex one-dimensional Discrete Fourier Transform (DFT) of size~$m$:
+\begin{equation}
+Z_k\leftarrow\sum_j^m z_j e^{-2\pi i\frac{jk}{m}}; \quad 1 \le k \le m
+\label{eqn:ffft}
+\end{equation}
+where:
+\[z, Z\in\mathbf{C}^m.\]
+
+\subsection{Data Size}
+$Z$ and~$z$ are $m$-element double precision complex vectors. The combined size
+of the vectors~($2m$ bytes) should be at least quarter of the system memory.
+The size~$m$ of the vectors can be implementation-specific, e.g. be an integral
+power of~$2$.
+
+\subsection{Initialization}
+$z$ should contain values produced by a reasonable pseudo-random number
+generator. The real and imaginary parts of~$z$ should be generated
+independently. The storage for the vector~$z$
+
+\subsection{Timed Region}
+The computation implied by~(\ref{eqn:ffft}) is timed together with the portion
+of code that unscrambles~(if necessary) the resulting vector data. Timing for
+computation and unscrambling can be given separately for informational
+purposes but the combined time is used for calculating performance.
+
+\subsection{Duration}
+Untile the transform defined by~(\ref{eqn:ffft}) is obtained.
+
+\subsection{Verification}
+Verification is done by acertainig the following bound on the residual:
+\begin{equation}
+\frac{\|z-\hat{z}\|_{\infty}}{\epsilon\,\ln m} < 16
+\end{equation}
+where $\hat{z}$ is the result of applying a reference implementation of the
+inverse transform to the outcome of the benchmarked code~(in infinite-precision
+arithmetic the residual should be zero):
+\begin{equation}
+\hat{z}_k\leftarrow\sum_j^m Z_j e^{2\pi i\frac{jk}{m}}; \quad 1 \le k \le m
+\end{equation}
+
+\subsection{Performance}
+The operation count is taken to be~$5m\log_2 m$ for the calculation of the
+computational rate~(in Gflop/s) in time~$t$:
+\begin{equation}
+  p_{\fft}=5\frac{m\log_2 m}{t}10^{-9}
+\end{equation}
+
+\subsection{Alternative Implementations}
+The reference implementation splits the algorithm into computational and
+communication portion which do not overlap. Valid submsissions may choose other
+methods that take advantage of language and architectural features.
+
+\end{document}
+
+\section{}
+\subsection{Description}
+\subsection{Data Size}
+\subsection{Initialization}
+\subsection{Timed Region}
+\subsection{Duration}
+\subsection{Verification}
+\subsection{Performance}
+\subsection{Alternative Implementations}
+
+I think we need to say somewhere that a call to a library routine or A\b is
+not the kind of elegant solution we are looking for.
+Jack
+
+Ps by the way it's not Global STREAM triad. It EP STREAM Triad on the
+system, and its derived.
+
+**********************************************************************
+Jack Dongarra; Innovative Computing Laboratory; Computer Science Dept;
+1122 Volunteer Blvd; University of Tennessee; Knoxville TN, 37996-3450
++1-865-974-8295; dongarra@cs.utk.edu; http://www.cs.utk.edu/~dongarra/
+
+-----Original Message-----
+From: Jeremy Kepner [mailto:kepner@ll.mit.edu] 
+Sent: Monday, June 20, 2005 3:57 PM
+To: Piotr Luszczek
+Cc: dongarra@cs.utk.edu; Jeremy Kepner
+Subject: Re: HPC Challenge Competition Announced
+
+Piotr/Jack,
+  I told Cleve on the phone that the 64 bit twiddling
+was important.  More importantly,
+we need a short mathematical description of the big
+four that gives folks a recipe for a legal implementation
+for Class 2 (these are different than a legal implementation
+for Class 1).
+
+My guess would be something like:
+
+(1) Global HPL
+
+Create a random (centered at zero) double precision NxN
+matrix matrix that takes 1/4 to 1/2 of total system memory.
+
+Create a random (centered at zero) double precision 1xN
+vector.
+
+Start your timer
+
+Perform the LU factorization of the matrix using guassian
+elimination with partial pivoting.
+
+Solve the linear system.
+
+Stop your timer.
+
+Validate by checking various norms.
+
+Report the performance using: list HPL performance formula.
+
+
+(2) Global STREAM triad
+
+Create three double precision vectors A, B and C of length N  such that
+the combined total memory takes 1/4 to 1/2 of total system memory.
+
+Initialize B and C to random values.
+
+Pick a value for a scalar constant q.
+
+Start your timer
+
+Perform the following operation at least 10 times.
+
+   A = q*B + C
+
+Stop your timer.
+
+Compute the performance using the formula
+
+  Memory Bandwidth = N * (12 bytes) / time
+
+
+(3) Global FFT
+
+Create a random complex double precision vector of size N such that the
+total memory takes 1/4 to 1/2 of total system memory.
+
+Initialize your FFT (i.e. compute twiddle tables).
+
+Start your timer.
+
+Perform a 1D complex-to-complex FFT.
+
+Stop your timer.
+
+Perform an inverse 1D complex-to-complex FFT.
+
+Compute the max absolute difference between
+the initial input and the ouput of the inverse FFT,
+should be less than 1.e-9.
+
+Report performance using:
+
+  Flops = 5*N*log2(N) / time
+
+(4) RandomAccess (see David Koester's slides).
+
+
+Pick a value for a scalar constant q.
+
+Start your timer
+
+Perform the following operation at least 10 times.
+
+   A = q*B + C
+
+Stop your timer.
+
+
+Compute the performance using ...
+
+
+
+
+
+
+
+
+Regards.  -Jeremy
+
+On Mon, Jun 20, 2005 at 02:05:25PM -0400, Piotr Luszczek wrote:
+
+>> Jack and Jeremy,
+>> 
+>> please correct me if I'm wrong but I think that "64-bit fiddling"
+>> for RandomAccess is crucial. It's by "mission partner" request.
+>> 
+>> Piotr
+>> 
+>> Jack Dongarra wrote:
+>
+>>> > Cleve,
+>>> > We are still trying to sort out the productivity (class 2) part of the
+>>> > award. I would agree what you have is elegant but how fast is it? What
+
+size
+
+>>> > problem are you planning to solve? How readable is the code? The Matlab
+
+FFT
+
+>>> > example hides the complexity in a library. In some sense we are more
+>>> > interested in how the language solves this type of problem rather than
+
+how
+
+>>> > it calls library routines. In the end it's subjective with 8 judges.
+>>> > 
+>>> > For the class 1 part you have to run the program as is, at least for the
+>>> > base run. So there should be no confusion there.
+>>> > 
+>>> > As I said we are still sorting this out and your comments are welcomed.
+>>> > Jack
+>>> > 
+>>> > **********************************************************************
+>>> > Jack Dongarra; Innovative Computing Laboratory; Computer Science Dept;
+>>> > 1122 Volunteer Blvd; University of Tennessee; Knoxville TN, 37996-3450
+>>> > +1-865-974-8295; dongarra@cs.utk.edu; http://www.cs.utk.edu/~dongarra/
+>>> > 
+>>> > -----Original Message-----
+>>> > From: Cleve Moler [mailto:Cleve.Moler@mathworks.com] 
+>>> > Sent: Monday, June 20, 2005 9:50 AM
+>>> > To: Jeremy Kepner; dongarra@cs.utk.edu
+>>> > Subject: FW: HPC Challenge Competition Announced
+>>> > 
+>>> > Hi, guys --
+>>> > 
+>>> > I am thinking of participating in the "Productivity" portion of the HPC
+>>> > Challenge Award Competition, using MATLAB.  But I don't know what level
+
+of
+
+>>> > "implementation" you are thinking of.
+>>> > 
+>>> > For example, take the 3-D FFT.  If you got to
+>>> >    http://icl.cs.utk.edu/hpcc/
+>>> > and click on FFTE, you are taken directly to
+>>> >    http://www.ffte.jp/
+>>> > where you can download a compressed zip file with a mixture of Fortran
+
+and C
+
+>>> > code.  It seems that HPCC benchmark is to run this code on your new
+>>> > supercomputer.  I guess that may be productive, but certainly not
+
+elegant.
+
+>>> > 
+>>> > For the FFT, at the top level, in MATLAB, we have
+>>> > 
+>>> >       n = some integer, probably a power of 2
+>>> >       X = drandn(n,n,n);
+>>> >       tic
+>>> >       fft3(X);
+>>> >       toc
+>>> > 
+>>> > You gotta admit that's elegant and productive.   Even the next level
+
+down is
+
+>>> > pretty nice:
+>>> > 
+>>> >       function X = fft3(X)
+>>> >       X = fft(X,[],1);
+>>> >       X = fft(X,[],2);
+>>> >       X = permute(X,[3 2 1]);
+>>> >       X = fft(X,[],1);
+>>> >       X = permute(X,[3 2 1]);
+>>> > 
+>>> > Would that, along with some timings, be an acceptable entry for the FFT
+>>> > portion of the competition?  What timings?  What machine?  How many
+>>> > processors?
+>>> > 
+>>> > Likewise, for HPL.  Is the challenge to run the code from the HPL
+
+website
+
+>>> > with some souped-up BLAS, or is it to solve a large linear system.
+>>> > 
+>>> >       tic
+>>> >       A\b
+>>> >       toc
+>>> > 
+>>> > In the Random Access benchmark, do you want us to do exactly the same
+
+64-bit
+
+>>> > bit fiddling?
+>>> > 
+>>> > In other words, we need to know more about the ground rules for this
+>>> > competition.
+>>> > 
+>>> > Thanks.
+>>> > 
+>>> >   -- Cleve
+>>> > 
+>>> > 
+>>> > 
+>>> > -----Original Message-----
+>>> > From: HPCwire [mailto:hpcmore@news.hpcwire.com] 
+>>> > Sent: Friday, June 03, 2005 12:48 AM
+>>> > To: Cleve Moler
+>>> > Subject: HPC Challenge Competition Announced
+>>> > 
+>>> > 
+>>> > 
+>>> > 
+>>> > FEATURES
+>>> > ======================================================================
+>>> > [ ] M393115 ) HPC Challenge Competition
+>>> > Announced.........................4.1K 
+>>> > 
+>>> >   The DARPA High Productivity Computing Systems (HPCS) Program and 
+>>> >   HPCWire are pleased to announce the first annual HPC Challenge Award 
+>>> >   Competition (<http://www.hpcchallenge.org>).
+>>> >   
+>>> >   The goal of the competition is to focus the HPC community's attention 
+>>> >   on a broad set of HPC hardware and HPC software capabilities that are 
+>>> >   necessary to effectively use HPC systems.
+>>> >   
+>>> >   The core of the HPC Challenge Award Competition is the HPC Challenge 
+>>> >   benchmark suite developed by University of Tennessee under the DARPA 
+>>> >   HPCS program with inputs from a wide range of organizations around the
+
+
+>>> >   world (see <http://icl.cs.utk.edu/hpcc/>). The Competition will focus 
+>>> >   on four of the most challenging benchmarks in the suite:
+>>> >   
+>>> >   Global HPL
+>>> >   Global RandomAccess
+>>> >   Global STREAM (Triad)
+>>> >   Global FFT 
+>>> >   There will be two classes of awards. 
+>>> >   
+>>> >   Class 1: Best Performance (4 awards)
+>>> >   
+>>> >   Best performance on the base or optimized run submitted to the HPC 
+>>> >   Challenge website.  The benchmarks to be judged are: Global HPL, 
+>>> >   Global RandomAccess, Global STREAM (Triad) and Global FFT. The prize 
+>>> >   will be $500 plus a certificate for the best of each.
+>>> >   
+>>> >   Class 2: Most Productivity
+>>> >   
+>>> >   Most "elegant" implementation of one or more of the HPC Challenge 
+>>> >   benchmarks with special emphasis being placed on: Global HPL, Global 
+>>> >   RandomAccess, Global STREAM (Triad) and Global FFT. This award would 
+>>> >   be weighted 50% on performance and 50% on code elegance/clarity/size.
+
+
+>>> >   Both will be determined by an evaluation committee.
+>>> >   
+>>> >   For this award, the implementer must submit to 
+>>> >   <mailto:hpcc-awards@cs.utk.edu> (by October 15th) a short description 
+>>> >   of: the implementation, the performance achieved, lines-of-code, and 
+>>> >   the actual source code of their implementation. The evaluation 
+>>> >   committee will select a set of finalists who will be invited to give a
+
+
+>>> >   short presentation at the HPC Challenge Award BOF at SC|05.   This 
+>>> >   presentation will be judged by the evaluation committee to select the 
+>>> >   winner. The prize will be $1500 plus a certificate for this award and 
+>>> >   may be split among the "best" entries.
+>>> >   
+>>> >   The awards will be presented at the HPC Challenge Award BOF at SC|05 
+>>> >   and the prizes are sponsored by HPCWire. 
+>>> >   
+>>> >   HPC Challenge Awards Evaluation Committee 
+>>> >   David Bailey, LBNL NERSC
+>>> >   Jack Dongarra (Co-Chair), U of Tennessee/ORNL
+>>> >   
+>>> >   Jeremy Kepner (Co-Chair), MIT Lincoln Lab
+>>> >   David Koester, MITRE
+>>> >   Bob Lucas, ISI
+>>> >   Rusty Lusk, Argonne National Lab 
+>>> >   
+>>> >   Piotr Luszczek, U of Tennessee
+>>> >   John McCalpin, IBM Austin
+>>> >   Rolf Rabenseifner, HLRS, Stuttgart
+>>> >   Daisuke Takahashi, U of Tsukuba 
+>>> > 
+>>> > 
+>>> > 
+>>> >  
+>>> > 
+>>> > [ ] P357M382451 )                LCI Workshop at OSCER
+>>> >                                    June 21-24, 2005
+>>> >                                       Norman, OK
+>>> >                          REGISTRATION DEADLINE: MAY 20, 2005
+>>> >                         http://www.linuxclustersinstitute.org/
+>>> > 
+>>> > [ ] P357M382452 )  OMG's Sixth Annual Workshop on Distributed Object
+>>> >                      Computing for Real-time and Embedded Systems
+>>> >                                    July 11-14, 2005
+>>> >                                     Washington, DC
+>>> >                          Presentations, panels & discussions
+>>> >                              http://www.omg.org/hpc-rte/
+>>> > 
+>>> > [ ] P357M320047 )             Commodity Cluster Symposium
+>>> >                          On the Use of Commodity Clusters for
+>>> >                          Large-Scale Scientific Applications
+>>> >                                    July 26-28, 2005
+>>> >                                  Greenbelt, Maryland
+>>> >                          CALL FOR PARTICIPATION AND ABSTRACTS
+>>> >                          http://www.arl.hpc.mil/Clusters2005
+>>> > 
+>>> > [ ] P357M382453 )                     Security '05
+>>> >                             14th USENIX Security Symposium
+>>> >                                    August 1-5, 2005
+>>> >                                  Baltimore, Maryland
+>>> >                          http://www.usenix.org/events/sec05/
+>>> > 
+>>> > [ ] P357M389465 )         **"Data Mining: Levels I, II & III"
+>>> >                                 September 26-30, 2005
+>>> >                                 San Diego, California
+>>> > 
+>>> > [ ] P357M382454 )             SC|05 - Gateway to Discovery
+>>> >                                  November 12-18, 2005
+>>> >                                  Seattle, Washington
+>>> >                           Housing Now Open to All Attendees!
+>>> >                         http://sc05.supercomputing.org/travel
+>>> > 
+>>> > 
+>>> >
+
+______________________________________________________________________
+
+>>> >       Full background information on all leading HPC solution providers 
+>>> > 
+>>> >              [ ] A517 ) Data Direct 
+>>> >              [ ] A639 ) Microway 
+>>> >              [ ] A341 ) NEC 
+>>> >              [ ] A518 ) Cray 
+>>> >              [ ] A345 ) Myricom 
+>>> >              [ ] A330 ) Atipa 
+>>> >              [ ] A351 ) APPRO 
+>>> >              [ ] A470 ) HP 
+>>> >              [ ] A342 ) Sun 
+>>> >              [ ] A335 ) IBM 
+>>> >              [ ] A339 ) SGI 
+>>> >              [ ] A337 ) Linux Networx 
+>>> >              [ ] A332 ) Etnus/TotalView 
+>>> >              [ ] A373 ) Dell 
+>>> >              [ ] A338 ) PathScale 
+>>> >              [ ] A331 ) Intel 
+>>> >              [ ] A343 ) Portland Group 
+>>> > 
+>>> > 
+>>> >            For sponsorship information contact: promote@hpcwire.com
+
+
+>>> >
+
+______________________________________________________________________ 
+
+>> 
+
+
