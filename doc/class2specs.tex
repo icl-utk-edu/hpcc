@@ -1,8 +1,8 @@
 % -*- LaTeX -*-
-\documentclass[twocolumn,draft]{article}
+\documentclass[twocolumn]{article}
 
 \usepackage{pslatex}
-\usepackage{draftcopy}
+%\usepackage{draftcopy}
 \usepackage{xspace}
 \usepackage[letterpaper,twoside,hmargin={2cm,2cm},tmargin=3.5cm,bmargin=1.5cm]{geometry}
 \usepackage[letterpaper,backref,colorlinks=true]{hyperref}
@@ -286,6 +286,9 @@ computational rate~(in Gflop/s) in time~$t$:
 The reference implementation splits the algorithm into computational and
 communication portions which do not overlap. Valid submsissions may choose other
 methods that take advantage of language and architectural features.
+
+The number of processors may be implementation-specific, e.g. be an integral
+power of~$2$.
 
 \end{document}
 
