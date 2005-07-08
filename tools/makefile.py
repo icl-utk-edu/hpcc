@@ -86,6 +86,9 @@ allDeps = (
     ("../src/", (hhpcc, hhpccv, hhpl),
      ("bench_lat_bw_1.5.2",  "hpcc",  "io", "HPL_slamch"), "-I../../../../include $(CCFLAGS)"),
 
+    ("../src/", (hhpcc, hhpl),
+     ("HPL_slamch", "noopt"), "-I../../../../include $(CCNOOPT)"),
+
     ("../DGEMM/", (hhpcc, hhpl),
      ("tstdgemm",  "onecpu"), "-I../../../../include $(CCFLAGS)"),
 

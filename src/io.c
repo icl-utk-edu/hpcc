@@ -339,34 +339,6 @@ HPCC_Init(HPCC_Params *params) {
   return 0;
 }
 
-double
-HPCC_dweps() {
-  double eps, one, half;
-
-  one = 1.0;
-  half = one / 2.0;
-  eps = one;
-
-  while (one + eps != one)
-    eps *= half;
-
-  return eps;
-}
-
-float
-HPCC_sweps() {
-  float eps, one, half;
-
-  one = 1.0f;
-  half = one / 2.0f;
-  eps = one;
-
-  while (one + eps != one)
-    eps *= half;
-
-  return eps;
-}
-
 int
 HPCC_Finalize(HPCC_Params *params) {
   int myRank, commSize;
