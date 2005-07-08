@@ -25,11 +25,13 @@ mpi.h
 typedef unsigned long u64Int;
 typedef long s64Int;
 #define FSTR64 "%ld"
+#define FSTRU64 "%lu"
 #define ZERO64B 0L
 #else
 typedef unsigned long long u64Int;
 typedef long long s64Int;
 #define FSTR64 "%lld"
+#define FSTRU64 "%llu"
 #define ZERO64B 0LL
 #endif
 
@@ -125,6 +127,8 @@ HPCC_Defaults(HPL_T_test *TEST, int *NS, int *N,
 
 extern int HPL_main(int ARGC, char **ARGV, HPL_RuntimeData *rdata, int *failure);
 extern float HPL_slamch (const HPL_T_MACH);
+extern double HPCC_dweps();
+extern float HPCC_sweps();
 extern int HPCC_StarDGEMM(HPCC_Params *params);
 extern int HPCC_SingleDGEMM(HPCC_Params *params);
 extern int PTRANS(HPCC_Params *params);
