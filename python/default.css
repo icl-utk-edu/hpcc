@@ -1,0 +1,174 @@
+a:link {
+  color: blue;
+}
+a:visited {
+  color: #F00040;
+}
+a.samecolor:visited {
+  color: blue;
+}
+a:active {
+  color: red;
+}
+
+body {
+  background-color: gray;
+  color: white;
+}
+
+pre {
+  background-color: silver;
+  color: black;
+}
+
+table {
+  width: 100%;
+}
+
+.corner {
+  background-color: #B0A080;
+  color: black;
+  text-align: center;
+  height: 5em;
+  font-family: lucida, sans-serif;
+}
+td.navbar {
+  background-color: #CFDED0;
+  width: 85%;
+  color: black;
+}
+td.links {
+  vertical-align: top;
+  background-color: #CFDED0;
+  color: black;
+}
+.body {
+  background-color: white;
+  color: black;
+  vertical-align: top;
+  padding: 1em;
+}
+
+.title {
+  background-color: #067098;
+  color: white;
+  font-weight: bold;
+  font-size: medium;
+  padding: .25em;
+  margin: .5em 0em .5em 0em;
+}
+.title:first-child {
+  margin: 0em;
+}
+div.nav {
+  margin: 0em 0em 0em 0em;
+}
+div.info {
+  background-color: gray;
+  color: white;
+  margin: 0em 0em .25em .125em;
+  text-align: left;
+}
+
+td>h1 {
+  width: 75%;
+  color: #064068;
+  border-bottom: solid;
+  margin: 0em;
+}
+h1.album {
+  width: auto;
+  height: auto;
+  border: inherit;
+  font-size: large;
+  padding: 0.25em;
+}
+
+ul.links {
+  /* list-style: none; */
+  padding: 0em 1em;
+}
+
+.current {
+  font-weight: bold;
+}
+span.filesize {
+  width: 4em;
+  float: left;
+  text-align: right;
+  margin-right: 1em;
+  background-color: teal;
+  color: white;
+}
+.notice {
+  color: black;
+  background-color: yellow;
+  border: 2px solid red;
+}
+.cite {
+  border-left: solid blue; 
+  padding-left: 1em;
+  margin-left:inherit;
+}
+
+/*
+ * Photobob 
+ */
+.album {
+  padding: 2em;
+  text-align: left;
+  vertical-align: top;
+}
+.image, .leaf {
+  background-color: black;
+  vertical-align: top;
+}
+div.image {
+  text-align: center;
+  padding: 25px;
+}
+img.thumbnail {
+  background: #e0e0e0;
+  padding: 12px;
+  margin: 2px;
+}
+img.image {
+  border: 0px;
+}
+
+/*
+ * Code highlighting 
+ */
+.STRING {
+  color: green;
+}
+.COMMENT {
+  color: #800000;
+  font-family: serif;
+  font-style: italic;
+}
+.KEYWORD {
+  color: purple;
+}
+.FUNCTION {
+  color: blue;
+  font-family: sans-serif;
+  font-size: large;
+}
+
+
+/* Crap */
+div.Neale {
+  background-color: #ccffcc;
+  padding: 0em 0.5em;
+}
+
+div.Amy {
+  background-color: #ffcccc;
+  font-family: sans-serif;
+}
+
+div.Kellie {
+  background-color: #ccccff;
+  font-family: sans-serif;
+}

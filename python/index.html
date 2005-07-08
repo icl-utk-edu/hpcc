@@ -1,0 +1,39 @@
+<html>
+<head>
+<title>Sample HPCC Awards Class 2 Submission</title>
+</head>
+<body>
+<h1>Sample HPCC Awards Class 2 Submission</h1>
+<h2>Overview</h2>
+<p>
+The language for implementation is Python. The messaging used is
+MPI. The implemented tests are <b>EP-STREAM</b> and <b>RandomAccess</b>.
+</p>
+<h2>Files</h2>
+<p>
+The complete implementation of the benchmark tests is in file
+<a href="hpcc.py.html"><code>hpcc.py</code></a> (raw source code
+is <a href="hpcc.py">available as well</a>).
+</p>
+<p>
+There is no default (out-of-the-box) interface to MPI in Python
+so the submission includes one written in
+<a href="http://www.cosc.canterbury.ac.nz/~greg/python/Pyrex/">Pyrex</a>.
+It's in the file <a href="mpi.pyx"><code>mpi.pyx</code></a>
+</p>
+<p>
+Installation procedure should be self-explanatory after reading
+a <a href="Makefile"><code>make(1)</code> file</a>.
+</p>
+<h2>Results</h2>
+The tests were performed on two dual Intel Xeon EMT64 3.2 GHz computers with
+2 GiBytes per processor. Inteconnect was Myrnet2000 and Lam 7.1.1 over TCP/IP
+was used as messaging layer. The output files are:
+<ol>
+<li><a href="grig-data/hpccoutf.txt-1procs">One MPI process</a></li>
+<li><a href="grig-data/hpccoutf.txt-2procs">Two MPI processes</a></li>
+<li><a href="grig-data/hpccoutf.txt-3procs">Three MPI processes</a></li>
+<li><a href="grig-data/hpccoutf.txt-4procs">Four MPI processes</a></li>
+</ol>
+</body>
+</html>
