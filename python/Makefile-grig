@@ -1,0 +1,13 @@
+# -*- Makefile -*-
+
+PYTHON_PREFIX=/home/luszczek/install/Python-2.4.1
+
+CC = /opt/mpich-gm/bin/mpicc
+CC = mpicc
+CFLAGS = -I$(PYTHON_PREFIX)/include/python2.4
+BLACS = /opt/lib/blacsCinit_MPI-LINUX-0.a /opt/lib/blacsF77init_MPI-LINUX-0.a /opt/lib/blacs_MPI-LINUX-0.a
+LDFLAGS = -L$(PYTHON_PREFIX)/lib/python2.4/config -L/opt/lib -Xlinker -export-dynamic
+LOADLIBES = -lpython2.4 -lpthread -ldl -lutil -lscalapack /opt/lib/lapack_LINUX.a -lf77blas -latlas $(BLACS) -lg2c -lm
+LOADLIBES = -lpython2.4 -lpthread -ldl -lutil -lg2c -lm
+
+hpcc: hpcc.o mpi.o

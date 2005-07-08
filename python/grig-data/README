@@ -1,0 +1,2 @@
+Tests were performed on two dual Intel Xeon EMT64 3.2 GHz computers with 2 GiBytes per processor.
+Inteconnect was Myrnet2000 and Lam 7.1.1 over TCP/IP was used as messaging layer.
