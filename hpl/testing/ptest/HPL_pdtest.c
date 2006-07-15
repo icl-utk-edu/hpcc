@@ -408,7 +408,7 @@ void HPL_pdtest
          "||Ax-b||_oo / ( eps * ||A||_1  * ||x||_1  ) = ", resid2,
          " ...... ", ( resid2 < TEST->thrsh ? "PASSED" : "FAILED" ) );
       HPL_fprintf( TEST->outfp, "%s%16.7f%s%s\n",
-         "||Ax-b||_oo / ( eps * ||A||_oo * ||x||_oo ) = ", resid3,
+         "||Ax-b||_oo / ( eps * ||A||_oo * ||x||_oo * N ) = ", resid3,
          " ...... ", ( resid3 < TEST->thrsh ? "PASSED" : "FAILED" ) );
 
       if( ( resid1 >= TEST->thrsh ) || ( resid2 >= TEST->thrsh ) ||
