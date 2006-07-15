@@ -135,7 +135,7 @@ LAlib        = $(LAdir)/libf77blas.a $(LAdir)/libatlas.a
 #                       Cray  fcd  (fortran  character  descriptor)  for
 #                       interoperation.
 #
-F2CDEFS      = -DAdd__ -DF77_INTEGER=int -DStringSunStyle
+F2CDEFS      = -DAdd_ -DF77_INTEGER=int -DStringSunStyle
 #
 # ----------------------------------------------------------------------
 # - HPL includes / libraries / specifics -------------------------------
