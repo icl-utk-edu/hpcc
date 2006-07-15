@@ -4,7 +4,7 @@
 # HPC Challenge Benchmark
 # Piotr Luszczek
 # University of Tennessee Knoxville
-# Innovative Computing Laboratories
+# Innovative Computing Laboratory
 # (C) Copyright 2005 All Rights Reserved
 #
 
