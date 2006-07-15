@@ -56,7 +56,7 @@ iiamax(int n, int *x, int incx) {
 
   idx = 0;
   mx = (x[0] < 0 ? -x[0] : x[0]);
-  for (i = 0; i < n; i++, x += incx) {
+  for (i = 0; i < n; i += incx) {
     v = (x[i] < 0 ? -x[i] : x[i]);
     if (mx < v) {mx = v; idx = i;}
   }
@@ -304,7 +304,8 @@ HPCC_Init(HPCC_Params *params) {
 
   params->DGEMM_N =
   params->FFT_N =
-  params->StreamVectorSize = -1;
+  params->StreamVectorSize =
+  params->MPIFFT_Procs = -1;
 
   params->StreamThreads = 1;
 
@@ -452,6 +453,7 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "MPIFFT_N=" FSTR64, params->MPIFFT_N );
   FPRINTF( myRank, outputFile, "MPIFFT_Gflops=%g", params->MPIFFTGflops );
   FPRINTF( myRank, outputFile, "MPIFFT_maxErr=%g", params->MPIFFT_maxErr );
+  FPRINTF( myRank, outputFile, "MPIFFT_Procs=%d", params->MPIFFT_Procs );
   FPRINTF( myRank, outputFile, "MaxPingPongLatency_usec=%g", params->MaxPingPongLatency );
   FPRINTF( myRank, outputFile, "RandomlyOrderedRingLatency_usec=%g", params->RandomlyOrderedRingLatency );
   FPRINTF( myRank, outputFile, "MinPingPongBandwidth_GBytes=%g", params->MinPingPongBandwidth );
@@ -688,6 +690,9 @@ HPCC_Defaults(HPL_T_test *TEST, int *NS, int *N,
 
 #ifdef Add_
 #define F77xerbla xerbla_
+#endif
+#ifdef Add__
+#define F77xerbla xerbla__
 #endif
 #ifdef NoChange
 #define F77xerbla xerbla
