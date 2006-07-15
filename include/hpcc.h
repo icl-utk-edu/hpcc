@@ -78,6 +78,7 @@ typedef struct {
   int DGEMM_N;
   int StreamThreads, StreamVectorSize;
   int FFT_N;
+  int MPIFFT_Procs;
 
   HPL_RuntimeData HPLrdata;
   PTRANS_RuntimeData PTRANSrdata;
