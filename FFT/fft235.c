@@ -383,18 +383,222 @@ fft8b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
 
 static void
 fft3a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
+  int j;
+  double x0, x1, x2;
+  double y0, y1, y2;
+  double wr1, wr2;
+  double wi1, wi2;
+  double c31 = 0.86602540378443865, c32 = 0.5;
+
+  for (j = 0; j < l; ++j) {
+    wr1 = c_re( w[j] );
+    wi1 = c_im( w[j] );
+    wr2=wr1*wr1-wi1*wi1;
+    wi2=wr1*wi1+wr1*wi1;
+    x0 = c_re( ARR2D( a, j, 1, l ) ) + c_re( ARR2D( a, j, 2, l ) );
+    y0 = c_im( ARR2D( a, j, 1, l ) ) + c_im( ARR2D( a, j, 2, l ) );
+    x1 = c_re( ARR2D( a, j, 0, l ) ) - c32 * x0;
+    y1 = c_im( ARR2D( a, j, 0, l ) ) - c32 * y0;
+    x2 = c31 * ( c_im( ARR2D( a, j, 1, l ) ) - c_im( ARR2D( a, j, 2, l ) ));
+    y2 = c31 * ( c_re( ARR2D( a, j, 2, l ) ) - c_re( ARR2D( a, j, 1, l ) ));
+    c_re( ARR2D( b, 0, j, 3 ) ) = c_re( ARR2D( a, j, 0, l ) ) + x0;
+    c_im( ARR2D( b, 0, j, 3 ) ) = c_im( ARR2D( a, j, 0, l ) ) + y0;
+    c_re( ARR2D( b, 1, j, 3 ) ) = wr1*(x1+x2)-wi1*(y1+y2);
+    c_im( ARR2D( b, 1, j, 3 ) ) = wr1*(y1+y2)+wi1*(x1+x2);
+    c_re( ARR2D( b, 2, j, 3 ) ) = wr2*(x1-x2)-wi2*(y1-y2);
+    c_im( ARR2D( b, 2, j, 3 ) ) = wr2*(y1-y2)+wi2*(x1-x2);
+  }
 }
 
 static void
 fft3b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
+  int i, j;
+  double x0, x1, x2;
+  double y0, y1, y2;
+  double wr1, wr2;
+  double wi1, wi2;
+  double c31 = 0.86602540378443865, c32 = 0.5;
+
+  for (i = 0; i < m; ++i) {
+    x0 = c_re( ARR3D( a, i, 0, 1, m, l ) ) + c_re( ARR3D( a, i, 0, 2, m, l ) );
+    y0 = c_im( ARR3D( a, i, 0, 1, m, l ) ) + c_im( ARR3D( a, i, 0, 2, m, l ) );
+    x1 = c_re( ARR3D( a, i, 0, 0, m, l ) ) - c32 * x0;
+    y1 = c_im( ARR3D( a, i, 0, 0, m, l ) ) - c32 * y0;
+    x2 = c31 * (c_im( ARR3D( a, i, 0, 1, m, l ) ) - c_im( ARR3D( a, i, 0, 2, m, l ) ));
+    y2 = c31 * (c_re( ARR3D( a, i, 0, 2, m, l ) ) - c_re( ARR3D( a, i, 0, 1, m, l ) ));
+    c_re( ARR3D( b, i, 0, 0, m, 3 ) ) = c_re( ARR3D( a, i, 0, 0, m, l ) ) + x0;
+    c_im( ARR3D( b, i, 0, 0, m, 3 ) ) = c_im( ARR3D( a, i, 0, 0, m, l ) ) + y0;
+    c_re( ARR3D( b, i, 1, 0, m, 3 ) ) = x1 + x2;
+    c_im( ARR3D( b, i, 1, 0, m, 3 ) ) = y1 + y2;
+    c_re( ARR3D( b, i, 2, 0, m, 3 ) ) = x1 - x2;
+    c_im( ARR3D( b, i, 2, 0, m, 3 ) ) = y1 - y2;
+  }
+
+  for (j = 1; j < l; ++j) {
+    wr1 = c_re( w[j] );
+    wi1 = c_im( w[j] );
+    wr2=wr1*wr1-wi1*wi1;
+    wi2=wr1*wi1+wr1*wi1;
+    for (i = 0; i < m; ++i) {
+      x0 = c_re( ARR3D( a, i, j, 1, m, l ) ) + c_re( ARR3D( a, i, j, 2, m, l ) );
+      y0 = c_im( ARR3D( a, i, j, 1, m, l ) ) + c_im( ARR3D( a, i, j, 2, m, l ) );
+      x1 = c_re( ARR3D( a, i, j, 0, m, l ) ) - c32 * x0;
+      y1 = c_im( ARR3D( a, i, j, 0, m, l ) ) - c32 * y0;
+      x2 = c31 * (c_im( ARR3D( a, i, j, 1, m, l ) ) - c_im( ARR3D( a, i, j, 2, m, l ) ));
+      y2 = c31 * (c_re( ARR3D( a, i, j, 2, m, l ) ) - c_re( ARR3D( a, i, j, 1, m, l ) ));
+      c_re( ARR3D( b, i, 0, j, m, 3 ) ) = c_re( ARR3D( a, i, j, 0, m, l ) ) + x0;
+      c_im( ARR3D( b, i, 0, j, m, 3 ) ) = c_im( ARR3D( a, i, j, 0, m, l ) ) + y0;
+      c_re( ARR3D( b, i, 1, j, m, 3 ) ) = wr1*(x1+x2)-wi1*(y1+y2);
+      c_im( ARR3D( b, i, 1, j, m, 3 ) ) = wr1*(y1+y2)+wi1*(x1+x2);
+      c_re( ARR3D( b, i, 2, j, m, 3 ) ) = wr2*(x1-x2)-wi2*(y1-y2);
+      c_im( ARR3D( b, i, 2, j, m, 3 ) ) = wr2*(y1-y2)+wi2*(x1-x2);
+    }
+  }
 }
 
 static void
 fft5a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
+  int j;
+  double wr1, wr2, wr3, wr4;
+  double wi1, wi2, wi3, wi4;
+  double x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10;
+  double y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10;
+  double c51 = 0.95105651629515357, c52 = 0.61803398874989485;
+  double c53 = 0.55901699437494742, c54 = 0.25;
+
+  for (j = 0; j < l; ++j) {
+    wr1 = c_re( w[j] );
+    wi1 = c_im( w[j] );
+    wr2=wr1*wr1-wi1*wi1;
+    wi2=wr1*wi1+wr1*wi1;
+    wr3=wr1*wr2-wi1*wi2;
+    wi3=wr1*wi2+wi1*wr2;
+    wr4=wr2*wr2-wi2*wi2;
+    wi4=wr2*wi2+wr2*wi2;
+    x0 = c_re( ARR2D( a, j, 1, l ) ) + c_re( ARR2D( a, j, 4, l ) );
+    y0 = c_im( ARR2D( a, j, 1, l ) ) + c_im( ARR2D( a, j, 4, l ) );
+    x1 = c_re( ARR2D( a, j, 2, l ) ) + c_re( ARR2D( a, j, 3, l ) );
+    y1 = c_im( ARR2D( a, j, 2, l ) ) + c_im( ARR2D( a, j, 3, l ) );
+    x2 = c51 * (c_re( ARR2D( a, j, 1, l ) ) - c_re( ARR2D( a, j, 4, l ) ));
+    y2 = c51 * (c_im( ARR2D( a, j, 1, l ) ) - c_im( ARR2D( a, j, 4, l ) ));
+    x3 = c51 * (c_re( ARR2D( a, j, 2, l ) ) - c_re( ARR2D( a, j, 3, l ) ));
+    y3 = c51 * (c_im( ARR2D( a, j, 2, l ) ) - c_im( ARR2D( a, j, 3, l ) ));
+    x4 = x0 + x1;
+    y4 = y0 + y1;
+    x5 = c53 * (x0-x1);
+    y5 = c53 * (y0-y1);
+    x6 = c_re( ARR2D( a, j, 0, l ) ) - c54 * x4;
+    y6 = c_im( ARR2D( a, j, 0, l ) ) - c54 * y4;
+    x7 = x6 + x5;
+    y7 = y6 + y5;
+    x8 = x6 - x5;
+    y8 = y6 - y5;
+    x9 = y2 + c52*y3;
+    y9 = -x2 - c52*x3;
+    x10 = c52*y2 - y3;
+    y10 = x3 - c52*x2;
+    c_re( ARR2D( b, 0, j, 5 ) ) = c_re( ARR2D( a, j, 0, l ) ) + x4;
+    c_im( ARR2D( b, 0, j, 5 ) ) = c_im( ARR2D( a, j, 0, l ) ) + y4;
+    c_re( ARR2D( b, 1, j, 5 ) ) = wr1 * (x7+x9) - wi1 * (y7+y9);
+    c_im( ARR2D( b, 1, j, 5 ) ) = wr1 * (y7+y9) + wi1 * (x7+x9);
+    c_re( ARR2D( b, 2, j, 5 ) ) = wr2 * (x8+x10) - wi2 * (y8+y10);
+    c_im( ARR2D( b, 2, j, 5 ) ) = wr2 * (y8+y10) + wi2 * (x8+x10);
+    c_re( ARR2D( b, 3, j, 5 ) ) = wr3 * (x8-x10) - wi3 * (y8-y10);
+    c_im( ARR2D( b, 3, j, 5 ) ) = wr3 * (y8-y10) + wi3 * (x8-x10);
+    c_re( ARR2D( b, 4, j, 5 ) ) = wr4 * (x7-x9) - wi4 * (y7-y9);
+    c_im( ARR2D( b, 4, j, 5 ) ) = wr4 * (y7-y9) + wi4 * (x7-x9);
+  }
 }
 
 static void
 fft5b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
+  int i, j;
+  double x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10;
+  double y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10;
+  double wr1, wr2, wr3, wr4;
+  double wi1, wi2, wi3, wi4;
+  double c51 = 0.95105651629515357, c52 = 0.61803398874989485;
+  double c53 = 0.55901699437494742, c54 = 0.25;
+
+  for (i = 0; i < m; ++i) {
+    x0 = c_re( ARR3D( a, i, 0, 1, m, l ) ) + c_re( ARR3D( a, i, 0, 4, m, l ) );
+    y0 = c_im( ARR3D( a, i, 0, 1, m, l ) ) + c_im( ARR3D( a, i, 0, 4, m, l ) );
+    x1 = c_re( ARR3D( a, i, 0, 2, m, l ) ) + c_re( ARR3D( a, i, 0, 3, m, l ) );
+    y1 = c_im( ARR3D( a, i, 0, 2, m, l ) ) + c_im( ARR3D( a, i, 0, 3, m, l ) );
+    x2 = c51 * (c_re( ARR3D( a, i, 0, 1, m, l ) ) - c_re( ARR3D( a, i, 0, 4, m, l ) ));
+    y2 = c51 * (c_im( ARR3D( a, i, 0, 1, m, l ) ) - c_im( ARR3D( a, i, 0, 4, m, l ) ));
+    x3 = c51 * (c_re( ARR3D( a, i, 0, 2, m, l ) ) - c_re( ARR3D( a, i, 0, 3, m, l ) ));
+    y3 = c51 * (c_im( ARR3D( a, i, 0, 2, m, l ) ) - c_im( ARR3D( a, i, 0, 3, m, l ) ));
+    x4 = x0 + x1;
+    y4 = y0 + y1;
+    x5 = c53 * (x0-x1);
+    y5 = c53 * (y0-y1);
+    x6 = c_re( ARR3D( a, i, 0, 0, m, l ) ) - c54 * x4;
+    y6 = c_im( ARR3D( a, i, 0, 0, m, l ) ) - c54 * y4;
+    x7 = x6 + x5;
+    y7 = y6 + y5;
+    x8 = x6 - x5;
+    y8 = y6 - y5;
+    x9 = y2 + c52 * y3;
+    y9 = -x2 - c52 * x3;
+    x10 = c52 * y2 - y3;
+    y10 = x3 - c52 * x2;
+    c_re( ARR3D( b, i, 0, 0, m, 5 ) ) = c_re( ARR3D( a, i, 0, 0, m, l ) ) + x4;
+    c_im( ARR3D( b, i, 0, 0, m, 5 ) ) = c_im( ARR3D( a, i, 0, 0, m, l ) ) + y4;
+    c_re( ARR3D( b, i, 1, 0, m, 5 ) ) = x7 + x9;
+    c_im( ARR3D( b, i, 1, 0, m, 5 ) ) = y7 + y9;
+    c_re( ARR3D( b, i, 2, 0, m, 5 ) ) = x8 + x10;
+    c_im( ARR3D( b, i, 2, 0, m, 5 ) ) = y8 + y10;
+    c_re( ARR3D( b, i, 3, 0, m, 5 ) ) = x8 - x10;
+    c_im( ARR3D( b, i, 3, 0, m, 5 ) ) = y8 - y10;
+    c_re( ARR3D( b, i, 4, 0, m, 5 ) ) = x7 - x9;
+    c_im( ARR3D( b, i, 4, 0, m, 5 ) ) = y7 - y9;
+  }
+
+  for (j = 1; j < l; ++j) {
+    wr1 = c_re( w[j] );
+    wi1 = c_im( w[j] );
+    wr2 = wr1 * wr1 - wi1*wi1;
+    wi2 = wr1 * wi1 + wr1*wi1;
+    wr3 = wr1 * wr2 - wi1*wi2;
+    wi3 = wr1 * wi2 + wi1*wr2;
+    wr4 = wr2 * wr2 - wi2*wi2;
+    wi4 = wr2 * wi2 + wr2*wi2;
+    for (i = 0; i < m; ++i) {
+      x0 = c_re( ARR3D( a, i, j, 1, m, l ) ) + c_re( ARR3D( a, i, j, 4, m, l ) );
+      y0 = c_im( ARR3D( a, i, j, 1, m, l ) ) + c_im( ARR3D( a, i, j, 4, m, l ) );
+      x1 = c_re( ARR3D( a, i, j, 2, m, l ) ) + c_re( ARR3D( a, i, j, 3, m, l ) );
+      y1 = c_im( ARR3D( a, i, j, 2, m, l ) ) + c_im( ARR3D( a, i, j, 3, m, l ) );
+      x2 = c51 * (c_re( ARR3D( a, i, j, 1, m, l ) ) - c_re( ARR3D( a, i, j, 4, m, l ) ));
+      y2 = c51 * (c_im( ARR3D( a, i, j, 1, m, l ) ) - c_im( ARR3D( a, i, j, 4, m, l ) ));
+      x3 = c51 * (c_re( ARR3D( a, i, j, 2, m, l ) ) - c_re( ARR3D( a, i, j, 3, m, l ) ));
+      y3 = c51 * (c_im( ARR3D( a, i, j, 2, m, l ) ) - c_im( ARR3D( a, i, j, 3, m, l ) ));
+      x4 = x0 + x1;
+      y4 = y0 + y1;
+      x5 = c53 * (x0-x1);
+      y5 = c53 * (y0-y1);
+      x6 = c_re( ARR3D( a, i, j, 0, m, l ) ) - c54*x4;
+      y6 = c_im( ARR3D( a, i, j, 0, m, l ) ) - c54*y4;
+      x7 = x6 + x5;
+      y7 = y6 + y5;
+      x8 = x6 - x5;
+      y8 = y6 - y5;
+      x9 = y2 + c52 * y3;
+      y9 = -x2 - c52 * x3;
+      x10 = c52*y2 - y3;
+      y10 = x3 - c52*x2;
+      c_re( ARR3D( b, i, 0, j, m, 5 ) ) = c_re( ARR3D( a, i, j, 0, m, l ) ) + x4;
+      c_im( ARR3D( b, i, 0, j, m, 5 ) ) = c_im( ARR3D( a, i, j, 0, m, l ) ) + y4;
+      c_re( ARR3D( b, i, 1, j, m, 5 ) ) = wr1*(x7+x9) - wi1*(y7+y9);
+      c_im( ARR3D( b, i, 1, j, m, 5 ) ) = wr1*(y7+y9) + wi1*(x7+x9);
+      c_re( ARR3D( b, i, 2, j, m, 5 ) ) = wr2*(x8+x10) - wi2*(y8+y10);
+      c_im( ARR3D( b, i, 2, j, m, 5 ) ) = wr2*(y8+y10) + wi2*(x8+x10);
+      c_re( ARR3D( b, i, 3, j, m, 5 ) ) = wr3*(x8-x10) - wi3*(y8-y10);
+      c_im( ARR3D( b, i, 3, j, m, 5 ) ) = wr3*(y8-y10) + wi3*(x8-x10);
+      c_re( ARR3D( b, i, 4, j, m, 5 ) ) = wr4*(x7-x9) - wi4*(y7-y9);
+      c_im( ARR3D( b, i, 4, j, m, 5 ) ) = wr4*(y7-y9) + wi4*(x7-x9);
+    }
+  }
 }
 
 static void
@@ -536,7 +740,7 @@ HPCC_fft235(fftw_complex *a, fftw_complex *b, fftw_complex *w, int n, const int 
   }
 
   return 0;
-}	/* fft235 */
+}
 
 static int
 settbl0(fftw_complex *w, int m, int l) {
@@ -559,7 +763,7 @@ HPCC_settbl(fftw_complex *w, int n) {
   int j, k, l, kp4, kp8;
   int ip[3];
 
-  HPCC_factor( n, ip );
+  HPCC_factor235( n, ip );
 
   if (1 != ip[0]) {
     kp4 = 2 - (ip[0] + 2) % 3;
@@ -600,14 +804,14 @@ HPCC_settbl(fftw_complex *w, int n) {
 }	/* settbl */
 
 int
-HPCC_factor(int n, int *ip) {
+HPCC_factor235(int n, int *ip) {
   ip[0] = ip[1] = ip[2] = 0;
 
   if (n % 2 != 0 && n % 3 != 0 && n % 5 != 0)
-    return 0;
+    return 1;
 
   if (n <= 1)
-    return 0;
+    return 1;
 
   /* count all 2 factors */
   for (; n > 1 && ! (n & 1); n >>= 1)
@@ -621,18 +825,21 @@ HPCC_factor(int n, int *ip) {
   for (; n > 1 && ! (n % 5); n /= 5)
     ip[2]++;
 
+  if (n != 1)
+    return 1;
+
   return 0;
-}	/* HPCC_factor */
+}
 
 int
-HPCC_factor8(s64Int_t n, int *ip) {
+HPCC_factor235_8(s64Int_t n, int *ip) {
   ip[0] = ip[1] = ip[2] = 0;
 
   if (n % 2 != 0 && n % 3 != 0 && n % 5 != 0)
-    return 0;
+    return 1;
 
   if (n <= 1)
-    return 0;
+    return 1;
 
   /* count all 2 factors */
   for (; n > 1 && ! (n & 1); n >>= 1)
@@ -646,5 +853,8 @@ HPCC_factor8(s64Int_t n, int *ip) {
   for (; n > 1 && ! (n % 5); n /= 5)
     ip[2]++;
 
+  if (n != 1)
+    return 1;
+
   return 0;
-}	/* HPCC_factor8 */
+}

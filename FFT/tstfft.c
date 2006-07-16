@@ -16,7 +16,19 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
   int i, n, failure = 1;
   double deps = HPL_dlamch( HPL_MACH_EPS );
 
-  n = HPCC_LocalVectorSize( params, 2, sizeof(fftw_complex), 1 ); /* Need 2 vectors and power of 2 */
+#ifdef HPCC_FFT_235
+  int f[3];
+
+  /* Need 2 vectors */
+  n = HPCC_LocalVectorSize( params, 2, sizeof(fftw_complex), 0 );
+
+  /* Adjust local size for factors */
+  for ( ; HPCC_factor235( n, f ); n--)
+    ; /* EMPTY */
+#else
+  /* Need 2 vectors and vectors' sizes as power of 2 */
+  n = HPCC_LocalVectorSize( params, 2, sizeof(fftw_complex), 1 );
+#endif
 
   /* need to use fftw_malloc() so that the returned pointers will be aligned properly for SSE
      instructions on Intel/AMD systems */

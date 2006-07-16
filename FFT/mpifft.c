@@ -10,8 +10,8 @@
 double *HPCC_fft_timings_forward, *HPCC_fft_timings_backward;
 
 static void
-MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, double *UGflops, s64Int_t *Un,
-        double *UmaxErr, int *Ufailure) {
+MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
+        double *UGflops, s64Int_t *Un, double *UmaxErr, int *Ufailure) {
   int commRank, commSize;
   int failure;
   s64Int_t i, n;
@@ -29,12 +29,10 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, double *UGf
   MPI_Comm_size( comm, &commSize );
   MPI_Comm_rank( comm, &commRank );
 
-  /* there are two vectors of size 'n'/'commSize': inout, work, and internal work: 2*'n'/'commSize' */
-  n = HPCC_LocalVectorSize( params, 4, sizeof(fftw_complex), 1 );
+  n = locN;
 
-  /* make sure that the size of the vector size is greater than number of processes squared */
-  if (n < commSize)
-    n = 2 * commSize;
+  /* number of processes have been factored out - need to put it back in */
+  n *= commSize;
 
   n *= commSize; /* global vector size */
 
@@ -124,7 +122,7 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, double *UGf
 int
 HPCC_MPIFFT(HPCC_Params *params) {
   int commRank, commSize;
-  int i, procPow2, isComputing, doIO, failure;
+  int locN, procCnt, isComputing, doIO, failure;
   s64Int_t n;
   double Gflops = -1.0, maxErr = -1.0;
   MPI_Comm comm;
@@ -140,31 +138,63 @@ HPCC_MPIFFT(HPCC_Params *params) {
     if (! outFile) outFile = stderr;
   }
 
-  /* Find power of two that is smaller or equal to number of processes */
-  for (i = 0, procPow2 = 1;
-       procPow2 <= commSize && i < (int)(sizeof(int) * 8 - 1);
-       i++, procPow2 <<= 1)
-    ;
-  i--;
-  procPow2 = 1 << i;
+  /*
+  There are two vectors of size 'n'/'commSize': inout, work,
+  and internal work: 2*'n'/'commSize'; it's 4 vectors then.
 
-  isComputing = commRank < procPow2 ? 1 : 0;
+  FFTE requires that the global vector size 'n' has to be at least
+  as big as square of number of processes. The square is calculated
+  in each factor independently. In other words, 'n' has to have as
+  at least twice as many 2 factors as the process count, twice as many
+  3 factors and 5 factors.
+  */
+
+#ifdef HPCC_FFT_235
+  locN = 0; procCnt = commSize + 1;
+  do {
+    int f[3];
+
+    procCnt--;
+
+    for ( ; procCnt > 1 && HPCC_factor235( procCnt, f ); procCnt--)
+      ; /* EMPTY */
+
+    /* Make sure the local vector size is greater than 0 */
+    locN = HPCC_LocalVectorSize( params, 4*procCnt, sizeof(fftw_complex), 0 );
+    for ( ; locN >= 1 && HPCC_factor235( locN, f ); locN--)
+      ; /* EMPTY */
+  } while (locN < 1);
+#else
+  /* Find power of two that is smaller or equal to number of processes */
+  for (procCnt = 1; procCnt <= (commSize >> 1); procCnt <<= 1)
+    ; /* EMPTY */
+
+  /* Make sure the local vector size is greater than 0 */
+  while (1) {
+    locN = HPCC_LocalVectorSize( params, 4*procCnt, sizeof(fftw_complex), 1 );
+    if (locN) break;
+    procCnt >>= 1;
+  }
+#endif
+
+  isComputing = commRank < procCnt ? 1 : 0;
 
   HPCC_fft_timings_forward = params->MPIFFTtimingsForward;
   HPCC_fft_timings_backward = params->MPIFFTtimingsBackward;
 
-  if (commSize == procPow2)
+  if (commSize == procCnt)
     comm = MPI_COMM_WORLD;
   else
     MPI_Comm_split( MPI_COMM_WORLD, isComputing ? 0 : MPI_UNDEFINED, commRank, &comm );
 
   if (isComputing)
-    MPIFFT0( params, doIO, outFile, comm, &Gflops, &n, &maxErr, &failure );
+    MPIFFT0( params, doIO, outFile, comm, locN, &Gflops, &n, &maxErr, &failure );
 
-  if (commSize != procPow2 && isComputing && comm != MPI_COMM_NULL)
+  if (commSize != procCnt && isComputing && comm != MPI_COMM_NULL)
     MPI_Comm_free( &comm );
 
   params->MPIFFT_N = n;
+  params->MPIFFT_Procs = procCnt;
   params->MPIFFT_maxErr = maxErr;
 
   MPI_Bcast( &Gflops, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD );

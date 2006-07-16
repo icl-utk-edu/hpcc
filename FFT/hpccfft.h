@@ -47,8 +47,8 @@ extern int HPCC_ipow(int x, int p);
 extern int HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p);
 extern int HPCC_fft235(fftw_complex *a, fftw_complex *b, fftw_complex *w, int n, const int *ip);
 extern int HPCC_settbl(fftw_complex *w, int n);
-extern int HPCC_factor(int n, int *ip);
-extern int HPCC_factor8(s64Int_t n, int *ip);
+extern int HPCC_factor235(int n, int *ip);
+extern int HPCC_factor235_8(s64Int_t n, int *ip);
 
 extern int HPCC_bcnrand(u64Int_t n, u64Int_t a, void *x);
 

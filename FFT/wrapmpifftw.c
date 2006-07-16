@@ -12,8 +12,8 @@ GetNXYZ(s64Int_t n, int npu) {
   int ip[3], lnx[3], lny[3], lnz[3], lnpu[3];
   int i, nx, ny, nz, nxyz;
 
-  HPCC_factor( npu, lnpu );
-  HPCC_factor8( n, ip );
+  HPCC_factor235( npu, lnpu );
+  HPCC_factor235_8( n, ip );
 
   for (i = 0; i < 3; ++i) {
     EMAX( lnz[i], lnpu[i], (ip[i]+1)/3 );

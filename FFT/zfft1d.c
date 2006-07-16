@@ -243,7 +243,7 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
   ww = p->ww;
   c = p->c;
 
-  HPCC_factor( n, ip );
+  HPCC_factor235( n, ip );
 
   if (1 == iopt)
     for (i = 0; i < n; ++i) {

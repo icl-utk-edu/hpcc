@@ -315,8 +315,8 @@ HPCC_pzfft1d(s64Int_t n, fftw_complex *a, fftw_complex *b, fftw_complex *w, int 
   nn = n / npu; inn = (int)nn;
   nn2 = nn / npu;
 
-  HPCC_factor( npu, lnpu );
-  HPCC_factor8( n, ip );
+  HPCC_factor235( npu, lnpu );
+  HPCC_factor235_8( n, ip );
 
   for (i = 0; i < 3; ++i) {
     EMAX( lnz[i], lnpu[i], (ip[i]+1)/3 );
