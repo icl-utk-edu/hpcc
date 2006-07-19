@@ -52,23 +52,6 @@ PTRANS(HPCC_Params *params) {
 
 /*  Purpose: Driver routine for testing the full matrix transpose. */
 
-/*    The user should modify TOTMEM to indicate the maximum amount of memory */
-/*  in bytes his system has.  Remember to leave room in memory for operating */
-/*  system, the buffer of the communication package, etc ... */
-
-/*    The constants INTGSZ and DBLESZ indicate the length in bytes on the */
-/*  given platform for an integer and a double precision real. For example, */
-/*  on a system with 8 MB of memory, the parameters we use are */
-/*  TOTMEM=6200000 (leaving 1.8 MB for OS, code, communication buffer, etc). */
-/*  However, for PVM, we usually set TOTMEM = 2000000. */
-/*  The length of a double precision real is 8, and an integer takes up 4 bytes. */
-
-/*    Some playing around to discover what the maximum value you can set */
-/*  TOTMEM to may be required. All arrays used by the factorization and */
-/*  check are allocated out of the array called MEM. The integer IPA, */
-/*  for example, indicates the element of MEM that the answer vector(s) */
-/*  A begin(s) on. */
-
   FILE *outFile;
   double curGBs, cpuGBs, *GBs;
   int AllocSuccessful;
@@ -185,7 +168,7 @@ PTRANS(HPCC_Params *params) {
         fprintf( outFile, "Bad %s parameters: going on to next test case.", "grid" );
       }
       ++kskip;
-      goto L30;
+      continue;
     }
 
 /*        Define process grid */
@@ -197,7 +180,7 @@ PTRANS(HPCC_Params *params) {
 /*        Go to bottom of process grid loop if this case doesn't use my process */
 
     if (myrow >= nprow || mycol >= npcol) {
-      goto L30;
+      continue;
     }
 
     for (i__ = 0; i__ < nmat; ++i__) {
@@ -228,7 +211,7 @@ PTRANS(HPCC_Params *params) {
           fprintf( outFile, "Bad %s parameters: going on to next test case.", "matrix" );
         }
         ++kskip;
-        goto L20;
+        continue;
       }
 
 /*           Loop over different block sizes */
@@ -262,7 +245,7 @@ PTRANS(HPCC_Params *params) {
             fprintf( outFile, "Bad %s parameters: going on to next test case.", "NB" );
           }
           ++kskip;
-          goto L10;
+          continue;
         }
 
         mp = numroc_(&m, &mb, &myrow, &imrow, &nprow);
@@ -304,7 +287,7 @@ PTRANS(HPCC_Params *params) {
             fprintf( outFile, "Bad %s parameters: going on to next test case.", "MEMORY" );
           }
           ++kskip;
-          goto L10;
+          continue;
         }
 
 /*              Generate matrix A */
@@ -399,17 +382,10 @@ PTRANS(HPCC_Params *params) {
                      m, n, mb, nb, nprow, npcol, ctime[0], passed, cpuGBs, resid );
           }
         }
-      L10:
-        ;
       }
-  L20:
-      ;
   }
 
-  Cblacs_gridexit(context_1.ictxt);
-
-  L30:
-  ;
+    Cblacs_gridexit(context_1.ictxt);
   }
 
   if (imem) free( imem );

@@ -2,8 +2,6 @@
 
 #include <hpcc.h>
 
-/* Table of constant values */
-
 int
 pdmatgen(int *ictxt, char *aform, char *diag, int *m, int *n, int *mb, int *nb, double *aMat, 
   int *lda, int *iarow, int *iacol, int *iseed, int *iroff, int *irnum, int *icoff, int *icnum,
