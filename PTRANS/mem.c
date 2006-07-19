@@ -108,7 +108,7 @@ MaxMem(int nprocs, int imrow, int imcol, int nmat, int *mval, int *nval, int nbm
   return 0;
 }
 
-#ifdef MEMMAIN
+#ifdef HPCC_MEMMAIN
 #include <stdio.h>
 int iceil_(int *n,int *d) {return *n>0 ? (*n+*d-1)/ *d : *n/ *d;}
 int numroc_(int *n, int *nb, int *iproc, int *isrcproc, int *nprocs) {

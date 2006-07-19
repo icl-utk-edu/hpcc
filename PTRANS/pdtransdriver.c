@@ -1,6 +1,14 @@
 /* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*- */
 /*
-pdtransdriver.c
+  pdtransdriver.c
+
+  -- PUMMA Package routine (version 2.1) --
+     Jaeyoung Choi, Oak Ridge National Laboratory.
+     Jack Dongarra, Univ. of Tennessee, Oak Ridge National Laboratory.
+     David Walker,  Oak Ridge National Laboratory.
+     March 26, 1995.
+
+  Purpose: Driver routine for testing the full matrix transpose.
 */
 
 #include <hpcc.h>
@@ -18,6 +26,25 @@ struct {
 static int c__1 = 1;
 static int c__0 = 0;
 
+static void
+param_dump(FILE *outFile, char *name, int n, int *vals) {
+  fprintf( outFile, "%s:", name );
+  for (j = 0; j < n; ++j)
+    fprintf( outFile, " %d", vals[j] );
+  fprintf( outFile, "\n" );
+}
+
+static void
+param_illegal(int iam, FILE *outFile, char *fmt, char *contxt, char *val_name, int x) {
+  if (0 != iam) return;
+
+  if (val_name[0])
+    fprintf( outFile, fmt, contxt, val_name, x );
+  else
+    fprintf( outFile, fmt, contxt );
+  fprintf( outFile, "\n" );
+}
+
 int
 PTRANS(HPCC_Params *params) {
   /* calculation of passed/failed/skipped tests assumes that MPI rank 0 is 0x0 in CBLACS */
@@ -33,24 +60,15 @@ PTRANS(HPCC_Params *params) {
   int *imem;
   long ipa, ipc, ipw, ipiw, isw;
   int nmat, *mval, ierr[1], *nval;
-    int nbmat, *mbval, imcol, *nbval;
-    double ctime[2], resid, resid0;
-    int npcol, *npval, mycol, *nqval;
-    double wtime[2];
-    int imrow, nprow, myrow, iaseed;
-    char *passed;
-    int ngrids;
-    double thresh;
-    int nprocs;
-
-
-/*  -- PUMMA Package routine (version 2.1) -- */
-/*     Jaeyoung Choi, Oak Ridge National Laboratory. */
-/*     Jack Dongarra, Univ. of Tennessee, Oak Ridge National Laboratory. */
-/*     David Walker,  Oak Ridge National Laboratory. */
-/*     March 26, 1995. */
-
-/*  Purpose: Driver routine for testing the full matrix transpose. */
+  int nbmat, *mbval, imcol, *nbval;
+  double ctime[2], resid, resid0;
+  int npcol, *npval, mycol, *nqval;
+  double wtime[2];
+  int imrow, nprow, myrow, iaseed;
+  char *passed;
+  int ngrids;
+  double thresh;
+  int nprocs;
 
   FILE *outFile;
   double curGBs, cpuGBs, *GBs;
@@ -115,20 +133,14 @@ PTRANS(HPCC_Params *params) {
   /* Print headings */
   if (iam == 0) {
     /* matrix sizes */
-    fprintf( outFile, "M:" );
-    for (j = 0; j < nmat; j++) fprintf( outFile, " %d", mval[j] ); fprintf( outFile, "\n" );
-    fprintf( outFile, "N:" );
-    for (j = 0; j < nmat; j++) fprintf( outFile, " %d", nval[j] ); fprintf( outFile, "\n" );
+    param_dump( outFile, "M", nmat, mval );
+    param_dump( outFile, "N", nmat, nval );
     /* block sizes */
-    fprintf( outFile, "MB:" );
-    for (j = 0; j < nbmat; j++) fprintf( outFile, " %d", mbval[j] ); fprintf( outFile, "\n" );
-    fprintf( outFile, "NB:" );
-    for (j = 0; j < nbmat; j++) fprintf( outFile, " %d", nbval[j] ); fprintf( outFile, "\n" );
+    param_dump( outFile, "MB", nbmat, mbval );
+    param_dump( outFile, "NB", nbmat, nbval );
     /* process grids */
-    fprintf( outFile, "P:" );
-    for (j = 0; j < ngrids; j++) fprintf( outFile, " %d", npval[j] ); fprintf( outFile, "\n" );
-    fprintf( outFile, "Q:" );
-    for (j = 0; j < ngrids; j++) fprintf( outFile, " %d", nqval[j] ); fprintf( outFile, "\n" );
+    param_dump( outFile, "P", ngrids, npval );
+    param_dump( outFile, "Q", ngrids, nqval );
 
     fprintf( outFile,
              "TIME   M     N    MB  NB  P   Q     TIME   CHECK   GB/s   RESID\n"
@@ -136,48 +148,49 @@ PTRANS(HPCC_Params *params) {
     fflush( outFile );
   }
 
-/*     Loop over different process grids */
+
+  /*
+    Loop over different process grids
+   */
 
   for (j = 0; j < ngrids; ++j) {
     nprow = npval[j];
     npcol = nqval[j];
 
-/*        Make sure grid information is correct */
+    /*
+      Make sure grid information is correct
+    */
 
     ierr[0] = 0;
     if (nprow < 1) {
-      if (iam == 0) {
-        fprintf( outFile, "ILLEGAL %s: %s = %d; It should be at least 1", "GRID", "nprow", nprow );
-      }
-     ierr[0] = 1;
+      param_illegal( iam, outFile, "ILLEGAL %s: %s = %d; It should be at least 1", "GRID", "nprow", nprow );
+      ierr[0] = 1;
     } else if (npcol < 1) {
-      if (iam == 0) {
-        fprintf( outFile, "ILLEGAL %s: %s = %d; It should be at least 1", "GRID", "npcol", npcol );
-      }
+      param_illegal( iam, outFile, "ILLEGAL %s: %s = %d; It should be at least 1", "GRID", "npcol", npcol );
       ierr[0] = 1;
     } else if (nprow * npcol > nprocs) {
-      if (iam == 0) {
-        fprintf( outFile, "ILLEGAL GRID: nprow*npcol = %d. It can be at most %d.",
-                 nprow * npcol, nprocs );
-      }
+      param_illegal( iam, outFile, "ILLEGAL %s: %s = %d. Too many processes requested.", "GRID", "nprow*npcol-nprocs",
+                     nprow * npcol - nprocs );
       ierr[0] = 1;
     }
 
     if (ierr[0] > 0) {
-      if (iam == 0) {
-        fprintf( outFile, "Bad %s parameters: going on to next test case.", "grid" );
-      }
+      param_illegal( iam, outFile, "Bad %s parameters: going on to next test case.", "grid", "", 0 );
       ++kskip;
       continue;
     }
 
-/*        Define process grid */
+    /*
+      Define process grid
+    */
 
     Cblacs_get(-1, 0, &context_1.ictxt);
     Cblacs_gridinit(&context_1.ictxt, "Row-major", nprow, npcol);
     Cblacs_gridinfo(context_1.ictxt, &nprow, &npcol, &myrow, &mycol);
 
-/*        Go to bottom of process grid loop if this case doesn't use my process */
+    /*
+      Go to bottom of process grid loop if this case doesn't use my process
+     */
 
     if (myrow >= nprow || mycol >= npcol) {
       continue;
@@ -187,63 +200,61 @@ PTRANS(HPCC_Params *params) {
       m = mval[i__];
       n = nval[i__];
 
-/*           Make sure matrix information is correct */
+      /*
+        Make sure matrix information is correct
+       */
 
       ierr[0] = 0;
       if (m < 1) {
-        if (iam == 0) {
-          fprintf( outFile, "ILLEGAL %s: %s = %d; It should be at least 1", "MATRIX", "M", m );
-        }
+        param_illegal( iam, outFile, "ILLEGAL %s: %s = %d; It should be at least 1", "MATRIX", "M", m );
         ierr[0] = 1;
       } else if (n < 1) {
-        if (iam == 0) {
-          fprintf( outFile, "ILLEGAL %s: %s = %d; It should be at least 1", "MATRIX", "N", n );
-        }
+        param_illegal( iam, outFile, "ILLEGAL %s: %s = %d; It should be at least 1", "MATRIX", "N", n );
         ierr[0] = 1;
       }
 
-/*           Make sure no one had error */
+      /*
+        Make sure no one had error
+       */
 
       Cigsum2d(context_1.ictxt,"a","h",1,1,ierr,1,-1,0);
 
       if (ierr[0] > 0) {
-        if (iam == 0) {
-          fprintf( outFile, "Bad %s parameters: going on to next test case.", "matrix" );
-        }
+        param_illegal( iam, outFile, "Bad %s parameters: going on to next test case.", "MATRIX", "", 0 );
         ++kskip;
         continue;
       }
 
-/*           Loop over different block sizes */
+      /*
+        Loop over different block sizes
+       */
 
       for (ii = 1; ii <= nbmat; ++ii) {
 
         mb = mbval[ii - 1];
         nb = nbval[ii - 1];
 
-/*              Make sure blocking sizes are legal */
+        /*
+          Make sure blocking sizes are legal
+         */
 
         ierr[0] = 0;
         if (mb < 1) {
           ierr[0] = 1;
-          if (iam == 0) {
-            fprintf( outFile, "ILLEGAL %s: %s = %d; It should be at least 1", "MB", "MB", mb );
-          }
+          param_illegal( iam, outFile, "ILLEGAL %s: %s = %d; It should be at least 1", "MB", "MB", mb );
         } else if (nb < 1) {
           ierr[0] = 1;
-          if (iam == 0) {
-            fprintf( outFile, "ILLEGAL %s: %s = %d; It should be at least 1", "NB", "NB", nb );
-          }
+          param_illegal( iam, outFile, "ILLEGAL %s: %s = %d; It should be at least 1", "NB", "NB", nb );
         }
 
-/*              Make sure no one had error */
+        /*
+          Make sure no one had error
+         */
 
         Cigsum2d(context_1.ictxt,"a","h",1,1,ierr, 1,-1,0);
 
         if (ierr[0] > 0) {
-          if (iam == 0) {
-            fprintf( outFile, "Bad %s parameters: going on to next test case.", "NB" );
-          }
+          param_illegal( iam, outFile, "Bad %s parameters: going on to next test case.", "NB", "", 0 );
           ++kskip;
           continue;
         }
@@ -268,29 +279,31 @@ PTRANS(HPCC_Params *params) {
         ipw = ipiw;
         isw = ipw + (long)(iceil_(&mg, &lcm) << 1) * (long)mb * (long)iceil_(&ng, &lcm) * (long)nb;
 
-/*              Make sure have enough memory to handle problem */
+        /*
+          Make sure have enough memory to handle problem
+         */
 
         if (isw > dMemSize) {
-          if (iam == 0) {
-            fprintf( outFile, "Unable to perform %s: need memory of at least %ld doubles\n",
-                     "PTRANS", isw );
-          }
+          param_illegal( iam, outFile, "Unable to perform %s: need %s of at least %d thousand doubles\n",
+                         "PTRANS", "memory", (int)((isw + 999)/ 1000) );
           ierr[0] = 1;
         }
 
-/*              Make sure no one had error */
+        /*
+          Make sure no one had error
+         */
 
         Cigsum2d(context_1.ictxt,"a","h",1,1,ierr, 1,-1,0);
 
         if (ierr[0] > 0) {
-          if (iam == 0) {
-            fprintf( outFile, "Bad %s parameters: going on to next test case.", "MEMORY" );
-          }
+          param_illegal( iam, outFile, "Bad %s parameters: going on to next test case.", "MEMORY", "", 0 );
           ++kskip;
           continue;
         }
 
-/*              Generate matrix A */
+        /*
+          Generate matrix A
+         */
 
         lda = Mmax(1,mp);
         /* A = rand(m, n, iaseed) */
@@ -304,7 +317,9 @@ PTRANS(HPCC_Params *params) {
         Cblacs_barrier(context_1.ictxt, "All");
         sltimer_(&c__1);
 
-/*              Perform the matrix transpose */
+        /*
+          Perform the matrix transpose
+         */
 
         ldc = Mmax(1,np);
         /* C := A' + d_One * C */
@@ -315,18 +330,21 @@ PTRANS(HPCC_Params *params) {
 
         if (thresh > 0.0) {
 
-/*                  Regenerate matrix A in transpose form (A') */
+          /*
+            Regenerate matrix A in transpose form (A')
+           */
 
           lda = Mmax(1,np);
           /* A = rand(n, m, icseed) */
-          pdmatgen(&context_1.ictxt, "T", "N", &n, &m, &nb, &mb, &
-                   mem[ipa - 1], &lda, &imrow, &imcol, &icseed, &
-                   c__0, &np, &c__0, &mq, &myrow, &mycol, &nprow, &npcol, 0.0);
+          pdmatgen( &context_1.ictxt, "T", "N", &n, &m, &nb, &mb, &mem[ipa - 1], &lda, &imrow, &imcol, &icseed,
+                    &c__0, &np, &c__0, &mq, &myrow, &mycol, &nprow, &npcol, 0.0);
           /* A += rand(m, n, iaseed) */
-          pdmatgen(&context_1.ictxt, "T", "N", &m, &n, &mb, &nb, &mem[ipa - 1], &lda, &imrow,
-                   &imcol, &iaseed, &c__0, &mp, &c__0, &nq, &myrow, &mycol, &nprow, &npcol, 1.0);
+          pdmatgen( &context_1.ictxt, "T", "N", &m, &n, &mb, &nb, &mem[ipa - 1], &lda, &imrow,
+                    &imcol, &iaseed, &c__0, &mp, &c__0, &nq, &myrow, &mycol, &nprow, &npcol, 1.0);
 
-/*                  Compare A' to C */
+          /*
+            Compare A' to C
+           */
 
           pdmatcmp(&context_1.ictxt, &np, &mq, &mem[ipa - 1], &lda, &mem[ipc - 1], &ldc, &resid);
           resid0 = resid;
@@ -341,23 +359,31 @@ PTRANS(HPCC_Params *params) {
           }
         } else {
 
-/*                  Don't perform the checking, only the timing operation */
+          /*
+            Don't perform the checking, only the timing operation
+           */
 
           ++kpass;
           resid -= resid;
           passed = "BYPASS";
         }
 
-/*              Gather maximum of all CPU and WALL clock timings */
+        /*
+          Gather maximum of all CPU and WALL clock timings
+         */
 
         slcombine_(&context_1.ictxt, "All", ">", "W", &c__1, &c__1, wtime);
         slcombine_(&context_1.ictxt, "All", ">", "C", &c__1, &c__1, ctime);
 
-/*              Print results */
+        /*
+          Print results
+         */
 
         if (iam == 0) {
 
-/*                  Print WALL time if machine supports it */
+          /*
+            Print WALL time if machine supports it
+           */
 
           if (wtime[0] > 0.0) {
             curGBs = 1e-9 / wtime[0] * m * n * sizeof(double);
@@ -374,7 +400,9 @@ PTRANS(HPCC_Params *params) {
                      m, n, mb, nb, nprow, npcol, wtime[0], passed, curGBs, resid );
           }
 
-/*                  Print CPU time if machine supports it */
+          /*
+            Print CPU time if machine supports it
+           */
 
           if (ctime[0] > 0.0) {
             cpuGBs = 1e-9 / ctime[0] * m * n * sizeof(double);
@@ -383,7 +411,7 @@ PTRANS(HPCC_Params *params) {
           }
         }
       }
-  }
+    }
 
     Cblacs_gridexit(context_1.ictxt);
   }
@@ -393,7 +421,7 @@ PTRANS(HPCC_Params *params) {
 
   mem_failure:
 
-/*     Print out ending messages and close output file */
+  /* Print out ending messages and close output file */
 
   if (iam == 0) {
     ktests = kpass + kfail + kskip;
