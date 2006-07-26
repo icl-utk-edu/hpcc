@@ -13,6 +13,8 @@
 
 #include <hpcc.h>
 
+#include "cblacslt.h"
+
 /* Common Block Declarations */
 
 struct {
@@ -28,6 +30,7 @@ static int c__0 = 0;
 
 static void
 param_dump(FILE *outFile, char *name, int n, int *vals) {
+  int j;
   fprintf( outFile, "%s:", name );
   for (j = 0; j < n; ++j)
     fprintf( outFile, " %d", vals[j] );
@@ -43,6 +46,40 @@ param_illegal(int iam, FILE *outFile, char *fmt, char *contxt, char *val_name, i
   else
     fprintf( outFile, fmt, contxt );
   fprintf( outFile, "\n" );
+}
+
+static void
+param_allred_sum(int *ierr) {
+  int success;
+  MPI_Allreduce( ierr, &success, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD );
+  ierr[0] = success;
+}
+
+static void
+grid_map(int np_me, int npall, int nprow, int npcol, int seed, int *umap) {
+  int i, j, k, rval[2], rmul[2], radd[2];
+
+  if (seed < 0) seed = -seed;
+  rval[1] = (seed >> 16) & 32767; rval[0] = seed & 65535;
+
+  rmul[0] = 20077;
+  rmul[1] = 16838;
+  radd[0] = 12345;
+  radd[1] = 0;
+  setran_( rval, rmul, radd );
+  pdrand();
+
+  for (i = 0; i < npall; ++i)
+    umap[i] = i;
+
+  for (i = 0; i < npall; ++i) {
+    j = pdrand() * npall;
+
+    /* swap entries i and j */
+    k = umap[j];
+    umap[j] = umap[i];
+    umap[i] = k;
+  }
 }
 
 int
@@ -61,18 +98,18 @@ PTRANS(HPCC_Params *params) {
   long ipa, ipc, ipw, ipiw, isw;
   int nmat, *mval, ierr[1], *nval;
   int nbmat, *mbval, imcol, *nbval;
-  double ctime[2], resid, resid0;
+  double ctime[2], resid, resid0 = 1.0;
   int npcol, *npval, mycol, *nqval;
   double wtime[2];
-  int imrow, nprow, myrow, iaseed;
+  int imrow, nprow, myrow, iaseed = 100, proc_seed;
   char *passed;
   int ngrids;
   double thresh;
   int nprocs;
 
   FILE *outFile;
-  double curGBs, cpuGBs, *GBs;
-  int AllocSuccessful;
+  double curGBs, curGBs_0, cpuGBs, *GBs;
+  int AllocSuccessful, grid_cnt, r0x0, r0_ingrid;
   int icseed = 200;
   double d_One = 1.0;
   long dMemSize, li;
@@ -85,7 +122,8 @@ PTRANS(HPCC_Params *params) {
   if (0 == iam) {
     outFile = fopen( params->outFname, "a" );
     if (! outFile) outFile = stderr;
-  }
+  } else
+    outFile = stderr;
 
   nmat = params->PTRANSns;
   mval = params->PTRANSnval;
@@ -102,7 +140,6 @@ PTRANS(HPCC_Params *params) {
   thresh = params->test.thrsh;
   eps = params->test.epsil;
 
-  iaseed = 100;
   imrow = imcol = 0;
 
   /* calculate and allocate memory */
@@ -131,7 +168,7 @@ PTRANS(HPCC_Params *params) {
   for (j = 0; j < 3 * nprocs; j++) imem[j] = 0;
 
   /* Print headings */
-  if (iam == 0) {
+  if (0 == iam) {
     /* matrix sizes */
     param_dump( outFile, "M", nmat, mval );
     param_dump( outFile, "N", nmat, nval );
@@ -174,25 +211,11 @@ PTRANS(HPCC_Params *params) {
       ierr[0] = 1;
     }
 
+    param_allred_sum( ierr );
+
     if (ierr[0] > 0) {
       param_illegal( iam, outFile, "Bad %s parameters: going on to next test case.", "grid", "", 0 );
       ++kskip;
-      continue;
-    }
-
-    /*
-      Define process grid
-    */
-
-    Cblacs_get(-1, 0, &context_1.ictxt);
-    Cblacs_gridinit(&context_1.ictxt, "Row-major", nprow, npcol);
-    Cblacs_gridinfo(context_1.ictxt, &nprow, &npcol, &myrow, &mycol);
-
-    /*
-      Go to bottom of process grid loop if this case doesn't use my process
-     */
-
-    if (myrow >= nprow || mycol >= npcol) {
       continue;
     }
 
@@ -217,7 +240,7 @@ PTRANS(HPCC_Params *params) {
         Make sure no one had error
        */
 
-      Cigsum2d(context_1.ictxt,"a","h",1,1,ierr,1,-1,0);
+      param_allred_sum( ierr );
 
       if (ierr[0] > 0) {
         param_illegal( iam, outFile, "Bad %s parameters: going on to next test case.", "MATRIX", "", 0 );
@@ -251,12 +274,48 @@ PTRANS(HPCC_Params *params) {
           Make sure no one had error
          */
 
-        Cigsum2d(context_1.ictxt,"a","h",1,1,ierr, 1,-1,0);
+        param_allred_sum( ierr );
 
         if (ierr[0] > 0) {
           param_illegal( iam, outFile, "Bad %s parameters: going on to next test case.", "NB", "", 0 );
           ++kskip;
           continue;
+        }
+
+        for (grid_cnt = 0; grid_cnt < 5; ++grid_cnt) {
+
+        /*
+          Make sure all processes have the same seed
+         */
+        mp = (int)time(NULL);
+        MPI_Allreduce( &mp, &proc_seed, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD );
+
+        /* Define process grid */
+        Cblacs_get(-1, 0, &context_1.ictxt);
+        grid_map( iam, nprocs, nprow, npcol, proc_seed, imem );
+        Cblacs_gridmap( &context_1.ictxt, imem, npcol, nprow, npcol );
+        Cblacs_gridinfo(context_1.ictxt, &nprow, &npcol, &myrow, &mycol);
+
+        /*
+          Make sure all processes know who's 0x0
+         */
+        mp = (0 == myrow && 0 == mycol) ? iam : 0;
+        MPI_Allreduce( &mp, &r0x0, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD );
+
+        r0_ingrid = 1;
+
+        /* Go to bottom of process grid loop if this case doesn't use my process */
+        if (myrow >= nprow || mycol >= npcol) {
+          /* nprow and npcol were lost in the call to Cblacs_gridinfo */
+          nprow = npval[j];
+          npcol = nqval[j];
+
+          /* reporting must be done on process 0 */
+          if (0 != iam)
+            continue;
+
+          r0_ingrid = 0;
+          goto report;
         }
 
         mp = numroc_(&m, &mb, &myrow, &imrow, &nprow);
@@ -279,20 +338,14 @@ PTRANS(HPCC_Params *params) {
         ipw = ipiw;
         isw = ipw + (long)(iceil_(&mg, &lcm) << 1) * (long)mb * (long)iceil_(&ng, &lcm) * (long)nb;
 
-        /*
-          Make sure have enough memory to handle problem
-         */
-
+        /* Make sure have enough memory to handle problem */
         if (isw > dMemSize) {
           param_illegal( iam, outFile, "Unable to perform %s: need %s of at least %d thousand doubles\n",
                          "PTRANS", "memory", (int)((isw + 999)/ 1000) );
           ierr[0] = 1;
         }
 
-        /*
-          Make sure no one had error
-         */
-
+        /* Make sure no one had error */
         Cigsum2d(context_1.ictxt,"a","h",1,1,ierr, 1,-1,0);
 
         if (ierr[0] > 0) {
@@ -375,27 +428,54 @@ PTRANS(HPCC_Params *params) {
         slcombine_(&context_1.ictxt, "All", ">", "W", &c__1, &c__1, wtime);
         slcombine_(&context_1.ictxt, "All", ">", "C", &c__1, &c__1, ctime);
 
+        Cblacs_gridexit(context_1.ictxt);
+
+        report:
+
+        if (0 != r0x0) {
+          double dva[3];
+          MPI_Status status;
+
+          dva[0] = wtime[0];
+          dva[1] = ctime[0];
+          dva[2] = passed[0];
+
+          if (r0x0 == iam)
+            MPI_Send( dva, 3, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD );
+
+          if (0 == iam) {
+            MPI_Recv( dva, 3, MPI_DOUBLE, r0x0, 0, MPI_COMM_WORLD, &status );
+
+            if (! r0_ingrid) { /* if 0's process not in grid, timing and pass/fail info is missing */
+              wtime[0] = dva[0];
+              ctime[0] = dva[1];
+              switch ((int)(dva[2])) {
+                case 'F': passed = "FAILED"; ++kfail; break;
+                case 'B': passed = "BYPASS"; ++kpass; break;
+                default:  passed = "PASSED"; ++kpass; break;
+              }
+            }
+          }
+        }
+
         /*
           Print results
          */
 
-        if (iam == 0) {
-
+        if (0 == iam) {
           /*
             Print WALL time if machine supports it
            */
 
           if (wtime[0] > 0.0) {
-            curGBs = 1e-9 / wtime[0] * m * n * sizeof(double);
-            if (curGBs > *GBs) {
-              *GBs = curGBs;
-              params->PTRANSrdata.time = wtime[0];
-              params->PTRANSrdata.residual = resid0;
-              params->PTRANSrdata.n = n;
-              params->PTRANSrdata.nb = nb;
-              params->PTRANSrdata.nprow = nprow;
-              params->PTRANSrdata.npcol = npcol;
-            }
+            curGBs_0 = 1e-9 / wtime[0] * m * n * sizeof(double);
+
+            if (0 == grid_cnt)
+              curGBs = curGBs_0;
+
+            if (curGBs > curGBs_0) /* take minimum performance */
+              curGBs = curGBs_0;
+
             fprintf( outFile, "WALL %5d %5d %3d %3d %3d %3d %8.2f %s %8.3f %5.2f\n",
                      m, n, mb, nb, nprow, npcol, wtime[0], passed, curGBs, resid );
           }
@@ -410,10 +490,21 @@ PTRANS(HPCC_Params *params) {
                      m, n, mb, nb, nprow, npcol, ctime[0], passed, cpuGBs, resid );
           }
         }
+
+        }
+
+        if (0 == iam && curGBs > *GBs) {
+          *GBs = curGBs;
+          params->PTRANSrdata.time = wtime[0];
+          params->PTRANSrdata.residual = resid0;
+          params->PTRANSrdata.n = n;
+          params->PTRANSrdata.nb = nb;
+          params->PTRANSrdata.nprow = nprow;
+          params->PTRANSrdata.npcol = npcol;
+        }
+
       }
     }
-
-    Cblacs_gridexit(context_1.ictxt);
   }
 
   if (imem) free( imem );
@@ -423,7 +514,7 @@ PTRANS(HPCC_Params *params) {
 
   /* Print out ending messages and close output file */
 
-  if (iam == 0) {
+  if (0 == iam) {
     ktests = kpass + kfail + kskip;
 
     fprintf( outFile, "\nFinished %4d tests, with the following results:\n", ktests );

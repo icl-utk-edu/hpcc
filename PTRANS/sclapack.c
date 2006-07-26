@@ -2,6 +2,8 @@
 
 #include <hpcc.h>
 
+#include "cblacslt.h"
+
 /* Common Block Declarations */
 
 struct {

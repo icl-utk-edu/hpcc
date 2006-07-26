@@ -17,44 +17,15 @@ Written by Piotr Luszczek.
 
 #include <mpi.h>
 
+#include "cblacslt.h"
+
 #define DPRN(i,v) do{printf(__FILE__ "(%d)@%d:" #v "=%g\n",__LINE__,i,(double)(v));fflush(stdout);}while(0)
-
-#define SGET_SYSCONTXT    0
-#define SGET_BLACSCONTXT 10
-
-extern double dcputime00(void);
-extern double dwalltime00(void);
-extern void Cblacs_abort(int ConTxt, int ErrNo);
-extern void Cblacs_barrier(int ConTxt, char *scope);
-extern void Cblacs_exit(int NotDone);
-extern void Cblacs_get(int ConTxt, int what, int *val);
-extern void Cblacs_gridexit(int ConTxt);
-extern void Cblacs_gridinfo(int ConTxt, int *nprow, int *npcol, int *myrow, int *mycol);
-extern void Cblacs_gridinit(int *ConTxt, char *order, int nprow, int npcol);
-extern void Cblacs_pinfo(int *mypnum, int *nprocs);
-extern void Cdgamn2d(int ConTxt, char *scope, char *top, int m, int n, double *A, int lda, int *rA,
-  int *cA, int ldia, int rdest, int cdest);
-extern void Cdgamx2d(int ConTxt, char *scope, char *top, int m, int n, double *A, int lda,
-  int *rA, int *cA, int ldia, int rdest, int cdest);
-extern void Cdgebr2d(int ConTxt, char *scope, char *top, int m, int n, double *A,
-  int lda, int rsrc, int csrc);
-extern void Cdgebs2d(int ConTxt, char *scope, char *top, int m, int n, double *A, int lda);
-extern void Cdgerv2d(int ConTxt, int m, int n, double *A, int lda, int rsrc, int csrc);
-extern void Cdgesd2d(int ConTxt, int m, int n, double *A, int lda, int rdest, int cdest);
-extern void Cdgsum2d(int ConTxt, char *scope, char *top, int m, int n, double *A, int lda,
-  int rdest, int cdest);
-extern void Cigebr2d(int ConTxt, char *scope, char *top, int m, int n, int *A, int lda, int rsrc,
-  int csrc);
-extern void Cigebs2d(int ConTxt, char *scope, char *top, int m, int n, int *A, int lda);
-extern void Cigsum2d(int ConTxt, char *scope, char *top, int m, int n, int *A, int lda,
-  int rdest, int cdest);
-extern void Cblacs_dSendrecv(int ctxt, int mSrc, int nSrc, double *Asrc, int ldaSrc, int rdest,
-  int cdest, int mDest, int nDest, double *Adest, int ldaDest, int rsrc, int csrc);
 
 /* ---------------------------------------------------------------------- */
 
 /*FIXME: what about parameter checking: context, etc? have a macro too? */
 #define CBLACS_INIT if (! CblacsInitialized) CblacsInit(); else if (CblacsFinalized) do{CblacsWarn();return;}while(0)
+#define CBLACS_INIT1(v) if (! CblacsInitialized) CblacsInit();else if (CblacsFinalized)do{CblacsWarn();return(v);}while(0)
 #define CblacsWarn() CblacsWarnImp( __FILE__, __LINE__ )
 
 static int CblacsInitialized = 0, CblacsFinalized;
@@ -143,7 +114,8 @@ CblacsDeleteCtxt(int *ctxtP) {
 
   CblacsComms[idx].taken = 0;
 
-  *ctxtP = 0;
+  *ctxtP = 0; /* deleted contexts are 0 */
+
   return 0;
 }
 
@@ -226,76 +198,103 @@ Cblacs_get(int ConTxt, int what, int *val) {
       break;
   }
 }
+static int my_id(){int rank;MPI_Comm_rank(MPI_COMM_WORLD,&rank);return rank;}
+static int 
+CblacsGridNew(int nprow, int npcol, int *ConTxt, MPI_Comm *comm) {
+  int size;
 
-void
-Cblacs_gridinit(int *ConTxt, char *order, int nprow, int npcol) {
-  MPI_Comm comm, newComm, rowComm, colComm;
-  int rv, size, dims[2], periods[2], coords[2];
+  CBLACS_INIT1(-1);
 
-  CBLACS_INIT;
+  *comm = CblacsGetComm(*ConTxt);
+  if (MPI_COMM_NULL == *comm) return -1;
 
-  /* The user `order' is ignored - MPI knows better what's optimal */
-  order = order;
-
-  comm = CblacsGetComm(*ConTxt);
-  if (MPI_COMM_NULL == comm) goto ginitErr;
-
-  MPI_Comm_size( comm, &size );
-
-  if (nprow < 1 || nprow > size) goto ginitErr;
-  if (npcol < 1 || npcol > size) goto ginitErr;
-  if (nprow * npcol > size) goto ginitErr;
+  MPI_Comm_size( *comm, &size );
+  DPRN(my_id(),nprow);
+  DPRN(my_id(),npcol);
+  DPRN(my_id(),size);
+  if (nprow < 1 || nprow > size) return -1;
+  if (npcol < 1 || npcol > size) return -1;
+  if (nprow * npcol > size) return -1;
 
   *ConTxt = CblacsNewCtxt();
 
-  /* global communicator */
-  dims[0] = nprow;
-  dims[1] = npcol;
-  periods[0] = periods[1] = 0;
-  rv = MPI_Cart_create( comm, 2, dims, periods, 1, &newComm );
+  return 0;
+}
+
+void
+Cblacs_gridmap(int *ConTxt, int *umap, int ldumap, int nprow, int npcol) {
+  int i, j, np_me, npall, npwho, myrow, mycol, color, key, rv;
+  MPI_Comm comm, newComm, rowComm, colComm;
+
+  if (CblacsGridNew( nprow, npcol, ConTxt, &comm )) {
+    CblacsWarn();
+    goto gmapErr;
+  }
+
+  Cblacs_pinfo( &np_me, &npall );
+
+  myrow = mycol = -1;
+  color = MPI_UNDEFINED;
+  key = 0;
+  for (i = 0; i < nprow; ++i)
+    for (j = 0; j < npcol; ++j) {
+      npwho = umap[j + i * ldumap];
+      if (np_me == npwho) {
+        color = 0;
+        key = j + i * npcol;
+        myrow = i;
+        mycol = j;
+        goto gmapFound;
+      }
+    }
+
+  gmapFound:
+
+  /* communicator of all grid processes */
+  rv = MPI_Comm_split( comm, color, key, &newComm );
   if (MPI_SUCCESS != rv) {
+    /* make contexts for non-participating processes a 0 value so gridinfo() works correctly */
     CblacsDeleteCtxt( ConTxt );
-    goto ginitErr;
+    CblacsWarn();
+    goto gmapErr;
   }
   CblacsSetComm( *ConTxt, newComm );
   if (MPI_COMM_NULL == newComm) { /* this process does not participate in this grid */
     CblacsDeleteCtxt( ConTxt );
     return;
   }
+  MPI_Comm_rank( comm, &key );
+  DPRN(key, myrow);
+  DPRN(key, mycol);
+  MPI_Comm_size( newComm, &i ); DPRN(key,i);
+  MPI_Comm_rank( newComm, &i ); DPRN(key,i);
 
   /* row communicator */
-  dims[0] = 0;
-  dims[1] = 1;
-  rv = MPI_Cart_sub( newComm, dims, &rowComm);
+  rv = MPI_Comm_split( newComm, myrow, mycol, &rowComm );
   if (MPI_SUCCESS != rv) {
     CblacsDeleteCtxt( ConTxt );
-    goto ginitErr;
+    CblacsWarn();
+    goto gmapErr;
   }
   CblacsSetRowComm( *ConTxt, rowComm );
+  MPI_Comm_size( rowComm, &i ); DPRN(key,i);
+  MPI_Comm_rank( rowComm, &i ); DPRN(key,i);
+
 
   /* column communicator */
-  dims[0] = 1;
-  dims[1] = 0;
-  rv = MPI_Cart_sub( newComm, dims, &colComm);
+  rv = MPI_Comm_split( newComm, mycol, myrow, &colComm );
   if (MPI_SUCCESS != rv) {
     CblacsDeleteCtxt( ConTxt );
-    goto ginitErr;
+    CblacsWarn();
+    goto gmapErr;
   }
   CblacsSetColComm( *ConTxt, colComm );
-
-  /* This checks whether creating sub-topologies preserves node order. An MPI implementation without
-   * this feature is useless without extra code here and other places. */
-  MPI_Cart_get( newComm, 2, dims, periods, coords );
-  nprow = coords[0];
-  npcol = coords[1];
-  MPI_Cart_get( rowComm, 1, dims, periods, coords );
-  if (npcol != coords[0]) {CblacsWarn();}
-  MPI_Cart_get( colComm, 1, dims, periods, coords );
-  if (nprow != coords[0]) {CblacsWarn();}
+  MPI_Comm_size( colComm, &i ); DPRN(key,i);
+  MPI_Comm_rank( colComm, &i ); DPRN(key,i);
 
   return;
 
-  ginitErr:
+  gmapErr:
 
   *ConTxt = 0;
   CblacsWarn();
@@ -317,22 +316,14 @@ Cblacs_gridinfo(int ConTxt, int *nprow, int *npcol, int *myrow, int *mycol) {
 
   comm = CblacsGetComm( ConTxt );
 
+  /* deleted contexts (or the contexts for non-participating processes) are 0 */
   if (MPI_COMM_NULL == comm) {
     *nprow = *npcol = *myrow = *mycol = -1;
   } else {
-    MPI_Cart_get( comm, 2, dims, periods, coords );
-    *nprow = dims[0];
-    *npcol = dims[1];
-    *myrow = coords[0];
-    *mycol = coords[1];
-/*
-    MPI_Comm_size( CblacsGetRowComm(ConTxt), dims + 1 );
-    MPI_Comm_rank( MPI_COMM_WORLD, dims );
-DPRN(dims[0], dims[1]);
-    MPI_Comm_size( CblacsGetColComm(ConTxt), dims + 1 );
-    MPI_Comm_rank( MPI_COMM_WORLD, dims );
-DPRN(dims[0], dims[1]);
-*/
+    MPI_Comm_size( CblacsGetRowComm(ConTxt), npcol );
+    MPI_Comm_rank( CblacsGetRowComm(ConTxt), mycol );
+    MPI_Comm_size( CblacsGetColComm(ConTxt), nprow );
+    MPI_Comm_rank( CblacsGetColComm(ConTxt), myrow );
   }
 }
 
@@ -361,7 +352,7 @@ Cblacs_barrier(int ConTxt, char *scope) {
 static void
 Cvgred2d(int ConTxt, char *scope, int m, int n, void *A, int lda, int rowRank,
   int colRank, MPI_Datatype dtype, int dsize, MPI_Op op) {
-  int j, rank, root, count, coords[2];
+  int j, rank, root, count, coords[2], dest_rank, npcol;
   void *sbuf, *rbuf;
   MPI_Comm comm;
 
@@ -374,14 +365,18 @@ Cvgred2d(int ConTxt, char *scope, int m, int n, void *A, int lda, int rowRank,
       comm = CblacsGetComm( ConTxt );
       coords[0] = rowRank;
       coords[1] = colRank;
+      MPI_Comm_size( CblacsGetRowComm( ConTxt ), &npcol );
+      dest_rank = colRank + rowRank * npcol;
       break;
     case 'C': case 'c':
       comm = CblacsGetColComm( ConTxt );
       coords[0] = rowRank;
+      dest_rank = rowRank;
       break;
     case 'R': case 'r':
       comm = CblacsGetRowComm( ConTxt );
       coords[0] = colRank;
+      dest_rank = colRank;
       break;
     default: comm = MPI_COMM_NULL; CblacsWarn(); break;
   }
@@ -390,14 +385,14 @@ Cvgred2d(int ConTxt, char *scope, int m, int n, void *A, int lda, int rowRank,
     return;
   }
   /* if not leave-on-all then get rank of the destination */
-  if (root) MPI_Cart_rank( comm, coords, &root );
+  if (root) root = dest_rank; /* MPI_Cart_rank( comm, coords, &root ); */
   else root = MPI_PROC_NULL;
 
   /* FIXME: what if contiguous buffer cannot be allocated */
   count = m * n;
   if (m == lda || n == 1) sbuf = A; /* A is contiguous, reuse it */
   else {
-    /* a new data type could be created to reflect layot `A' but then the
+    /* a new data type could be created to reflect layout of `A' but then the
      * receiving buffer would have to be the same, and if `lda' is large in
      * comparison to `m' then it might be unfeasible */
     sbuf = CblacsNewBuf( count, dsize );
@@ -587,136 +582,13 @@ Cdgamn2d(int ConTxt, char *scope, char *top, int m, int n, double *A, int lda, i
   MPI_Op_free( &op );
 }
 
-/*
- *  Purpose
- *
- *  Locally-blocking point-to-point general double precision send.
- *
- *  Arguments
- *
- *  ConTxt  (input) Ptr to int
- *          Index into MyConTxts00 (my contexts array).
- *
- *  M       (input) Ptr to int
- *          The number of rows of the matrix A.  M >= 0.
- *
- *  N       (input) Ptr to int
- *          The number of columns of the matrix A.  N >= 0.
- *
- *  A       (input) Ptr to double precision two dimensional array
- *          The m by n matrix A.  Fortran77 (column-major) storage
- *          assumed.
- *
- *  LDA     (input) Ptr to int
- *          The leading dimension of the array A.  LDA >= M.
- *
- *  RDEST   (input) Ptr to int
- *          The process row of the destination process.
- *
- *  CDEST   (input) Ptr to int
- *          The process column of the destination process.
- */
-void
-Cdgesd2d(int ConTxt, int m, int n, double *A, int lda, int rdest, int cdest) {
-  MPI_Comm comm;
-  MPI_Datatype type;
-  MPI_Request req;
-  int rank, coords[2], dataIsContiguous, count;
-
-  CBLACS_INIT;
-
-  comm = CblacsGetComm( ConTxt );
-  if (MPI_COMM_NULL == comm) {CblacsWarn(); return;}
-
-  if (m == lda || 1 == n) {
-    dataIsContiguous = 1;
-    count = m * n;
-    type = MPI_DOUBLE;
-  } else {
-    dataIsContiguous = 0;
-    count = 1;
-    MPI_Type_vector( n, m, lda, MPI_DOUBLE, &type );
-    MPI_Type_commit( &type );
-  }
-
-  coords[0] = rdest;
-  coords[1] = cdest;
-  MPI_Cart_rank( comm, coords, &rank );
-  /* FIXME: non-blocking send in general requires an extra buffer and some tag magic */
-  MPI_Isend( A, count, type, rank, 0, comm, &req );
-  MPI_Request_free( &req );
-
-  if (! dataIsContiguous) MPI_Type_free( &type );
-}
-
-/*
- *  Purpose
- *
- *  Globally-blocking point to point general double precision receive.
- *
- *  Arguments
- *
- *  ConTxt  (input) Ptr to int
- *          Index into MyConTxts00 (my contexts array).
- *
- *  M       (input) Ptr to int
- *          The number of rows of the matrix A.  M >= 0.
- *
- *  N       (input) Ptr to int
- *          The number of columns of the matrix A.  N >= 0.
- *
- *  A       (output) Ptr to double precision two dimensional array
- *          The m by n matrix A.  Fortran77 (column-major) storage
- *          assumed.
- *
- *  LDA     (input) Ptr to int
- *          The leading dimension of the array A.  LDA >= M.
- *
- *
- *  RSRC    (input) Ptr to int
- *          The process row of the source of the matrix.
- *
- *  CSRC    (input) Ptr to int
- *          The process column of the source of the matrix.
- */
-void
-Cdgerv2d(int ConTxt, int m, int n, double *A, int lda, int rsrc, int csrc) {
-  MPI_Comm comm;
-  MPI_Datatype type;
-  MPI_Status stat;
-  int rank, coords[2], dataIsContiguous, count;
-
-  CBLACS_INIT;
-
-  comm = CblacsGetComm( ConTxt );
-  if (MPI_COMM_NULL == comm) {CblacsWarn(); return;}
-
-  if (m == lda || 1 == n) {
-    dataIsContiguous = 1;
-    count = m * n;
-    type = MPI_DOUBLE;
-  } else {
-    dataIsContiguous = 0;
-    count = 1;
-    MPI_Type_vector( n, m, lda, MPI_DOUBLE, &type );
-    MPI_Type_commit( &type );
-  }
-
-  coords[0] = rsrc;
-  coords[1] = csrc;
-  MPI_Cart_rank( comm, coords, &rank );
-  MPI_Recv( A, count, type, rank, 0, comm, &stat ); /* IBM's (old ?) MPI doesn't have: MPI_STATUS_IGNORE */
-
-  if (! dataIsContiguous) MPI_Type_free( &type );
-}
-
 void
 Cblacs_dSendrecv(int ctxt, int mSrc, int nSrc, double *Asrc, int ldaSrc, int rdest, int cdest,
   int mDest, int nDest, double *Adest, int ldaDest, int rsrc, int csrc) {
   MPI_Comm comm;
   MPI_Datatype typeSrc, typeDest;
   MPI_Status stat;
-  int src, dest, coords[2], dataIsContiguousSrc, dataIsContiguousDest, countSrc, countDest;
+  int src, dest, coords[2], dataIsContiguousSrc, dataIsContiguousDest, countSrc, countDest, npcol;
 
   CBLACS_INIT;
 
@@ -744,12 +616,18 @@ Cblacs_dSendrecv(int ctxt, int mSrc, int nSrc, double *Asrc, int ldaSrc, int rde
     MPI_Type_commit( &typeDest );
   }
 
+  /*
   coords[0] = rdest;
   coords[1] = cdest;
   MPI_Cart_rank( comm, coords, &dest );
   coords[0] = rsrc;
   coords[1] = csrc;
   MPI_Cart_rank( comm, coords, &src );
+  */
+
+  MPI_Comm_size( comm, &npcol );
+  dest = cdest + rdest * npcol;
+  src  = csrc + rsrc * npcol;
 
   MPI_Sendrecv( Asrc, countSrc, typeSrc, dest, 0, Adest, countDest, typeDest, src, 0, comm,
                 &stat ); /* IBM's (old ?) MPI doesn't have: MPI_STATUS_IGNORE */
@@ -763,7 +641,7 @@ CblacsBcast(int ConTxt, char *scope, int m, int n, void *A, int lda, int rowRank
   MPI_Datatype baseType){
   MPI_Comm comm;
   MPI_Datatype type;
-  int root, coords[2];
+  int root, coords[2], dest_rank, npcol;
 
   /* if this process is the root of broadcast */
   if (-1 == rowRank || -1 == colRank) root = 0;
@@ -774,14 +652,18 @@ CblacsBcast(int ConTxt, char *scope, int m, int n, void *A, int lda, int rowRank
       comm = CblacsGetComm( ConTxt );
       coords[0] = rowRank;
       coords[1] = colRank;
+      MPI_Comm_size( CblacsGetRowComm( ConTxt ), &npcol );
+      dest_rank = colRank + rowRank * npcol;
       break;
     case 'C': case 'c':
       comm = CblacsGetColComm( ConTxt );
       coords[0] = rowRank;
+      dest_rank = rowRank;
       break;
     case 'R': case 'r':
       comm = CblacsGetRowComm( ConTxt );
       coords[0] = colRank;
+      dest_rank = colRank;
       break;
     default: comm = MPI_COMM_NULL; CblacsWarn(); break;
   }
@@ -794,9 +676,9 @@ CblacsBcast(int ConTxt, char *scope, int m, int n, void *A, int lda, int rowRank
     return;
   }
 
-  /* if broadcast/send */
-  if (root) MPI_Cart_rank( comm, coords, &root );
-  else MPI_Comm_rank( comm, &root ); /* else broadcast/receive */
+  /* if broadcast/receive */
+  if (root) root = dest_rank; /* MPI_Cart_rank( comm, coords, &root ); */
+  else MPI_Comm_rank( comm, &root ); /* else broadcast/send - I'm the root */
 
   MPI_Type_vector( n, m, lda, baseType, &type );
   MPI_Type_commit( &type );
