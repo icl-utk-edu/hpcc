@@ -80,7 +80,7 @@ allDeps = (
     ("../STREAM/", (hhpcc, hhpl),
      ("onecpu", "stream"), "-I../../../../include $(CCFLAGS)"),
 
-    ("../PTRANS/", (hhpcc, hhpl),
+    ("../PTRANS/", (hhpcc, hhpl, "../../../../PTRANS/cblacslt.h"),
      ("pmatgeninc", "pdmatgen", "pdtransdriver", "pdmatcmp", "pdtrans", "sclapack", "cblacslt", "mem"), "-I../../../../include $(CCFLAGS)"),
 
     ("../src/", (hhpcc, hhpccv, hhpl),
