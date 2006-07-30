@@ -3,7 +3,7 @@
 <article class="productsheet">
   <articleinfo>
     <title>
-      <acronym>DARPA</acronym>/<acronym>DOE</acronym> <acronym>HPC Challange</acronym> Benchmark
+      <acronym>DARPA</acronym>/<acronym>DOE</acronym> <acronym>HPC Challenge</acronym> Benchmark
     </title>
     <author>
       <firstname>Piotr</firstname>
@@ -23,7 +23,7 @@
       web site.
     </para>
     <para>
-      In essence, <acronym>HPC Challange</acronym> consists of a number of subbenchmarks each of
+      In essence, <acronym>HPC Challenge</acronym> consists of a number of subbenchmarks each of
       which tests different aspect of the system.
     </para>
     <para>
@@ -31,7 +31,7 @@
       url="http://www.netlib.org/benchmark/hpl/"><citetitle>HPL</citetitle></ulink> web site)
       then you can reuse the configuration file (input for <command>make(1)</command>)
        and the input file that you already have for
-      <acronym>HPL</acronym>. The <acronym>HPC Challange</acronym> benchmark includes
+      <acronym>HPL</acronym>. The <acronym>HPC Challenge</acronym> benchmark includes
       <acronym>HPL</acronym> and uses its configuration and input files with only slight
       modifications.
     </para>
@@ -47,7 +47,7 @@
       contains many examples of configuration files. A good approach is to copy one of them
       to the <filename class="directory">hpl</filename> directory and if it doesn't work then
       change it. This file is reused by all the components of the
-      <acronym>HPC Challange</acronym> suite.
+      <acronym>HPC Challenge</acronym> suite.
     </para>
     <para>
       When configuration is done, a file should exist in the <filename
@@ -67,17 +67,17 @@
   <section>
     <title>Configuration</title>
     <para>
-      The <acronym>HPC Challange</acronym> is driven by a short input file named
+      The <acronym>HPC Challenge</acronym> is driven by a short input file named
       <filename>hpccinf.txt</filename>
       that is almost the same as the input file for <acronym>HPL</acronym> (customarily called
       <filename>HPL.dat</filename>). Refer to the
       file <filename>hpl/www/tuning.html</filename> for details about the input file for
       <acronym>HPL</acronym>. A sample input file is included with the
-      <acronym>HPC Challange</acronym> distribution.
+      <acronym>HPC Challenge</acronym> distribution.
     </para>
     <para>
       The differences between <acronym>HPL</acronym> input file and
-      <acronym>HPC Challange</acronym> input file can be summarized as follows:
+      <acronym>HPC Challenge</acronym> input file can be summarized as follows:
     <itemizedlist>
       <listitem><simpara>
 	  Lines 3 and 4 are ignored. The output always goes to the file named
@@ -100,7 +100,7 @@
 	<listitem><simpara>
 	    Lines 33 and 34 describe additional matrix sizes to be used for running the
 	    <acronym>PTRANS</acronym> benchmark (one of the components of the
-	    <acronym>HPC Challange</acronym> benchmark).
+	    <acronym>HPC Challenge</acronym> benchmark).
 	  </simpara>
 	</listitem>
 	<listitem><simpara>
@@ -111,7 +111,7 @@
       </itemizedlist>
     </para>
     <para>
-      Just for completeness, here is the list of lines of the <acronym>HPC Challange's</acronym>
+      Just for completeness, here is the list of lines of the <acronym>HPC Challenge's</acronym>
       input file with brief descriptions of their meaning:
       <itemizedlist mark="">
 	<listitem><simpara>Line 1: ignored</simpara></listitem>
@@ -215,7 +215,7 @@
   <section>
     <title>Running</title>
     <para>
-    It is hard to describe all the possible ways in which the <acronym>HPC Challange</acronym>
+    It is hard to describe all the possible ways in which the <acronym>HPC Challenge</acronym>
     benchmark could be run on various systems. An example command to run the benchmark could
     like like this:
     <command>mpirun -np 4 hpcc</command>. The meaning of the command's components is as follows:
@@ -235,7 +235,7 @@
       </simpara>
       </listitem>
       <listitem><simpara>
-      <command>hpcc</command> is the name of the <acronym>HPC Challange</acronym> executable to
+      <command>hpcc</command> is the name of the <acronym>HPC Challenge</acronym> executable to
       run.
       </simpara>
       </listitem>

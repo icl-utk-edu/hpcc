@@ -2,7 +2,7 @@
 \documentclass[twocolumn]{article}
 \usepackage{pslatex}
 \begin{document}
-\title{DARPA/DOE HPC~Challange Benchmark} \author{Piotr
+\title{DARPA/DOE HPC~Challenge Benchmark} \author{Piotr
 Luszczek\footnote{University of Tennessee Knoxville, Innovative
 Computing Laboratory}} \maketitle
 
@@ -11,13 +11,13 @@ This is a suite of benchmarks that measure performance of CPU, memory
 subsytem and the interconnect. For details refer to the
 HPC~Challenge web site (\texttt{http://icl.cs.utk.edu/hpcc/}.)
 
-In essence, HPC~Challange consists of a number of subbenchmarks each
+In essence, HPC~Challenge consists of a number of subbenchmarks each
 of which tests different aspect of the system.
 
 If you are familiar with the HPL benchmark code (see the HPL web site:
 \texttt{http://www.netlib.org/benchmark/hpl/}) then you can reuse the
 configuration file~(input for \texttt{make(1)} command) and the input
-file that you already have for HPL. The HPC~Challange benchmark
+file that you already have for HPL. The HPC~Challenge benchmark
 includes HPL and uses its configuration and input files with only
 slight modifications.
 
@@ -27,7 +27,7 @@ characteristics of your machine. The configuration file should be
 created in the \texttt{hpl} directory. This directory contains
 instructions (the files \texttt{README} and \texttt{INSTALL}) on how
 to create the configuration file. This file is reused by all the
-components of the HPC~Challange suite.
+components of the HPC~Challenge suite.
 
 When configuration is done, a file should exist in the \texttt{hpl}
 directory whose name starts with \texttt{Make.} and ends with the name
@@ -41,14 +41,14 @@ the \texttt{hpl} directory for the configuration file and use it to
 build the benchmark executable.
 
 \section{Configuration}
-The HPC~Challange is driven by a short input file named
+The HPC~Challenge is driven by a short input file named
 \texttt{hpccinf.txt} that is almost the same as the input file for
 HPL~(customarily called \texttt{HPL.dat}). Refer to the directory
 \texttt{hpl/www/tuning.html} for details about the input file for
-HPL. A sample input file is included with the HPC~Challange
+HPL. A sample input file is included with the HPC~Challenge
 distribution.
 
-The differences between HPL's input file and HPC~Challange's input file can
+The differences between HPL's input file and HPC~Challenge's input file can
 be summarized as follows:
 
 \begin{itemize}
@@ -64,7 +64,7 @@ HPL input file) are:
 \begin{itemize}
 \item Lines 33 and 34 describe additional matrix sizes to be used for
 running the PTRANS benchmark (one of the components of the
-HPC~Challange benchmark).
+HPC~Challenge benchmark).
 \item Lines 35 and 36 describe additional blocking factors to be used
 for running the PTRANS benchmark.
 \end{itemize}
@@ -111,7 +111,7 @@ Challenge's input file and brief description of their meaning:
 \end{itemize}
 
 \section{Running}
-It is hard to describe all the possible ways that the HPC~Challange
+It is hard to describe all the possible ways that the HPC~Challenge
 benchmark should be run on various systems.  An example command to run
 the benchmark could like like this: \texttt{mpirun -np 4 hpcc}. The
 meaning of the command's components is as follows:
@@ -126,7 +126,7 @@ processes should be started. The number of MPI processes should be
 large enough to accomodate all the process grids specified in the
 \texttt{hpccinf.txt} file.
 
-\item \texttt{hpcc} is the name of the HPC~Challange executable to
+\item \texttt{hpcc} is the name of the HPC~Challenge executable to
 run.
 \end{itemize}
 

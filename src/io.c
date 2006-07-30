@@ -242,7 +242,7 @@ HPCC_Init(HPCC_Params *params) {
   FPRINTF( myRank, outputFile,
             "########################################################################%s", "" );
   FPRINTF3( myRank, outputFile,
-            "This is the DARPA/DOE HPC Challange Benchmark version %d.%d.%d October 2003",
+            "This is the DARPA/DOE HPC Challenge Benchmark version %d.%d.%d October 2003",
             HPCC_VERSION_MAJOR, HPCC_VERSION_MINOR, HPCC_VERSION_MICRO );
   FPRINTF( myRank, outputFile, "Produced by Jack Dongarra and Piotr Luszczek%s", "" );
   FPRINTF( myRank, outputFile, "Innovative Computing Laboratory%s", "" );
@@ -496,7 +496,7 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "End of Summary section.%s", "" );
   FPRINTF( myRank, outputFile,
             "########################################################################%s", "" );
-  FPRINTF( myRank, outputFile, "End of HPC Challange tests.%s", "" );
+  FPRINTF( myRank, outputFile, "End of HPC Challenge tests.%s", "" );
   FPRINTF2(myRank, outputFile, "Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
   FPRINTF( myRank, outputFile,
             "########################################################################%s", "" );
