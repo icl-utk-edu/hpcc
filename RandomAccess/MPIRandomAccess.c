@@ -135,7 +135,7 @@ Sum64(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
 static void
 AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
                               u64Int TableSize,
-                              u64Int LocalTableSize,
+                              s64Int LocalTableSize,
                               u64Int MinLocalTableSize,
                               u64Int GlobalStartMyProc,
                               u64Int Top,
@@ -406,7 +406,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 static void
 Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
                                  u64Int TableSize,
-                                 u64Int LocalTableSize,
+                                 s64Int LocalTableSize,
                                  u64Int MinLocalTableSize,
                                  u64Int GlobalStartMyProc,
                                  u64Int Top,
@@ -675,7 +675,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   u64Int GlobalStartMyProc;
   int Remainder;            /* Number of processors with (LocalTableSize + 1) entries */
   u64Int Top;               /* Number of table entries in top of Table */
-  u64Int LocalTableSize;    /* Local table width */
+  s64Int LocalTableSize;    /* Local table width */
   u64Int MinLocalTableSize; /* Integer ratio TableSize/NumProcs */
   u64Int logTableSize, TableSize;
 
@@ -763,7 +763,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   } /* end for i */
 
 
-  HPCC_Table = XMALLOC( u64Int, LocalTableSize);
+  HPCC_Table = XMALLOC( u64Int, LocalTableSize );
   sAbort = 0; if (! HPCC_Table) sAbort = 1;
 
   MPI_Allreduce( &sAbort, &rAbort, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD );
@@ -801,7 +801,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   MPI_Bcast( &GlbNumUpdates, 1, INT64_DT, 0, MPI_COMM_WORLD );
   ProcNumUpdates = Mmin(GlbNumUpdates, (4*LocalTableSize));
   /* works for both PowerofTwo and AnyNodes */
-  NumUpdates = Mmin((ProcNumUpdates*NumProcs), NumUpdates_Default);
+  NumUpdates = Mmin((ProcNumUpdates*NumProcs), (s64Int)NumUpdates_Default);
 
 #else
   ProcNumUpdates = 4*LocalTableSize;
