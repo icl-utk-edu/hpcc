@@ -223,7 +223,7 @@ HPCC_Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, do
     register int j, k;
     double  scalar, t, times[4][NTIMES];
     FILE *outFile;
-    double GBs = 1073741824.0, curGBs;
+    double GiBs = 1073741824.0, curGBs;
 
     if (doIO) {
       outFile = fopen( params->outFname, "a" );
@@ -263,8 +263,8 @@ HPCC_Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, do
 
     fprintf( outFile, HLINE);
     fprintf( outFile, "Array size = %d, Offset = %d\n" , VectorSize, OFFSET);
-    fprintf( outFile, "Total memory required = %.4f GB.\n",
-             (3.0 * BytesPerWord) * ( (double) VectorSize / GBs));
+    fprintf( outFile, "Total memory required = %.4f GiB.\n",
+             (3.0 * BytesPerWord) * ( (double) VectorSize / GiBs));
     fprintf( outFile, "Each test is run %d times, but only\n", NTIMES);
     fprintf( outFile, "the *best* time for each is used.\n");
     }
