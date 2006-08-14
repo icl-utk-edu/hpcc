@@ -1,5 +1,6 @@
 
 #define RA_TIME_BOUND 1
+#undef RA_TIME_BOUND
 
 /* time bound in seconds */
 #define TIME_BOUND 60
