@@ -17,34 +17,36 @@
 /* 1% of total number of updates */
 #define _RA_SAMPLE_FACTOR 100
 
-extern void HPCC_Power2NodesTime(u64Int logTableSize,
-		     u64Int TableSize,
-		     u64Int LocalTableSize,
-		     u64Int MinLocalTableSize,
-		     u64Int GlobalStartMyProc,
-		     u64Int Top,
-		     int logNumProcs,
-		     int NumProcs,
-		     int Remainder,
-		     int MyProc,
-		     MPI_Datatype INT64_DT,
-		     double timeBound,
-		     u64Int* numIter);
+extern void
+HPCC_Power2NodesTime(u64Int logTableSize,
+       u64Int TableSize,
+       u64Int LocalTableSize,
+       u64Int MinLocalTableSize,
+       u64Int GlobalStartMyProc,
+       u64Int Top,
+       int logNumProcs,
+       int NumProcs,
+       int Remainder,
+       int MyProc,
+       MPI_Datatype INT64_DT,
+       double timeBound,
+       u64Int* numIter,
+       MPI_Status *finish_statuses,
+       MPI_Request *finish_req);
 
 
 extern void HPCC_AnyNodesTime(u64Int logTableSize,
-		  u64Int TableSize,
-		  u64Int LocalTableSize,
-		  u64Int MinLocalTableSize,
-		  u64Int GlobalStartMyProc,
-		  u64Int Top,
-		  int logNumProcs,
-		  int NumProcs,
-		  int Remainder,
-		  int MyProc,
-		  MPI_Datatype INT64_DT,
-		  double timeBound,
-		  u64Int* numIter);
-
-
-
+    u64Int TableSize,
+    u64Int LocalTableSize,
+    u64Int MinLocalTableSize,
+    u64Int GlobalStartMyProc,
+    u64Int Top,
+    int logNumProcs,
+    int NumProcs,
+    int Remainder,
+    int MyProc,
+    MPI_Datatype INT64_DT,
+    double timeBound,
+    u64Int* numIter,
+    MPI_Status *finish_statuses,
+    MPI_Request *finish_req);

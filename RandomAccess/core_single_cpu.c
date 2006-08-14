@@ -56,9 +56,6 @@ RandomAccessUpdate(u64Int TableSize, u64Int *Table) {
   u64Int ran[128];              /* Current random numbers */
   int j;
 
-  /* Initialize main table */
-  for (i=0; i<TableSize; i++) Table[i] = i;
-
   /* Perform updates to main table.  The scalar equivalent is:
    *
    *     u64Int ran;
@@ -128,6 +125,9 @@ HPCC_RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
   fprintf( outFile, "Main table size   = 2^" FSTR64 " = " FSTR64 " words\n", logTableSize,TableSize);
   fprintf( outFile, "Number of updates = " FSTR64 "\n", NUPDATE);
   }
+
+  /* Initialize main table */
+  for (i=0; i<TableSize; i++) Table[i] = i;
 
   /* Begin timing here */
   cputime = -CPUSEC();

@@ -35,7 +35,9 @@ void HPCC_Power2NodesTime(u64Int logTableSize,
          int MyProc,
          MPI_Datatype INT64_DT,
          double timeBound,
-         u64Int* EstimatedNumIter)
+         u64Int* EstimatedNumIter,
+         MPI_Status *finish_statuses,
+         MPI_Request *finish_req)
 {
   s64Int i, j;
   int proc_count;
@@ -55,10 +57,7 @@ void HPCC_Power2NodesTime(u64Int logTableSize,
 #endif
   int bufferBase;
   u64Int inmsg;
-  MPI_Status finish_statuses[NumProcs];
-  MPI_Request finish_req[NumProcs];
   MPI_Status status;
-  MPI_Status ignoredStatus;
   int have_done;
 
   int pe;
@@ -69,13 +68,8 @@ void HPCC_Power2NodesTime(u64Int logTableSize,
   int recvUpdates;
   Bucket_Ptr Buckets;
 
-  double _ra_LoopRealTime;
+  double ra_LoopRealTime;
   double iterTime;
-
-  pendingUpdates = 0;
-  maxPendingUpdates = MAX_TOTAL_PENDING_UPDATES;
-  localBufferSize = LOCAL_BUFFER_SIZE;
-  Buckets = HPCC_InitBuckets(NumProcs, maxPendingUpdates);
 
   /* Initialize main table */
   for (i=0; i<LocalTableSize; i++)
@@ -91,12 +85,16 @@ void HPCC_Power2NodesTime(u64Int logTableSize,
    *     }
    */
 
+  ra_LoopRealTime = -RTSEC();
+
+  pendingUpdates = 0;
+  maxPendingUpdates = MAX_TOTAL_PENDING_UPDATES;
+  localBufferSize = LOCAL_BUFFER_SIZE;
+  Buckets = HPCC_InitBuckets(NumProcs, maxPendingUpdates);
+
   SendCnt = 4 * LocalTableSize/_RA_SAMPLE_FACTOR;
   Ran = HPCC_starts (4 * GlobalStartMyProc);
 
-  _ra_LoopRealTime = -RTSEC();
-
-  pendingUpdates = 0;
   i = 0;
 #ifdef USE_MULTIPLE_RECV
   NumRecvs = (NumProcs > 4) ? (Mmin(4,MAX_RECV)) : 1;
@@ -269,15 +267,15 @@ void HPCC_Power2NodesTime(u64Int logTableSize,
 #endif
    }
 
-   _ra_LoopRealTime += RTSEC();
+   ra_LoopRealTime += RTSEC();
 
    /* estimate largest number of iterations that satisfy time bound */
-   iterTime = (double)(_ra_LoopRealTime/SendCnt);
+   iterTime = (double)(ra_LoopRealTime/SendCnt);
    *EstimatedNumIter = timeBound/iterTime;
 #ifdef DEBUG_TIME_BOUND
    fprintf (stdout, "MyProc: %4d SampledNumIter: %8d ", MyProc, SendCnt);
    fprintf (stdout, "LoopRealTime: %.8f IterTime: %.8f EstimatedNumIter: %8d\n",
-       _ra_LoopRealTime, iterTime, *EstimatedNumIter);
+       ra_LoopRealTime, iterTime, *EstimatedNumIter);
 #endif
 
    MPI_Waitall( NumProcs, finish_req, finish_statuses);
@@ -287,11 +285,11 @@ void HPCC_Power2NodesTime(u64Int logTableSize,
 #ifdef USE_MULTIPLE_RECV
   for (j = 0; j < NumRecvs; j++) {
     MPI_Cancel(&inreq[j]);
-    MPI_Wait(&inreq[j], &ignoredStatus);
+    MPI_Wait(&inreq[j], MPI_STATUS_IGNORE);
   }
 #else
   MPI_Cancel(&inreq);
-  MPI_Wait(&inreq, &ignoredStatus);
+  MPI_Wait(&inreq, MPI_STATUS_IGNORE);
 #endif
 
 /* end multiprocessor code */
@@ -311,7 +309,9 @@ void HPCC_AnyNodesTime(u64Int logTableSize,
       int MyProc,
       MPI_Datatype INT64_DT,
       double timeBound,
-      u64Int* EstimatedNumIter)
+      u64Int* EstimatedNumIter,
+      MPI_Status *finish_statuses,
+      MPI_Request *finish_req)
 {
   s64Int i, j;
   int proc_count;
@@ -330,10 +330,7 @@ void HPCC_AnyNodesTime(u64Int logTableSize,
 #endif
   u64Int inmsg;
   int bufferBase;
-  MPI_Status finish_statuses[NumProcs];
-  MPI_Request finish_req[NumProcs];
   MPI_Status status;
-  MPI_Status ignoredStatus;
   int have_done;
 
   int pe;
@@ -344,13 +341,8 @@ void HPCC_AnyNodesTime(u64Int logTableSize,
   int recvUpdates;
   Bucket_Ptr Buckets;
 
-  double _ra_LoopRealTime;
+  double ra_LoopRealTime;
   double iterTime;
-
-  pendingUpdates = 0;
-  maxPendingUpdates = MAX_TOTAL_PENDING_UPDATES;
-  localBufferSize = LOCAL_BUFFER_SIZE;
-  Buckets = HPCC_InitBuckets(NumProcs, maxPendingUpdates);
 
   /* Initialize main table */
   for (i=0; i<LocalTableSize; i++)
@@ -366,12 +358,16 @@ void HPCC_AnyNodesTime(u64Int logTableSize,
    *     }
    */
 
+  ra_LoopRealTime = -RTSEC();
+
+  pendingUpdates = 0;
+  maxPendingUpdates = MAX_TOTAL_PENDING_UPDATES;
+  localBufferSize = LOCAL_BUFFER_SIZE;
+  Buckets = HPCC_InitBuckets(NumProcs, maxPendingUpdates);
+
   SendCnt = 4 * LocalTableSize/_RA_SAMPLE_FACTOR;
   Ran = HPCC_starts (4 * GlobalStartMyProc);
 
-  _ra_LoopRealTime = -RTSEC();
-
-  pendingUpdates = 0;
   i = 0;
 #ifdef USE_MULTIPLE_RECV
   NumRecvs = (NumProcs > 4) ? (Mmin(4,MAX_RECV)) : 1;
@@ -552,14 +548,14 @@ void HPCC_AnyNodesTime(u64Int logTableSize,
 #endif
   }
 
-  _ra_LoopRealTime += RTSEC();
-  iterTime = (double) (_ra_LoopRealTime/SendCnt);
+  ra_LoopRealTime += RTSEC();
+  iterTime = (double) (ra_LoopRealTime/SendCnt);
   *EstimatedNumIter = (int)(timeBound/iterTime);
 
 #ifdef DEBUG_TIME_BOUND
   fprintf (stdout, "MyProc: %4d SampledNumIter: %8d ", MyProc, SendCnt);
   fprintf (stdout, "LoopRealTime: %.8f IterTime: %.8f EstimatedNumIter: %8d\n",
-     _ra_LoopRealTime, iterTime, *EstimatedNumIter);
+     ra_LoopRealTime, iterTime, *EstimatedNumIter);
 #endif
 
   MPI_Waitall( NumProcs, finish_req, finish_statuses);
@@ -569,11 +565,11 @@ void HPCC_AnyNodesTime(u64Int logTableSize,
 #ifdef USE_MULTIPLE_RECV
   for (j = 0; j < NumRecvs; j++) {
     MPI_Cancel(&inreq[j]);
-    MPI_Wait(&inreq[j], &ignoredStatus);
+    MPI_Wait(&inreq[j], MPI_STATUS_IGNORE);
   }
 #else
   MPI_Cancel(&inreq);
-  MPI_Wait(&inreq, &ignoredStatus);
+  MPI_Wait(&inreq, MPI_STATUS_IGNORE);
 #endif
 
   /* end multiprocessor code */
