@@ -671,12 +671,15 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   int sAbort, rAbort;
   int PowerofTwo;
 
-  double timeBound;  /* OPTIONAL time bound for execution time */
+  double timeBound = -1;  /* OPTIONAL time bound for execution time */
   u64Int NumUpdates_Default; /* Number of updates to table (suggested: 4x number of table entries) */
   u64Int NumUpdates;  /* actual number of updates to table - may be smaller than
                        * NumUpdates_Default due to execution time bounds */
   s64Int ProcNumUpdates; /* number of updates per processor */
+
+#ifdef RA_TIME_BOUND
   s64Int GlbNumUpdates;  /* for reduction */
+#endif
 
   FILE *outFile = NULL;
   MPI_Op sum64;
