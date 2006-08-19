@@ -198,7 +198,7 @@ Cblacs_get(int ConTxt, int what, int *val) {
       break;
   }
 }
-static int my_id(){int rank;MPI_Comm_rank(MPI_COMM_WORLD,&rank);return rank;}
+
 static int 
 CblacsGridNew(int nprow, int npcol, int *ConTxt, MPI_Comm *comm) {
   int size;
@@ -209,9 +209,6 @@ CblacsGridNew(int nprow, int npcol, int *ConTxt, MPI_Comm *comm) {
   if (MPI_COMM_NULL == *comm) return -1;
 
   MPI_Comm_size( *comm, &size );
-  DPRN(my_id(),nprow);
-  DPRN(my_id(),npcol);
-  DPRN(my_id(),size);
   if (nprow < 1 || nprow > size) return -1;
   if (npcol < 1 || npcol > size) return -1;
   if (nprow * npcol > size) return -1;
@@ -255,7 +252,6 @@ Cblacs_gridmap(int *ConTxt, int *umap, int ldumap, int nprow, int npcol) {
   if (MPI_SUCCESS != rv) {
     /* make contexts for non-participating processes a 0 value so gridinfo() works correctly */
     CblacsDeleteCtxt( ConTxt );
-    CblacsWarn();
     goto gmapErr;
   }
   CblacsSetComm( *ConTxt, newComm );
@@ -264,33 +260,29 @@ Cblacs_gridmap(int *ConTxt, int *umap, int ldumap, int nprow, int npcol) {
     return;
   }
   MPI_Comm_rank( comm, &key );
-  DPRN(key, myrow);
-  DPRN(key, mycol);
-  MPI_Comm_size( newComm, &i ); DPRN(key,i);
-  MPI_Comm_rank( newComm, &i ); DPRN(key,i);
+  MPI_Comm_size( newComm, &i );
+  MPI_Comm_rank( newComm, &i );
 
   /* row communicator */
   rv = MPI_Comm_split( newComm, myrow, mycol, &rowComm );
   if (MPI_SUCCESS != rv) {
     CblacsDeleteCtxt( ConTxt );
-    CblacsWarn();
     goto gmapErr;
   }
   CblacsSetRowComm( *ConTxt, rowComm );
-  MPI_Comm_size( rowComm, &i ); DPRN(key,i);
-  MPI_Comm_rank( rowComm, &i ); DPRN(key,i);
+  MPI_Comm_size( rowComm, &i );
+  MPI_Comm_rank( rowComm, &i );
 
 
   /* column communicator */
   rv = MPI_Comm_split( newComm, mycol, myrow, &colComm );
   if (MPI_SUCCESS != rv) {
     CblacsDeleteCtxt( ConTxt );
-    CblacsWarn();
     goto gmapErr;
   }
   CblacsSetColComm( *ConTxt, colComm );
-  MPI_Comm_size( colComm, &i ); DPRN(key,i);
-  MPI_Comm_rank( colComm, &i ); DPRN(key,i);
+  MPI_Comm_size( colComm, &i );
+  MPI_Comm_rank( colComm, &i );
 
   return;
 
@@ -310,7 +302,6 @@ Cblacs_gridexit(int ConTxt) {
 void
 Cblacs_gridinfo(int ConTxt, int *nprow, int *npcol, int *myrow, int *mycol) {
   MPI_Comm comm;
-  int dims[2], periods[2], coords[2];
 
   CBLACS_INIT;
 
@@ -588,7 +579,7 @@ Cblacs_dSendrecv(int ctxt, int mSrc, int nSrc, double *Asrc, int ldaSrc, int rde
   MPI_Comm comm;
   MPI_Datatype typeSrc, typeDest;
   MPI_Status stat;
-  int src, dest, coords[2], dataIsContiguousSrc, dataIsContiguousDest, countSrc, countDest, npcol;
+  int src, dest, dataIsContiguousSrc, dataIsContiguousDest, countSrc, countDest, npcol;
 
   CBLACS_INIT;
 
@@ -615,15 +606,6 @@ Cblacs_dSendrecv(int ctxt, int mSrc, int nSrc, double *Asrc, int ldaSrc, int rde
     MPI_Type_vector( nDest, mDest, ldaDest, MPI_DOUBLE, &typeDest );
     MPI_Type_commit( &typeDest );
   }
-
-  /*
-  coords[0] = rdest;
-  coords[1] = cdest;
-  MPI_Cart_rank( comm, coords, &dest );
-  coords[0] = rsrc;
-  coords[1] = csrc;
-  MPI_Cart_rank( comm, coords, &src );
-  */
 
   MPI_Comm_size( comm, &npcol );
   dest = cdest + rdest * npcol;

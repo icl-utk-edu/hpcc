@@ -144,8 +144,7 @@ PTRANS(HPCC_Params *params) {
 
   /* calculate and allocate memory */
   AllocSuccessful = 0;
-  MaxMem( nprocs, imrow, imcol, nmat, mval, nval, nbmat, mbval, nbval, ngrids, npval, nqval,
-          &dMemSize );
+  MaxMem( nprocs, imrow, imcol, nmat, mval, nval, nbmat, mbval, nbval, ngrids, npval, nqval, &dMemSize );
   mem = NULL; imem = NULL;
   if (dMemSize > 0) {
     mem = XMALLOC( double, dMemSize );
