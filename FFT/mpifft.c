@@ -12,8 +12,7 @@ double *HPCC_fft_timings_forward, *HPCC_fft_timings_backward;
 static void
 MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
         double *UGflops, s64Int_t *Un, double *UmaxErr, int *Ufailure) {
-  int commRank, commSize;
-  int failure;
+  int commRank, commSize, failure, flags;
   s64Int_t i, n;
   s64Int_t locn, loc0, alocn, aloc0, tls;
   double maxErr, tmp1, tmp2, tmp3, t0, t1, t2, t3, Gflops;
@@ -36,8 +35,14 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
 
   n *= commSize; /* global vector size */
 
+#ifdef HPCC_FFTW_ESTIMATE
+  flags = FFTW_ESTIMATE;
+#else
+  flags = FFTW_MEASURE;
+#endif
+
   t1 = -MPI_Wtime();
-  p = fftw_mpi_create_plan( comm, n, FFTW_FORWARD, FFTW_MEASURE );
+  p = fftw_mpi_create_plan( comm, n, FFTW_FORWARD, flags );
   t1 += MPI_Wtime();
 
   if (! p) goto no_plan;

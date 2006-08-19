@@ -13,7 +13,7 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
   hpcc_fftw_plan ip;
   double Gflops = -1.0;
   double maxErr, tmp1, tmp2, tmp3, t0, t1, t2, t3;
-  int i, n, failure = 1;
+  int i, n, flags, failure = 1;
   double deps = HPL_dlamch( HPL_MACH_EPS );
 
 #ifdef HPCC_FFT_235
@@ -52,8 +52,14 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
   HPCC_bcnrand( 2*n, 0, in );
   t0 += MPI_Wtime();
 
+#ifdef HPCC_FFTW_ESTIMATE
+  flags = FFTW_ESTIMATE;
+#else
+  flags = FFTW_MEASURE;
+#endif
+
   t1 = -MPI_Wtime();
-  p = fftw_create_plan( n, FFTW_FORWARD, FFTW_MEASURE );
+  p = fftw_create_plan( n, FFTW_FORWARD, flags );
   t1 += MPI_Wtime();
 
   if (! p) goto comp_end;
