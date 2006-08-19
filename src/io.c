@@ -371,6 +371,7 @@ HPCC_Finalize(HPCC_Params *params) {
   FPRINTF( myRank, outputFile, "sizeof_double=%d", (int)sizeof(double) );
   FPRINTF( myRank, outputFile, "sizeof_s64Int=%d", (int)sizeof(s64Int) );
   FPRINTF( myRank, outputFile, "sizeof_u64Int=%d", (int)sizeof(u64Int) );
+  FPRINTF( myRank, outputFile, "sizeof_struct_double_double=%d", (int)sizeof(struct{double HPCC_r,HPCC_i;}) );
   FPRINTF( myRank, outputFile, "CommWorldProcs=%d", commSize );
   FPRINTF( myRank, outputFile, "MPI_Wtick=%e", MPI_Wtick() );
   FPRINTF( myRank, outputFile, "HPL_Tflops=%g", params->HPLrdata.Gflops * 1e-3 );
