@@ -90,9 +90,9 @@ void HPL_pdtest
  *         thrsh  specifies  the  threshhold value  for the test ratio.
  *         Concretely, a test is declared "PASSED"  if and only if  all
  *         of the following inequalities are satisfied:
- *         ||Ax-b||_oo / ( epsil * ||A||_1  * N        ) < thrsh,
- *         ||Ax-b||_oo / ( epsil * ||A||_1  * ||x||_1  ) < thrsh,
- *         ||Ax-b||_oo / ( epsil * ||A||_oo * ||x||_oo ) < thrsh.
+ *         ||Ax-b||_oo / ( epsil * ||A||_1  * N            ) < thrsh,
+ *         ||Ax-b||_oo / ( epsil * ||A||_1  * ||x||_1      ) < thrsh,
+ *         ||Ax-b||_oo / ( epsil * ||A||_oo * ||x||_oo * N ) < thrsh.
  *         epsil  is the  relative machine precision of the distributed
  *         computer. Finally the test counters, kfail, kpass, kskip and
  *         ktest are updated as follows:  if the test passes,  kpass is

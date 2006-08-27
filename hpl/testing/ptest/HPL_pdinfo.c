@@ -1150,7 +1150,7 @@ label_error:
          HPL_fprintf( TEST->outfp, "%s\n",
             "   2) ||Ax-b||_oo / ( eps * ||A||_1  * ||x||_1  )" );
          HPL_fprintf( TEST->outfp, "%s\n",
-            "   3) ||Ax-b||_oo / ( eps * ||A||_oo * ||x||_oo )" );
+            "   3) ||Ax-b||_oo / ( eps * ||A||_oo * ||x||_oo * N )" );
          HPL_fprintf( TEST->outfp, "%s %21.6e\n",
             "- The relative machine precision (eps) is taken to be",
             TEST->epsil );
