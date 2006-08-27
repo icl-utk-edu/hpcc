@@ -402,10 +402,10 @@ void HPL_pdtest
                    "--------------------------------------",
                    "--------------------------------------" );
       HPL_fprintf( TEST->outfp, "%s%16.7f%s%s\n",
-         "||Ax-b||_oo / ( eps * ||A||_1  * N        ) = ", resid1,
+         "||Ax-b||_oo / ( eps * ||A||_1  * N            ) = ", resid1,
          " ...... ", ( resid1 < TEST->thrsh ? "PASSED" : "FAILED" ) );
       HPL_fprintf( TEST->outfp, "%s%16.7f%s%s\n",
-         "||Ax-b||_oo / ( eps * ||A||_1  * ||x||_1  ) = ", resid2,
+         "||Ax-b||_oo / ( eps * ||A||_1  * ||x||_1      ) = ", resid2,
          " ...... ", ( resid2 < TEST->thrsh ? "PASSED" : "FAILED" ) );
       HPL_fprintf( TEST->outfp, "%s%16.7f%s%s\n",
          "||Ax-b||_oo / ( eps * ||A||_oo * ||x||_oo * N ) = ", resid3,
