@@ -435,12 +435,12 @@ PTRANS(HPCC_Params *params) {
           double dva[3];
           MPI_Status status;
 
-          dva[0] = wtime[0];
-          dva[1] = ctime[0];
-          dva[2] = passed[0];
-
-          if (r0x0 == iam)
+          if (r0x0 == iam) {
+            dva[0] = wtime[0];
+            dva[1] = ctime[0];
+            dva[2] = passed[0];
             MPI_Send( dva, 3, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD );
+          }
 
           if (0 == iam) {
             MPI_Recv( dva, 3, MPI_DOUBLE, r0x0, 0, MPI_COMM_WORLD, &status );
