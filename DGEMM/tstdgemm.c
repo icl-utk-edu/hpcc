@@ -6,12 +6,11 @@
 
 /* Generates random matrix with entries between 0.0 and 1.0 */
 static void
-dmatgen(int m, int n, double *a, int lda) {
+dmatgen(int m, int n, double *a, int lda, int seed) {
   int i, j;
   double *a0 = a, rcp = 1.0 / RAND_MAX;
-  time_t tt;
 
-  srand( time( &tt ) );
+  srand( seed );
 
   for (j = 0; j < n; j++) {
     for (i = 0; i < m; i++)
@@ -21,77 +20,44 @@ dmatgen(int m, int n, double *a, int lda) {
   }
 }
 
-/* Copies a matrix */
-static void
-dmatcpy(int m, int n, double *dst, int ldd, double *src, int lds) {
-  int i, j;
-  double *dst0 = dst, *src0 = src;
+static double
+dnrm_inf(int m, int n, double *a, int lda) {
+  int i, j, k, lnx;
+  double mx, *a0;
 
-  for (j = 0; j < n; j++) {
-    for (i = 0; i < m; i++)
-      dst0[i] = src0[i];
+  int nx = 10;
+  double x[10];
 
-    dst0 += ldd;
-    src0 += lds;
-  }
-}
+  mx = 0.0;
 
-/* Test output of DGEMM by performing 'n_' * 'k_' operations (and some cache trashing).
-   In each column of 'c' a random entry is computed (using entry from 'd') and compared to the
-   entry in 'c'. Sum of absolute values of differences is used to caluclate a scaled residual.
- */
-static void
-tst_dgemm(int m_, int n_, int k_, double alpha, double *a, int lda, double *b, int ldb,
-    double beta, double *c, int ldc, double *d, int ldd, double *Usres) {
-  int i, j, k;
-  double *a0, *b0 = b, *c0 = c, *d0 = d, tmp, sum = 0.0, sumc, sumd, norm;
-  double deps = HPL_dlamch( HPL_MACH_EPS );
+  for (i = 0; i < m; i += nx) {
+    lnx = Mmin( nx, m-i );
+    for (k = 0; k < lnx; ++k) x[k] = 0.0;
 
-  /* Calculate Frobenius norm of 'c' and 'd' */
-  sumc = sumd = 0.0;
-  for (j = 0; j < n_; j++) {
-    for (i = 0; i < m_; i++) {
-      sumc += c0[i] * c0[i];
-      sumd += d0[i] * d0[i];
-    }
-    c0 += ldc;
-    d0 += ldd;
-  }
+    a0 = a + i;
 
-  norm = sumc > sumd ? sumc : sumd;
-  norm = sqrt(norm);
-
-  c0 = c;
-  d0 = d;
-  sum = 0.0;
-  for (j = 0; j < n_; j++) { /* for each column of 'c' */
-    i = rand() % m_;
-
-    a0 = a;
-    tmp = 0.0;
-    for (k = 0; k < k_; k++) {
-      tmp += a0[i] * b0[k];
+    for (j = 0; j < n; ++j) {
+      for (k = 0; k < lnx; ++k)
+        x[k] += fabs( a0[k] );
 
       a0 += lda;
     }
-    tmp = beta * d0[i] + alpha * tmp;
-    sum += fabs(tmp - c0[i]); /* this should be zero (or around epsilon) */
 
-    b0 += ldb;
-    c0 += ldc;
-    d0 += ldd;
+    for (k = 0; k < lnx; ++k)
+      if (mx < x[k]) mx = x[k];
   }
 
-  if (Usres) *Usres = sum / norm / ((double)(m_ + n_ + k_) / 3.0) / deps;
+  return mx;
 }
 
 int
 HPCC_TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure) {
-  int n, failure = 1;
-  double *a, *b, *c0, *c1, alpha, beta, sres;
+  int n, lda, ldb, ldc, failure = 1;
+  double *a, *b, *c, *x, *y, *z, alpha, beta, sres, cnrm, xnrm;
   double Gflops = 0.0, dn, t0, t1;
   long l_n;
   FILE *outFile;
+  int seed_a, seed_b, seed_c, seed_x;
 
   if (doIO) {
     outFile = fopen( params->outFname, "a" );
@@ -102,29 +68,40 @@ HPCC_TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufa
     }
   }
 
-  n = (int)sqrt( params->HPLMaxProcMem / sizeof(double) / 4 );
+  n = (int)(sqrt( params->HPLMaxProcMem / sizeof(double) / 3 + 0.25 ) - 0.5);
   if (n < 0) n = -n; /* if 'n' has overflown an integer */
   l_n = n;
+  lda = ldb = ldc = n;
 
   a = XMALLOC( double, l_n * l_n );
   b = XMALLOC( double, l_n * l_n );
-  c0 = XMALLOC( double, l_n * l_n );
-  c1 = XMALLOC( double, l_n * l_n );
+  c = XMALLOC( double, l_n * l_n );
 
-  if (! a || ! b || ! c0 || ! c1) {
+  x = XMALLOC( double, l_n );
+  y = XMALLOC( double, l_n );
+  z = XMALLOC( double, l_n );
+
+  if (! a || ! b || ! c || ! x || ! y || ! z) {
     goto comp_end;
   }
 
-  dmatgen( n, n, a, n );
-  dmatgen( n, n, b, n );
-  dmatgen( n, n, c0, n );
-  dmatcpy( n, n, c1, n, c0, n );
+  seed_a = (int)time( NULL );
+  dmatgen( n, n, a, n, seed_a );
+
+  seed_b = (int)time( NULL );
+  dmatgen( n, n, b, n, seed_b );
+
+  seed_c = (int)time( NULL );
+  dmatgen( n, n, c, n, seed_c );
+
+  seed_x = (int)time( NULL );
+  dmatgen( n, 1, x, n, seed_x );
 
   alpha = a[n / 2];
   beta  = b[n / 2];
 
   t0 = MPI_Wtime();
-  HPL_dgemm( HplColumnMajor, HplNoTrans, HplNoTrans, n, n, n, alpha, a, n, b, n, beta, c0, n );
+  HPL_dgemm( HplColumnMajor, HplNoTrans, HplNoTrans, n, n, n, alpha, a, n, b, n, beta, c, n );
   t1 = MPI_Wtime();
 
   t1 -= t0;
@@ -134,7 +111,24 @@ HPCC_TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufa
   else
     Gflops = 0.0;
 
-  tst_dgemm( n, n, n, alpha, a, n, b, n, beta, c0, n, c1, n, &sres );
+  cnrm = dnrm_inf( n, n, c, n );
+  xnrm = dnrm_inf( n, 1, x, n );
+
+  /* y <- c*x */
+  HPL_dgemv( HplColumnMajor, HplNoTrans, n, n, 1.0, c, ldc, x, 1, 0.0, y, 1 );
+
+  /* z <- b*x */
+  HPL_dgemv( HplColumnMajor, HplNoTrans, n, n, 1.0, b, ldb, x, 1, 0.0, z, 1 );
+
+  /* y <- alpha * a * z - y */
+  HPL_dgemv( HplColumnMajor, HplNoTrans, n, n, alpha, a, lda, z, 1, -1.0, y, 1 );
+
+  dmatgen( n, n, c, n, seed_c );
+
+  /* y <- beta * c_orig * x + y */
+  HPL_dgemv( HplColumnMajor, HplNoTrans, n, n, beta, c, ldc, x, 1, 1.0, y, 1 );
+
+  sres = dnrm_inf( n, 1, y, n ) / cnrm / xnrm / n / HPL_dlamch( HPL_MACH_EPS );
 
   if (doIO) fprintf( outFile, "Scaled residual: %g\n", sres );
 
@@ -143,8 +137,10 @@ HPCC_TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufa
 
   comp_end:
 
-  if (c1) free( c1 );
-  if (c0) free( c0 );
+  if (z) free( z );
+  if (y) free( y );
+  if (x) free( x );
+  if (c) free( c );
   if (b) free( b );
   if (a) free( a );
 
