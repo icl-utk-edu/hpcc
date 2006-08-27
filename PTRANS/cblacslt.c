@@ -259,9 +259,6 @@ Cblacs_gridmap(int *ConTxt, int *umap, int ldumap, int nprow, int npcol) {
     CblacsDeleteCtxt( ConTxt );
     return;
   }
-  MPI_Comm_rank( comm, &key );
-  MPI_Comm_size( newComm, &i );
-  MPI_Comm_rank( newComm, &i );
 
   /* row communicator */
   rv = MPI_Comm_split( newComm, myrow, mycol, &rowComm );
@@ -270,9 +267,6 @@ Cblacs_gridmap(int *ConTxt, int *umap, int ldumap, int nprow, int npcol) {
     goto gmapErr;
   }
   CblacsSetRowComm( *ConTxt, rowComm );
-  MPI_Comm_size( rowComm, &i );
-  MPI_Comm_rank( rowComm, &i );
-
 
   /* column communicator */
   rv = MPI_Comm_split( newComm, mycol, myrow, &colComm );
@@ -281,8 +275,6 @@ Cblacs_gridmap(int *ConTxt, int *umap, int ldumap, int nprow, int npcol) {
     goto gmapErr;
   }
   CblacsSetColComm( *ConTxt, colComm );
-  MPI_Comm_size( colComm, &i );
-  MPI_Comm_rank( colComm, &i );
 
   return;
 
@@ -576,7 +568,7 @@ Cdgamn2d(int ConTxt, char *scope, char *top, int m, int n, double *A, int lda, i
 void
 Cblacs_dSendrecv(int ctxt, int mSrc, int nSrc, double *Asrc, int ldaSrc, int rdest, int cdest,
   int mDest, int nDest, double *Adest, int ldaDest, int rsrc, int csrc) {
-  MPI_Comm comm;
+  MPI_Comm comm, rowComm;
   MPI_Datatype typeSrc, typeDest;
   MPI_Status stat;
   int src, dest, dataIsContiguousSrc, dataIsContiguousDest, countSrc, countDest, npcol;
@@ -607,7 +599,8 @@ Cblacs_dSendrecv(int ctxt, int mSrc, int nSrc, double *Asrc, int ldaSrc, int rde
     MPI_Type_commit( &typeDest );
   }
 
-  MPI_Comm_size( comm, &npcol );
+  rowComm = CblacsGetRowComm( ctxt );
+  MPI_Comm_size( rowComm, &npcol );
   dest = cdest + rdest * npcol;
   src  = csrc + rsrc * npcol;
 
