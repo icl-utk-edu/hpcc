@@ -1,3 +1,40 @@
+% -*- LaTeX -*-
+\documentclass[twocolumn]{report}
+
+\usepackage{xspace}
+
+\newcommand{\STREAM}{\textsf{STREAM}\xspace}
+\newcommand{\RANDA}{\textsf{RandomAccess}\xspace}
+\newcommand{\PTRANS}{\textsf{PTRANS}\xspace}
+
+\begin{document}
+
+\title{HPC Challenge User Guide}
+\author{Piotr Luszczek}
+\maketitile
+
+\chapter{Performance Considerations}
+
+As mentioned earlier, we try to operate on large data objects. The
+size of these objects is determined at runtime which contrasts with
+the original version of the \STREAM benchmark which uses static
+storage~(determined at compile time) and size. The original benchmark
+gives the compiler more information~(and control) over data alignment,
+loop trip counts, etc.
+
+\RANDA is by design heavy in misses that occur at various levels of
+memory hierarchy. But also Translation Look-aside Buffer~(TLB) is
+streased. It might be the TLB pressure that comes into play in the SMP
+and multicore setting. If TLB is shared between multiple processing
+elements it will become the bottleneck. It's because TLBs do not have
+prefetch functionality nor any other latency hiding mechanism.
+
+\section{Tuning}
+
+\PTRANS
+
+\end{document}
+
 Rules: avoid, reference web page
 definitions: CPU, chip, core, process, node
 optimizations: FFTE parameters, using FFTW 2 by modyfing FFTW code to
