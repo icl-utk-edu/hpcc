@@ -780,8 +780,8 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   /* estimate number of updates such that execution time does not exceed time bound */
   /* time_bound should be a parameter */
   /* max run time in seconds */
-  MPI_Bcast( &params->HPLrdata.time, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD );
-  timeBound = Mmax( 0.25 * params->HPLrdata.time, (double)TIME_BOUND );
+  MPI_Allreduce( &params->HPLrdata.time, &timeBound, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD );
+  timeBound = Mmax( 0.25 * timeBound, (double)TIME_BOUND );
   if (PowerofTwo) {
     HPCC_Power2NodesTime(logTableSize, TableSize, LocalTableSize,
                     MinLocalTableSize, GlobalStartMyProc, Top,
