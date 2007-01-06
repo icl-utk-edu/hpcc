@@ -226,7 +226,8 @@ int HPL_main( ARGC, ARGV, rdata, failure )
               algo.equil = equil; algo.align = align;
 
               HPL_pdtest( &test, &grid, &algo, nval[in], nbval[inb], &rdataCur );
-              if (rdata->Gflops < rdataCur.Gflops) *rdata = rdataCur;
+              if (0 == myrow && 0 == mycol)
+                if (rdata->Gflops < rdataCur.Gflops) *rdata = rdataCur;
 
              }
             }
