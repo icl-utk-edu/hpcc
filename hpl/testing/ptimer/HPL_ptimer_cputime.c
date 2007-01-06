@@ -48,7 +48,7 @@
  * Include files
  */
 #include "hpl.h"
- 
+
 /* 
  * Purpose
  * =======
@@ -87,7 +87,7 @@ double HPL_ptimer_cputime()
    d = (double)(t1) / cps;
    return( d );
 }
- 
+
 #elif defined( HPL_USE_TIMES )
  
 #include <sys/times.h>
@@ -107,7 +107,23 @@ double HPL_ptimer_cputime()
    (void) times( &ts );
    return( (double)(ts.tms_utime) / ClockTick );
 }
- 
+
+#elif defined( HPL_USE_GETPROCESSTIMES )
+
+#include <time.h>
+#include <windows.h>
+
+#ifdef HPL_STDC_HEADERS
+double HPL_ptimer_cputime( void )
+#else
+double HPL_ptimer_cputime()
+#endif
+{
+  FILETIME creation, exit, kernel, user;
+  GetProcessTimes( GetCurrentProcess(), &creation, &exit, &kernel, &user );
+  return (*(LONGLONG*)&kernel+*(LONGLONG*)&user)*1e-7;
+}
+
 /* #elif defined( HPL_USE_GETRUSAGE ) */
 #else
  
@@ -121,7 +137,7 @@ double HPL_ptimer_cputime()
 #endif
 {
    struct rusage              ruse;
- 
+
    (void) getrusage( RUSAGE_SELF, &ruse );
    return( (double)( ruse.ru_utime.tv_sec  ) +
            ( (double)( ruse.ru_utime.tv_usec ) / 1000000.0 ) );
@@ -138,7 +154,7 @@ double HPL_ptimer_cputime()
 {
    return( HPL_PTIMER_ERROR );
 }
-*/ 
+*/
 
 #endif
 /*

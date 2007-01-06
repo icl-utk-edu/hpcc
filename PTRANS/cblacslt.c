@@ -9,11 +9,7 @@ Written by Piotr Luszczek.
 
 */
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <hpcc.h>
 
 #include <mpi.h>
 
@@ -31,7 +27,7 @@ Written by Piotr Luszczek.
 static int CblacsInitialized = 0, CblacsFinalized;
 
 double
-dcputime00(void) {return 1.0 / CLOCKS_PER_SEC * clock();}
+dcputime00(void) {return HPL_ptimer_cputime();}
 double
 dwalltime00(void) {return MPI_Wtime();}
 

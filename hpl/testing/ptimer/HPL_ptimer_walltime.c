@@ -60,7 +60,7 @@
  */ 
  
 #if defined( HPL_USE_GETTIMEOFDAY )
- 
+
 #include <sys/time.h>
 #include <sys/resource.h>
 
@@ -72,7 +72,7 @@ double HPL_ptimer_walltime()
 {
    struct timeval             tp;
    static long                start=0, startu;
- 
+
    if( !start )
    {
       (void) gettimeofday( &tp, NULL );
@@ -81,7 +81,7 @@ double HPL_ptimer_walltime()
       return( HPL_rzero );
    }
    (void) gettimeofday( &tp, NULL );
- 
+
    return( (double)( tp.tv_sec - start ) +
            ( (double)( tp.tv_usec-startu ) / 1000000.0 ) );
 }

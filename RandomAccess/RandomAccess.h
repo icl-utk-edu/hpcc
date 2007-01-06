@@ -10,7 +10,7 @@
 #endif
 
 /* Macros for timing */
-#define CPUSEC() ((double)clock()/CLOCKS_PER_SEC)
+#define CPUSEC() (HPL_timer_cputime())
 #define RTSEC() (MPI_Wtime())
 
 extern u64Int HPCC_starts (s64Int);

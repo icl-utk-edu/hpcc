@@ -59,6 +59,8 @@
  * ---------------------------------------------------------------------
  */ 
 
+#if defined( HPL_USE_GETTIMEOFDAY )
+
 #include <sys/time.h>
 #include <sys/resource.h>
 
@@ -82,7 +84,20 @@ double HPL_timer_walltime()
 
    return( (double)( tp.tv_sec - start ) +
            ( (double)( tp.tv_usec-startu ) / 1000000.0 ) );
-}                                                                               
+}
+
+#else
+
+#ifdef HPL_STDC_HEADERS
+double HPL_timer_walltime( void )
+#else
+double HPL_timer_walltime()
+#endif
+{
+   return( MPI_Wtime() );
+}
+ 
+#endif
 /*
  * End of HPL_timer_walltime
  */

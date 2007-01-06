@@ -5,6 +5,8 @@ pdmatcmp.c
 
 #include <hpcc.h>
 
+#include "cblacslt.h"
+
 /*
 Purpose
 
