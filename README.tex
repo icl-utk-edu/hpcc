@@ -1,44 +1,51 @@
 % -*- LaTeX -*-
 \documentclass[twocolumn]{article}
-\usepackage{pslatex}
 \begin{document}
-\title{DARPA/DOE HPC~Challenge Benchmark} \author{Piotr
-Luszczek\footnote{University of Tennessee Knoxville, Innovative
-Computing Laboratory}} \maketitle
+\title{DARPA/DOE HPC~Challenge Benchmark}
+\author{Piotr Luszczek\footnote{University of Tennessee Knoxville, Innovative
+Computing Laboratory}}
+\maketitle
 
 \section{Introduction}
-This is a suite of benchmarks that measure performance of CPU, memory
-subsytem and the interconnect. For details refer to the
+This is a suite of benchmarks that measure performance of processor,
+memory subsytem, and the interconnect. For details refer to the
 HPC~Challenge web site (\texttt{http://icl.cs.utk.edu/hpcc/}.)
 
 In essence, HPC~Challenge consists of a number of subbenchmarks each
-of which tests different aspect of the system.
+of which tests a different aspect of the system.
 
-If you are familiar with the HPL benchmark code (see the HPL web site:
+If you are familiar with the High Performance Linpack~(HPL) benchmark
+code (see the HPL web site:
 \texttt{http://www.netlib.org/benchmark/hpl/}) then you can reuse the
-configuration file~(input for \texttt{make(1)} command) and the input
+build script file~(input for \texttt{make(1)} command) and the input
 file that you already have for HPL. The HPC~Challenge benchmark
-includes HPL and uses its configuration and input files with only
-slight modifications.
+includes HPL and uses its build script and input files with only
+slight modifications. The most important change must be done to the
+line that sets the \texttt{TOPdir} variable. For HPC~Challenge the
+variable's value should always be \texttt{../../..} regardless of what
+it was in the HPL build script file.
 
 \section{Compiling}
-The first step is to create a configuration file that reflects
-characteristics of your machine. The configuration file should be
+The first step is to create a build script file that reflects
+characteristics of your machine. This file is reused by all the
+components of the HPC~Challenge suite. The build script file should be
 created in the \texttt{hpl} directory. This directory contains
 instructions (the files \texttt{README} and \texttt{INSTALL}) on how
-to create the configuration file. This file is reused by all the
-components of the HPC~Challenge suite.
+to create the build script file for your system. The directory
+\texttt{hpl/setup} contains many examples of build script files. A
+recommended approach is to copy one of them to the \texttt{hpl}
+directory and if it doesn't work then change it.
 
-When configuration is done, a file should exist in the \texttt{hpl}
-directory whose name starts with \texttt{Make.} and ends with the name
-for the system used for tests. For example, if the name for the system
-is \texttt{Unix}, the file should be named \texttt{Make.Unix}.
+The build script file has a name that starts with \texttt{Make.}
+prefix and usally ends with a suffix that identifies the target
+system. For example, if the suffix chosen for the system is
+\texttt{Unix}, the file should be named \texttt{Make.Unix}.
 
 To build the benchmark executable (for the system named \texttt{Unix})
-type: \texttt{make arch=Unix}.  This command should be run in the
-current directory (not in the \texttt{hpl} directory). It will look in
-the \texttt{hpl} directory for the configuration file and use it to
-build the benchmark executable.
+type: \texttt{make arch=Unix}.  This command should be run in the top
+directory~(not in the \texttt{hpl} directory). It will look in the
+\texttt{hpl} directory for the build script file and use it to build
+the benchmark executable.
 
 \section{Configuration}
 The HPC~Challenge is driven by a short input file named
@@ -48,25 +55,26 @@ HPL~(customarily called \texttt{HPL.dat}). Refer to the directory
 HPL. A sample input file is included with the HPC~Challenge
 distribution.
 
-The differences between HPL's input file and HPC~Challenge's input file can
-be summarized as follows:
+The differences between HPL's input file and HPC~Challenge's input
+file can be summarized as follows:
 
 \begin{itemize}
-\item Lines 3 and 4 are ignored. The output always goes to the file named \texttt{hpccoutf.txt}.
-\item There are additional lines (starting with line 33) that may (but
+\item Lines 3 and 4 are ignored. The output is always appended to the
+file named \texttt{hpccoutf.txt}.
+\item There are additional lines~(starting with line 33) that may~(but
 do not have to) be used to customize the HPC~Challenge benchmark. They
 are described below.
 \end{itemize}
 
-The additional lines in the HPC~Challenge input file (compared to the
+The additional lines in the HPC~Challenge input file~(compared to the
 HPL input file) are:
 
 \begin{itemize}
 \item Lines 33 and 34 describe additional matrix sizes to be used for
-running the PTRANS benchmark (one of the components of the
+running the PTRANS benchmark~(one of the components of the
 HPC~Challenge benchmark).
 \item Lines 35 and 36 describe additional blocking factors to be used
-for running the PTRANS benchmark.
+for running the PTRANS test.
 \end{itemize}
 
 Just for completeness, here is the list of lines of the HPC
@@ -111,9 +119,9 @@ Challenge's input file and brief description of their meaning:
 \end{itemize}
 
 \section{Running}
-It is hard to describe all the possible ways that the HPC~Challenge
-benchmark should be run on various systems.  An example command to run
-the benchmark could like like this: \texttt{mpirun -np 4 hpcc}. The
+The exact way how to run the HPC~Challenge benchmark depends on the
+MPI implementation and system details.  An example command to run the
+benchmark could like like this: \texttt{mpirun -np 4 hpcc}. The
 meaning of the command's components is as follows:
 \begin{itemize}
 \item \texttt{mpirun} is the command that starts execution of an MPI
@@ -130,4 +138,7 @@ large enough to accomodate all the process grids specified in the
 run.
 \end{itemize}
 
+After the run, a file called \texttt{hpccoutf.txt} is created. It
+contains results of the benchmark. This file should be uploaded
+through the web form at the HPC~Challenge website.
 \end{document}
