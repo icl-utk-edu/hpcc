@@ -51,20 +51,20 @@ HPCC_StarStream(HPCC_Params *params) {
   MPI_Bcast( &triadAvgGBs, 1, MPI_DOUBLE, 0, comm ); params->StarStreamTriadGBs = triadAvgGBs;
 
   BEGIN_IO( myRank, params->outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Node(s) with error %d", errCount );
-  FPRINTF(  myRank, outputFile, "Minimum Copy GB/s %.6f", copyMinGBs );
-  FPRINTF(  myRank, outputFile, "Average Copy GB/s %.6f", copyAvgGBs );
-  FPRINTF(  myRank, outputFile, "Maximum Copy GB/s %.6f", copyMaxGBs );
-  FPRINTF(  myRank, outputFile, "Minimum Scale GB/s %.6f", scaleMinGBs );
-  FPRINTF(  myRank, outputFile, "Average Scale GB/s %.6f", scaleAvgGBs );
-  FPRINTF(  myRank, outputFile, "Maximum Scale GB/s %.6f", scaleMaxGBs );
-  FPRINTF(  myRank, outputFile, "Minimum Add GB/s %.6f", addMinGBs );
-  FPRINTF(  myRank, outputFile, "Average Add GB/s %.6f", addAvgGBs );
-  FPRINTF(  myRank, outputFile, "Maximum Add GB/s %.6f", addMaxGBs );
-  FPRINTF(  myRank, outputFile, "Minimum Triad GB/s %.6f", triadMinGBs );
-  FPRINTF(  myRank, outputFile, "Average Triad GB/s %.6f", triadAvgGBs );
-  FPRINTF(  myRank, outputFile, "Maximum Triad GB/s %.6f", triadMaxGBs );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Node(s) with error %d\n", errCount );
+  fprintf( outputFile, "Minimum Copy GB/s %.6f\n", copyMinGBs );
+  fprintf( outputFile, "Average Copy GB/s %.6f\n", copyAvgGBs );
+  fprintf( outputFile, "Maximum Copy GB/s %.6f\n", copyMaxGBs );
+  fprintf( outputFile, "Minimum Scale GB/s %.6f\n", scaleMinGBs );
+  fprintf( outputFile, "Average Scale GB/s %.6f\n", scaleAvgGBs );
+  fprintf( outputFile, "Maximum Scale GB/s %.6f\n", scaleMaxGBs );
+  fprintf( outputFile, "Minimum Add GB/s %.6f\n", addMinGBs );
+  fprintf( outputFile, "Average Add GB/s %.6f\n", addAvgGBs );
+  fprintf( outputFile, "Maximum Add GB/s %.6f\n", addMaxGBs );
+  fprintf( outputFile, "Minimum Triad GB/s %.6f\n", triadMinGBs );
+  fprintf( outputFile, "Average Triad GB/s %.6f\n", triadAvgGBs );
+  fprintf( outputFile, "Maximum Triad GB/s %.6f\n", triadMaxGBs );
+  END_IO( myRank, outputFile );
 
   return 0;
 }
@@ -116,13 +116,13 @@ HPCC_SingleStream(HPCC_Params *params) {
   params->SingleStreamTriadGBs = triadLocalGBs;
 
   BEGIN_IO( myRank, params->outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Node(s) with error %d", errCount );
-  FPRINTF(  myRank, outputFile, "Node selected %d", rank );
-  FPRINTF(  myRank, outputFile, "Single STREAM Copy GB/s %.6f", copyLocalGBs );
-  FPRINTF(  myRank, outputFile, "Single STREAM Scale GB/s %.6f", scaleLocalGBs );
-  FPRINTF(  myRank, outputFile, "Single STREAM Add GB/s %.6f", addLocalGBs );
-  FPRINTF(  myRank, outputFile, "Single STREAM Triad GB/s %.6f", triadLocalGBs );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Node(s) with error %d\n", errCount );
+  fprintf( outputFile, "Node selected %d\n", rank );
+  fprintf( outputFile, "Single STREAM Copy GB/s %.6f\n", copyLocalGBs );
+  fprintf( outputFile, "Single STREAM Scale GB/s %.6f\n", scaleLocalGBs );
+  fprintf( outputFile, "Single STREAM Add GB/s %.6f\n", addLocalGBs );
+  fprintf( outputFile, "Single STREAM Triad GB/s %.6f\n", triadLocalGBs );
+  END_IO( myRank, outputFile );
 
   return 0;
 }

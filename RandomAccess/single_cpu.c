@@ -51,10 +51,10 @@ HPCC_SingleRandomAccess(HPCC_Params *params)
   if (failure) params->Failure = 1;
 
   BEGIN_IO( myRank, params->outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Node(s) with error %d", errCount );
-  FPRINTF(  myRank, outputFile, "Node selected %d", rank );
-  FPRINTF(  myRank, outputFile, "Single GUP/s %.6f", localGUPs );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Node(s) with error %d\n", errCount );
+  fprintf( outputFile, "Node selected %d\n", rank );
+  fprintf( outputFile, "Single GUP/s %.6f\n", localGUPs );
+  END_IO( myRank, outputFile );
 
   return 0;
 }

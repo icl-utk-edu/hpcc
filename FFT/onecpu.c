@@ -31,11 +31,11 @@ HPCC_StarFFT(HPCC_Params *params) {
   MPI_Bcast( &avgGflops, 1, MPI_DOUBLE, 0, comm ); params->StarFFTGflops = avgGflops;
 
   BEGIN_IO( commRank, params->outFname, outputFile);
-  FPRINTF(  commRank, outputFile, "Node(s) with error %d", errCount );
-  FPRINTF(  commRank, outputFile, "Minimum Gflop/s %.6f", minGflops );
-  FPRINTF(  commRank, outputFile, "Average Gflop/s %.6f", avgGflops );
-  FPRINTF(  commRank, outputFile, "Maximum Gflop/s %.6f", maxGflops );
-  END_IO(   commRank, outputFile );
+  fprintf( outputFile, "Node(s) with error %d\n", errCount );
+  fprintf( outputFile, "Minimum Gflop/s %.6f\n", minGflops );
+  fprintf( outputFile, "Average Gflop/s %.6f\n", avgGflops );
+  fprintf( outputFile, "Maximum Gflop/s %.6f\n", maxGflops );
+  END_IO( commRank, outputFile );
 
   return 0;
 }
@@ -81,10 +81,10 @@ HPCC_SingleFFT(HPCC_Params *params) {
   params->SingleFFTGflops = localGflops;
 
   BEGIN_IO( commRank, params->outFname, outputFile);
-  FPRINTF(  commRank, outputFile, "Node(s) with error %d", errCount );
-  FPRINTF(  commRank, outputFile, "Node selected %d", rank );
-  FPRINTF(  commRank, outputFile, "Single FFT Gflop/s %.6f", localGflops );
-  END_IO(   commRank, outputFile );
+  fprintf( outputFile, "Node(s) with error %d\n", errCount );
+  fprintf( outputFile, "Node selected %d\n", rank );
+  fprintf( outputFile, "Single FFT Gflop/s %.6f\n", localGflops );
+  END_IO( commRank, outputFile );
 
   return 0;
 }

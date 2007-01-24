@@ -31,32 +31,32 @@ main(int argc, char *argv[]) {
   MPI_Barrier( MPI_COMM_WORLD );
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of PTRANS section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of PTRANS section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunPTRANS) PTRANS( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF(  myRank, outputFile, "End of PTRANS section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of PTRANS section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                        HPL                         */
   /* -------------------------------------------------- */
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of HPL section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of HPL section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunHPL) HPL_main( argc, argv, &params.HPLrdata, &params.Failure );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF(  myRank, outputFile, "End of HPL section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of HPL section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                    StarDGEMM                       */
@@ -65,16 +65,16 @@ main(int argc, char *argv[]) {
   MPI_Barrier( MPI_COMM_WORLD );
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of StarDGEMM section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of StarDGEMM section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunStarDGEMM) HPCC_StarDGEMM( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF(  myRank, outputFile, "End of StarDGEMM section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of StarDGEMM section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                    SingleDGEMM                     */
@@ -83,16 +83,16 @@ main(int argc, char *argv[]) {
   MPI_Barrier( MPI_COMM_WORLD );
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of SingleDGEMM section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of SingleDGEMM section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunSingleDGEMM) HPCC_SingleDGEMM( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF(  myRank, outputFile, "End of SingleDGEMM section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of SingleDGEMM section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                    StarSTREAM                      */
@@ -101,16 +101,16 @@ main(int argc, char *argv[]) {
   MPI_Barrier( MPI_COMM_WORLD );
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of StarSTREAM section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of StarSTREAM section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunStarStream) HPCC_StarStream( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF(  myRank, outputFile, "End of StarSTREAM section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of StarSTREAM section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                    SingleSTREAM                    */
@@ -119,16 +119,16 @@ main(int argc, char *argv[]) {
   MPI_Barrier( MPI_COMM_WORLD );
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of SingleSTREAM section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of SingleSTREAM section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunSingleStream) HPCC_SingleStream( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF(  myRank, outputFile, "End of SingleSTREAM section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of SingleSTREAM section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                 MPI RandomAccess                   */
@@ -137,16 +137,16 @@ main(int argc, char *argv[]) {
   MPI_Barrier( MPI_COMM_WORLD );
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of MPIRandomAccess section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of MPIRandomAccess section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunMPIRandomAccess) HPCC_MPIRandomAccess( &params );
 
   time( &currentTime );
   BEGIN_IO(myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF( myRank, outputFile, "End of MPIRandomAccess section.%s", "" );
-  END_IO(  myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of MPIRandomAccess section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                  StarRandomAccess                  */
@@ -155,16 +155,16 @@ main(int argc, char *argv[]) {
   MPI_Barrier( MPI_COMM_WORLD );
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of StarRandomAccess section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of StarRandomAccess section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunStarRandomAccess) HPCC_StarRandomAccess( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF(  myRank, outputFile, "End of StarRandomAccess section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of StarRandomAccess section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                 SingleRandomAccess                 */
@@ -173,16 +173,16 @@ main(int argc, char *argv[]) {
   MPI_Barrier( MPI_COMM_WORLD );
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of SingleRandomAccess section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of SingleRandomAccess section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunSingleRandomAccess) HPCC_SingleRandomAccess( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF(  myRank, outputFile, "End of SingleRandomAccess section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of SingleRandomAccess section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                       MPIFFT                       */
@@ -191,16 +191,16 @@ main(int argc, char *argv[]) {
   MPI_Barrier( MPI_COMM_WORLD );
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of MPIFFT section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of MPIFFT section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunMPIFFT) HPCC_MPIFFT( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF(  myRank, outputFile, "End of MPIFFT section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of MPIFFT section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                      StarFFT                       */
@@ -209,16 +209,16 @@ main(int argc, char *argv[]) {
   MPI_Barrier( MPI_COMM_WORLD );
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of StarFFT section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of StarFFT section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunStarFFT) HPCC_StarFFT( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF(  myRank, outputFile, "End of StarFFT section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of StarFFT section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                      SingleFFT                     */
@@ -227,16 +227,16 @@ main(int argc, char *argv[]) {
   MPI_Barrier( MPI_COMM_WORLD );
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of SingleFFT section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of SingleFFT section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunSingleFFT) HPCC_SingleFFT( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF(  myRank, outputFile, "End of SingleFFT section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of SingleFFT section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                  Latency/Bandwidth                 */
@@ -245,16 +245,16 @@ main(int argc, char *argv[]) {
   MPI_Barrier( MPI_COMM_WORLD );
 
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Begin of LatencyBandwidth section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Begin of LatencyBandwidth section.\n" );
+  END_IO( myRank, outputFile );
 
   if (params.RunLatencyBandwidth) main_bench_lat_bw( &params );
 
   time( &currentTime );
   BEGIN_IO( myRank, outFname, outputFile);
-  FPRINTF2( myRank, outputFile,"Current time (%ld) is %s",(long)currentTime,ctime(&currentTime));
-  FPRINTF(  myRank, outputFile, "End of LatencyBandwidth section.%s", "" );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of LatencyBandwidth section.\n" );
+  END_IO( myRank, outputFile );
 
   hpcc_end:
 

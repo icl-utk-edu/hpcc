@@ -179,11 +179,8 @@ extern int xjumpm_(int *, int *, int *, int *, int *, int *, int *);
 
 #define DPRN(i,v) do{printf(__FILE__ "(%d)@%d:" #v "=%g\n",__LINE__,i,(double)(v));fflush(stdout);}while(0)
 
-#define FPRINTF(r,f,s,v) do{if(0==r){fprintf(f,s "\n",v);fflush(f);}}while(0)
-#define FPRINTF2(r,f,s,v1,v2) do{if(0==r){fprintf(f,s "\n",v1,v2);fflush(f);}}while(0)
-#define FPRINTF3(r,f,s,v1,v2,v3) do{if(0==r){fprintf(f,s "\n",v1,v2,v3);fflush(f);}}while(0)
-#define BEGIN_IO(r,fn,f) do{if(0==r){f=fopen(fn,"a" );if(!f){f=stderr;FPRINTF(r,f,"Problem with appending to file %s",fn);}}}while(0)
-#define END_IO(r,f) do{if(0==r){if(f!=stdout&&f!=stderr)fclose(f);}}while(0)
+#define BEGIN_IO(r,fn,f) if(0==r){f=fopen(fn,"a");if(!f)fprintf(f=stderr,"Problem with appending to file '%s'\n",fn)
+#define END_IO(r,f) fflush(f); if (f!=stdout && f!=stderr) fclose(f);} f=(FILE*)(NULL)
 
 #define XMALLOC(t,s) ((t*)malloc(sizeof(t)*(s)))
 #define XCALLOC(t,s) ((t*)calloc((s),sizeof(t)))

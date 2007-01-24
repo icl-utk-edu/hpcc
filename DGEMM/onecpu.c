@@ -31,11 +31,11 @@ HPCC_StarDGEMM(HPCC_Params *params) {
   MPI_Bcast( &avgGflops, 1, MPI_DOUBLE, 0, comm ); params->StarDGEMMGflops = avgGflops;
 
   BEGIN_IO( myRank, params->outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Node(s) with error %d", errCount );
-  FPRINTF(  myRank, outputFile, "Minimum Gflop/s %.6f", minGflops );
-  FPRINTF(  myRank, outputFile, "Average Gflop/s %.6f", avgGflops );
-  FPRINTF(  myRank, outputFile, "Maximum Gflop/s %.6f", maxGflops );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Node(s) with error %d\n", errCount );
+  fprintf( outputFile, "Minimum Gflop/s %.6f\n", minGflops );
+  fprintf( outputFile, "Average Gflop/s %.6f\n", avgGflops );
+  fprintf( outputFile, "Maximum Gflop/s %.6f\n", maxGflops );
+  END_IO( myRank, outputFile );
 
   return 0;
 }
@@ -81,10 +81,10 @@ HPCC_SingleDGEMM(HPCC_Params *params) {
   params->SingleDGEMMGflops = localGflops;
 
   BEGIN_IO( myRank, params->outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Node(s) with error %d", errCount );
-  FPRINTF(  myRank, outputFile, "Node selected %d", rank );
-  FPRINTF(  myRank, outputFile, "Single DGEMM Gflop/s %.6f", localGflops );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Node(s) with error %d\n", errCount );
+  fprintf( outputFile, "Node selected %d\n", rank );
+  fprintf( outputFile, "Single DGEMM Gflop/s %.6f\n", localGflops );
+  END_IO( myRank, outputFile );
 
   return 0;
 }

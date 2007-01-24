@@ -40,11 +40,11 @@ HPCC_StarRandomAccess(HPCC_Params *params)
   params->StarGUPs = avgGUPs;
 
   BEGIN_IO( myRank, params->outFname, outputFile);
-  FPRINTF(  myRank, outputFile, "Node(s) with error %d", errCount );
-  FPRINTF(  myRank, outputFile, "Minimum GUP/s %.6f", minGUPs );
-  FPRINTF(  myRank, outputFile, "Average GUP/s %.6f", avgGUPs );
-  FPRINTF(  myRank, outputFile, "Maximum GUP/s %.6f", maxGUPs );
-  END_IO(   myRank, outputFile );
+  fprintf( outputFile, "Node(s) with error %d\n", errCount );
+  fprintf( outputFile, "Minimum GUP/s %.6f\n", minGUPs );
+  fprintf( outputFile, "Average GUP/s %.6f\n", avgGUPs );
+  fprintf( outputFile, "Maximum GUP/s %.6f\n", maxGUPs );
+  END_IO( myRank, outputFile );
 
   return 0;
 }
