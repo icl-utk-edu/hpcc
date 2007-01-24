@@ -4,69 +4,11 @@
 
 /* Common Block Declarations */
 
-struct {
+static struct {
     int irand[2], ias[2], ics[2];
 } rancom_;
 
 #define rancom_1 rancom_
-
-static int
-ladd_(int *j, int *k, int *i__) {
-
-/*  -- ScaLAPACK routine (version 1.7) -- */
-/*     University of Tennessee, Knoxville, Oak Ridge National Laboratory, */
-/*     and University of California, Berkeley. */
-/*     May 1, 1997 */
-
-    /* Parameter adjustments */
-    --i__;
-    --k;
-    --j;
-
-    /* Function Body */
-    i__[1] = (k[1] + j[1]) % 65536;
-    i__[2] = ((k[1] + j[1]) / 65536 + k[2] + j[2]) % 32768;
-
-    return 0;
-} /* ladd_ */
-
-
-static int
-lmul_(int *k, int *j, int *i__) {
-    int kt, lt;
-
-/*  -- ScaLAPACK routine (version 1.7) -- */
-/*     University of Tennessee, Knoxville, Oak Ridge National Laboratory, */
-/*     and University of California, Berkeley. */
-/*     May 1, 1997 */
-
-    /* Parameter adjustments */
-    --i__;
-    --j;
-    --k;
-
-    /* Function Body */
-    kt = k[1] * j[1];
-    if (kt < 0) {
-	kt += -2147483647;
-	kt += -1;
-    }
-    i__[1] = kt % 65536;
-    lt = k[1] * j[2] + k[2] * j[1];
-    if (lt < 0) {
-	lt += -2147483647;
-	lt += -1;
-    }
-    kt = kt / 65536 + lt;
-    if (kt < 0) {
-	kt += -2147483647;
-	kt += -1;
-    }
-    i__[2] = kt % 32768;
-
-    return 0;
-} /* lmul_ */
-
 
 int
 xjumpm_(int *jumpm, int *mult, int *iadd, 
@@ -97,15 +39,15 @@ xjumpm_(int *jumpm, int *mult, int *iadd,
 	}
 	i__1 = *jumpm - 1;
 	for (i__ = 1; i__ <= i__1; ++i__) {
-	    lmul_(&iam[1], &mult[1], j);
+	    HPL_lmul(&iam[1], &mult[1], j);
 	    iam[1] = j[0];
 	    iam[2] = j[1];
-	    lmul_(&icm[1], &mult[1], j);
-	    ladd_(&iadd[1], j, &icm[1]);
+	    HPL_lmul(&icm[1], &mult[1], j);
+	    HPL_ladd(&iadd[1], j, &icm[1]);
 /* L20: */
 	}
-	lmul_(&irann[1], &iam[1], j);
-	ladd_(j, &icm[1], &iranm[1]);
+	HPL_lmul(&irann[1], &iam[1], j);
+	HPL_ladd(j, &icm[1], &iranm[1]);
     } else {
 	iranm[1] = irann[1];
 	iranm[2] = irann[2];
@@ -152,8 +94,8 @@ int jumpit_(int *mult, int *iadd, int *irann, int *iranm) {
     --iadd;
     --mult;
 
-    lmul_(&irann[1], &mult[1], j);
-    ladd_(j, &iadd[1], &iranm[1]);
+    HPL_lmul(&irann[1], &mult[1], j);
+    HPL_ladd(j, &iadd[1], &iranm[1]);
 
     rancom_1.irand[0] = iranm[1];
     rancom_1.irand[1] = iranm[2];
@@ -167,7 +109,7 @@ pdrand() {
     double ret_val;
 
     /* Local variables */
-    static int j[2];
+    int j[2];
 /*  -- ScaLAPACK routine (version 1.7) -- */
 /*     University of Tennessee, Knoxville, Oak Ridge National Laboratory, */
 /*     and University of California, Berkeley. */
@@ -176,8 +118,8 @@ pdrand() {
     ret_val = ((double) rancom_1.irand[0] + (double) rancom_1.irand[1]
 	     * 65536.) / 2147483648.;
 
-    lmul_(rancom_1.irand, rancom_1.ias, j);
-    ladd_(j, rancom_1.ics, rancom_1.irand);
+    HPL_lmul(rancom_1.irand, rancom_1.ias, j);
+    HPL_ladd(j, rancom_1.ics, rancom_1.irand);
 
     return ret_val;
 } /* pdrand */
