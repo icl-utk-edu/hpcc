@@ -391,6 +391,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   MPI_Cancel(&inreq);
   MPI_Wait(&inreq, MPI_STATUS_IGNORE);
 #endif
+  MPI_Wait(&outreq, MPI_STATUS_IGNORE);
 
   /* end multiprocessor code */
 }
@@ -647,6 +648,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
   MPI_Cancel(&inreq);
   MPI_Wait(&inreq, MPI_STATUS_IGNORE);
 #endif
+  MPI_Wait(&outreq, MPI_STATUS_IGNORE);
 
   /* end multiprocessor code */
 }

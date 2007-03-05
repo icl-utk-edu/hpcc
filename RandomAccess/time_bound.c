@@ -291,6 +291,7 @@ void HPCC_Power2NodesTime(u64Int logTableSize,
   MPI_Cancel(&inreq);
   MPI_Wait(&inreq, MPI_STATUS_IGNORE);
 #endif
+  MPI_Wait(&outreq, MPI_STATUS_IGNORE);
 
 /* end multiprocessor code */
 }
@@ -571,6 +572,7 @@ void HPCC_AnyNodesTime(u64Int logTableSize,
   MPI_Cancel(&inreq);
   MPI_Wait(&inreq, MPI_STATUS_IGNORE);
 #endif
+  MPI_Wait(&outreq, MPI_STATUS_IGNORE);
 
   /* end multiprocessor code */
 }
