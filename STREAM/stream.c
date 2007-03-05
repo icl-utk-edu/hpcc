@@ -42,8 +42,12 @@
 /*-----------------------------------------------------------------------*/
 #include <hpcc.h>
 
-# include <float.h>
-# include <limits.h>
+#include <float.h>
+#include <limits.h>
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #define TUNED 1
 #define VERBOSE 1
