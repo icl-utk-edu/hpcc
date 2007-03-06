@@ -132,7 +132,7 @@ void HPCC_Power2NodesTime(u64Int logTableSize,
            /* we got a done message.  Thanks for playing... */
            NumberReceiving--;
          } else {
-           abort();
+           MPI_Abort( MPI_COMM_WORLD, -1 );
          }
 #ifdef USE_MULTIPLE_RECV
          MPI_Irecv(&LocalRecvBuffer[index*LOCAL_BUFFER_SIZE], localBufferSize,
@@ -199,7 +199,7 @@ void HPCC_Power2NodesTime(u64Int logTableSize,
            /* we got a done message.  Thanks for playing... */
            NumberReceiving--;
          } else {
-           abort();
+           MPI_Abort( MPI_COMM_WORLD, -1 );
          }
 #ifdef USE_MULTIPLE_RECV
          MPI_Irecv(&LocalRecvBuffer[index*LOCAL_BUFFER_SIZE], localBufferSize,
@@ -255,7 +255,7 @@ void HPCC_Power2NodesTime(u64Int logTableSize,
        /* we got a done message.  Thanks for playing... */
        NumberReceiving--;
      } else {
-       abort();
+       MPI_Abort( MPI_COMM_WORLD, -1 );
      }
 #ifdef USE_MULTIPLE_RECV
      MPI_Irecv(&LocalRecvBuffer[index*LOCAL_BUFFER_SIZE], localBufferSize,
@@ -407,7 +407,7 @@ void HPCC_AnyNodesTime(u64Int logTableSize,
           /* we got a done message.  Thanks for playing... */
           NumberReceiving--;
         } else {
-          abort();
+          MPI_Abort( MPI_COMM_WORLD, -1 );
         }
 #ifdef USE_MULTIPLE_RECV
         MPI_Irecv(&LocalRecvBuffer[index*LOCAL_BUFFER_SIZE], localBufferSize,
@@ -481,7 +481,7 @@ void HPCC_AnyNodesTime(u64Int logTableSize,
           /* we got a done message.  Thanks for playing... */
           NumberReceiving--;
         } else {
-          abort();
+          MPI_Abort( MPI_COMM_WORLD, -1 );
         }
 #ifdef USE_MULTIPLE_RECV
         MPI_Irecv(&LocalRecvBuffer[index*LOCAL_BUFFER_SIZE], localBufferSize,
@@ -537,7 +537,7 @@ void HPCC_AnyNodesTime(u64Int logTableSize,
       /* we got a done message.  Thanks for playing... */
       NumberReceiving--;
     } else {
-      abort();
+      MPI_Abort( MPI_COMM_WORLD, -1 );
     }
 #ifdef USE_MULTIPLE_RECV
     MPI_Irecv(&LocalRecvBuffer[index*LOCAL_BUFFER_SIZE], localBufferSize,

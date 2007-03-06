@@ -235,7 +235,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
           /* we got a done message.  Thanks for playing... */
           NumberReceiving--;
         } else {
-          abort();
+          MPI_Abort( MPI_COMM_WORLD, -1 );
         }
 #ifdef USE_MULTIPLE_RECV
         MPI_Irecv(&LocalRecvBuffer[index*LOCAL_BUFFER_SIZE], localBufferSize,
@@ -309,7 +309,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
           /* we got a done message.  Thanks for playing... */
           NumberReceiving--;
         } else {
-          abort();
+          MPI_Abort( MPI_COMM_WORLD, -1 );
         }
 #ifdef USE_MULTIPLE_RECV
         MPI_Irecv(&LocalRecvBuffer[index*LOCAL_BUFFER_SIZE], localBufferSize,
@@ -366,7 +366,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
       /* we got a done message.  Thanks for playing... */
       NumberReceiving--;
     } else {
-      abort();
+      MPI_Abort( MPI_COMM_WORLD, -1 );
     }
 #ifdef USE_MULTIPLE_RECV
     MPI_Irecv(&LocalRecvBuffer[index*LOCAL_BUFFER_SIZE], localBufferSize,
@@ -499,7 +499,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
           /* we got a done message.  Thanks for playing... */
           NumberReceiving--;
         } else {
-          abort();
+          MPI_Abort( MPI_COMM_WORLD, -1 );
         }
 #ifdef USE_MULTIPLE_RECV
         MPI_Irecv(&LocalRecvBuffer[index*LOCAL_BUFFER_SIZE], localBufferSize,
@@ -567,7 +567,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
           /* we got a done message.  Thanks for playing... */
           NumberReceiving--;
         } else {
-          abort();
+          MPI_Abort( MPI_COMM_WORLD, -1 );
         }
 #ifdef USE_MULTIPLE_RECV
         MPI_Irecv(&LocalRecvBuffer[index*LOCAL_BUFFER_SIZE], localBufferSize,
@@ -623,7 +623,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
       /* we got a done message.  Thanks for playing... */
       NumberReceiving--;
     } else {
-      abort();
+      MPI_Abort( MPI_COMM_WORLD, -1 );
     }
 #ifdef USE_MULTIPLE_RECV
     MPI_Irecv(&LocalRecvBuffer[index*LOCAL_BUFFER_SIZE], localBufferSize,

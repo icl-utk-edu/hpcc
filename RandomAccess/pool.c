@@ -6,8 +6,8 @@
  * a char pointer "poolNext",  which maintain the pool lists.           
  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <hpcc.h>
+
 #include "pool.h"
 
 /* PoolInit: create a pool of objects */
@@ -29,7 +29,7 @@ POOL* HPCC_PoolInit(int numObjects, int objSize)
      
   if (ptr == HPCC_NULL_PTR) { 
     fprintf(stdout,"Malloc fails in PoolInit\n");
-    abort();
+    MPI_Abort( MPI_COMM_WORLD, -1 );
   }
 
   poolPtr->poolBase = ptr;
@@ -53,7 +53,7 @@ char *HPCC_PoolGetObj(POOL* poolPtr)
 
    if (poolPtr->head == HPCC_NULL_PTR) {  
      fprintf(stdout,"No unallocated objects in pool\n");
-     abort();
+     MPI_Abort( MPI_COMM_WORLD, -1 );
    }   
    ptr = poolPtr->head;                        
    poolPtr->head = *((char**)(poolPtr->head));  
