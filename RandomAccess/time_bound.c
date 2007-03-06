@@ -228,7 +228,7 @@ void HPCC_Power2NodesTime(u64Int logTableSize,
    for (proc_count = 0 ; proc_count < NumProcs ; ++proc_count) {
      if (proc_count == MyProc) { finish_req[MyProc] = MPI_REQUEST_NULL; continue; }
      /* send garbage - who cares, no one will look at it */
-     MPI_Isend(&Ran, 1, INT64_DT, proc_count, FINISHED_TAG,
+     MPI_Isend(&Ran, 0, INT64_DT, proc_count, FINISHED_TAG,
                MPI_COMM_WORLD, finish_req + proc_count);
    }
 
@@ -510,7 +510,7 @@ void HPCC_AnyNodesTime(u64Int logTableSize,
   for (proc_count = 0 ; proc_count < NumProcs ; ++proc_count) {
     if (proc_count == MyProc) { finish_req[MyProc] = MPI_REQUEST_NULL; continue; }
     /* send garbage - who cares, no one will look at it */
-    MPI_Isend(&Ran, 1, INT64_DT, proc_count, FINISHED_TAG,
+    MPI_Isend(&Ran, 0, INT64_DT, proc_count, FINISHED_TAG,
               MPI_COMM_WORLD, finish_req + proc_count);
   }
 
