@@ -132,7 +132,8 @@ Sum64(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
 }
 #endif
 
-static void
+#ifdef HPCC_RA_STDALG
+void
 AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
                               u64Int TableSize,
                               s64Int LocalTableSize,
@@ -396,7 +397,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   /* end multiprocessor code */
 }
 
-static void
+void
 Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
                                  u64Int TableSize,
                                  s64Int LocalTableSize,
@@ -652,6 +653,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 
   /* end multiprocessor code */
 }
+#endif
 
 int
 HPCC_MPIRandomAccess(HPCC_Params *params) {
@@ -777,7 +779,11 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
 
   /* Default number of global updates to table: 4x number of table entries */
   NumUpdates_Default = 4 * TableSize;
+  ProcNumUpdates = 4*LocalTableSize;
+  NumUpdates = NumUpdates_Default;
 
+  /* The time bound is only accurate for standard RandomAccess algorithm. */
+#ifdef HPCC_RA_STDALG
 #ifdef RA_TIME_BOUND
   /* estimate number of updates such that execution time does not exceed time bound */
   /* time_bound should be a parameter */
@@ -806,10 +812,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   ProcNumUpdates = Mmin(GlbNumUpdates, (4*LocalTableSize));
   /* works for both PowerofTwo and AnyNodes */
   NumUpdates = Mmin((ProcNumUpdates*NumProcs), (s64Int)NumUpdates_Default);
-
-#else
-  ProcNumUpdates = 4*LocalTableSize;
-  NumUpdates = NumUpdates_Default;
+#endif
 #endif
 
   if (MyProc == 0) {
@@ -932,6 +935,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
     if (GlbNumErrors > 0.01*TableSize) params->Failure = 1;
     params->MPIRandomAccess_Errors = (s64Int)GlbNumErrors;
     params->MPIRandomAccess_ErrorsFraction = (double)GlbNumErrors / (double)TableSize;
+    params->MPIRandomAccess_Algorithm = HPCC_RA_ALGORITHM;
   }
   /* End verification phase */
 

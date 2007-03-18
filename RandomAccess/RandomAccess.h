@@ -41,3 +41,44 @@ extern u64Int *HPCC_Table;
 
 extern u64Int LocalSendBuffer[LOCAL_BUFFER_SIZE];
 extern u64Int LocalRecvBuffer[MAX_RECV*LOCAL_BUFFER_SIZE];
+
+extern void
+AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
+                              u64Int TableSize,
+                              s64Int LocalTableSize,
+                              u64Int MinLocalTableSize,
+                              u64Int GlobalStartMyProc,
+                              u64Int Top,
+                              int logNumProcs,
+                              int NumProcs,
+                              int Remainder,
+                              int MyProc,
+                              s64Int ProcNumUpdates,
+                              MPI_Datatype INT64_DT,
+                              MPI_Status *finish_statuses,
+                              MPI_Request *finish_req);
+
+extern void
+Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
+                                 u64Int TableSize,
+                                 s64Int LocalTableSize,
+                                 u64Int MinLocalTableSize,
+                                 u64Int GlobalStartMyProc,
+                                 u64Int Top,
+                                 int logNumProcs,
+                                 int NumProcs,
+                                 int Remainder,
+                                 int MyProc,
+                                 s64Int ProcNumUpdates,
+                                 MPI_Datatype INT64_DT,
+                                 MPI_Status *finish_statuses,
+                                 MPI_Request *finish_req);
+
+#if defined( RA_SANDIA_NOPT )
+#define HPCC_RA_ALGORITHM 1
+#elif defined( RA_SANDIA_OPT2 )
+#define HPCC_RA_ALGORITHM 2
+#else
+#define HPCC_RA_STDALG 1
+#define HPCC_RA_ALGORITHM 0
+#endif

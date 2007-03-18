@@ -305,6 +305,7 @@ HPCC_Init(HPCC_Params *params) {
   params->DGEMM_N =
   params->FFT_N =
   params->StreamVectorSize =
+  params->MPIRandomAccess_Algorithm =
   params->MPIFFT_Procs = -1;
 
   params->StreamThreads = 1;
@@ -435,6 +436,7 @@ HPCC_Finalize(HPCC_Params *params) {
   fprintf( outputFile, "MPIRandomAccess_ExeUpdates=" FSTR64 "\n", params->MPIRandomAccess_ExeUpdates );
   fprintf( outputFile, "MPIRandomAccess_GUPs=%g\n", params->MPIGUPs );
   fprintf( outputFile, "MPIRandomAccess_TimeBound=%g\n", params->MPIRandomAccess_TimeBound );
+  fprintf( outputFile, "MPIRandomAccess_Algorithm=%d\n", params->MPIRandomAccess_Algorithm );
   fprintf( outputFile, "RandomAccess_N=" FSTR64 "\n", params->RandomAccess_N );
   fprintf( outputFile, "StarRandomAccess_GUPs=%g\n", params->StarGUPs );
   fprintf( outputFile, "SingleRandomAccess_GUPs=%g\n", params->SingleGUPs );

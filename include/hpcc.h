@@ -79,6 +79,7 @@ typedef struct {
   int StreamThreads, StreamVectorSize;
   int FFT_N;
   int MPIFFT_Procs;
+  int MPIRandomAccess_Algorithm;
 
   HPL_RuntimeData HPLrdata;
   PTRANS_RuntimeData PTRANSrdata;

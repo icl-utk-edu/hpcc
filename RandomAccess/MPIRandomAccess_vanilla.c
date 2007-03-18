@@ -117,27 +117,14 @@
 #include "time_bound.h"
 #include "verification.h"
 
-#define CHUNK    (1024)
-#define CHUNKBIG (32768)
+#define CHUNK    MAX_TOTAL_PENDING_UPDATES
+#define CHUNKBIG (32*CHUNK)
 
-/* Allocate main table (in global memory) */
-u64Int *HPCC_Table;
-
-u64Int LocalSendBuffer[LOCAL_BUFFER_SIZE];
-u64Int LocalRecvBuffer[MAX_RECV*LOCAL_BUFFER_SIZE];
-
-#ifndef LONG_IS_64BITS
-static void
-Sum64(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
-  int i, n = *len; s64Int *invec64 = (s64Int *)invec, *inoutvec64 = (s64Int *)inoutvec;
-  for (i = n; i; i--, invec64++, inoutvec64++) *inoutvec64 += *invec64;
-}
-#endif
-
-static void
+#ifdef RA_SANDIA_NOPT
+void
 AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
                               u64Int TableSize,
-                              u64Int LocalTableSize,
+                              s64Int LocalTableSize,
                               u64Int MinLocalTableSize,
                               u64Int GlobalStartMyProc,
                               u64Int Top,
@@ -146,7 +133,9 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
                               int Remainder,
                               int MyProc,
                               s64Int ProcNumUpdates,
-                              MPI_Datatype INT64_DT)
+                              MPI_Datatype INT64_DT,
+                              MPI_Status *finish_statuses,
+                              MPI_Request *finish_req)
 {
   int i,j;
   int ipartner,iterate,niterate,npartition,proclo,nlower,nupper,procmid;
@@ -162,9 +151,6 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 
   data = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
   send = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
-
-  for (i = 0; i < LocalTableSize; i++)
-    HPCC_Table[i] = i + GlobalStartMyProc;
 
   ran = HPCC_starts(4*GlobalStartMyProc);
 
@@ -269,10 +255,10 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   free(offsets);
 }
 
-static void
+void
 Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
                                  u64Int TableSize,
-                                 u64Int LocalTableSize,
+                                 s64Int LocalTableSize,
                                  u64Int MinLocalTableSize,
                                  u64Int GlobalStartMyProc,
                                  u64Int Top,
@@ -281,7 +267,9 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
                                  int Remainder,
                                  int MyProc,
                                  s64Int ProcNumUpdates,
-                                 MPI_Datatype INT64_DT)
+                                 MPI_Datatype INT64_DT,
+                                 MPI_Status *finish_statuses,
+                                 MPI_Request *finish_req)
 {
   int i,j;
   int logTableLocal,ipartner,iterate,niterate;
@@ -294,9 +282,6 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 
   data = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
   send = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
-
-  for (i = 0; i < LocalTableSize; i++)
-    HPCC_Table[i] = i + GlobalStartMyProc;
 
   ran = HPCC_starts(4*GlobalStartMyProc);
 
@@ -348,277 +333,4 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
   free(data);
   free(send);
 }
-
-int
-HPCC_MPIRandomAccess(HPCC_Params *params) {
-  s64Int i;
-  s64Int NumErrors, GlbNumErrors;
-
-  int NumProcs, logNumProcs, MyProc;
-  u64Int GlobalStartMyProc;
-  int Remainder;            /* Number of processors with (LocalTableSize + 1) entries */
-  u64Int Top;               /* Number of table entries in top of Table */
-  u64Int LocalTableSize;    /* Local table width */
-  u64Int MinLocalTableSize; /* Integer ratio TableSize/NumProcs */
-  u64Int logTableSize, TableSize;
-
-  double CPUTime;               /* CPU  time to update table */
-  double RealTime;              /* Real time to update table */
-
-  double TotalMem;
-  int sAbort, rAbort;
-  int PowerofTwo;
-
-  double timeBound;  /* OPTIONAL time bound for execution time */
-  u64Int NumUpdates_Default; /* Number of updates to table (suggested: 4x number of table entries) */
-  u64Int NumUpdates;  /* actual number of updates to table - may be smaller than
-                       * NumUpdates_Default due to execution time bounds */
-  s64Int ProcNumUpdates; /* number of updates per processor */
-  s64Int GlbNumUpdates;  /* for reduction */
-
-  FILE *outFile = NULL;
-  MPI_Op sum64;
-  double *GUPs;
-
-  MPI_Datatype INT64_DT;
-
-#ifdef LONG_IS_64BITS
-  INT64_DT = MPI_LONG;
-#else
-  INT64_DT = MPI_LONG_LONG_INT;
 #endif
-
-  GUPs = &params->MPIGUPs;
-
-  MPI_Comm_size( MPI_COMM_WORLD, &NumProcs );
-  MPI_Comm_rank( MPI_COMM_WORLD, &MyProc );
-
-  if (0 == MyProc) {
-    outFile = fopen( params->outFname, "a" );
-    if (! outFile) outFile = stderr;
-  }
-
-  TotalMem = params->HPLMaxProcMem; /* max single node memory */
-  TotalMem *= NumProcs;             /* max memory in NumProcs nodes */
-  TotalMem /= sizeof(u64Int);
-
-  /* calculate TableSize --- the size of update array (must be a power of 2) */
-  for (TotalMem *= 0.5, logTableSize = 0, TableSize = 1;
-       TotalMem >= 1.0;
-       TotalMem *= 0.5, logTableSize++, TableSize <<= 1)
-    ; /* EMPTY */
-
-
-  /* determine whether the number of processors is a power of 2 */
-  for (i = 1, logNumProcs = 0; ; logNumProcs++, i <<= 1) {
-    if (i == NumProcs) {
-      PowerofTwo = HPCC_TRUE;
-      Remainder = 0;
-      Top = 0;
-      MinLocalTableSize = (TableSize / NumProcs);
-      LocalTableSize = MinLocalTableSize;
-      GlobalStartMyProc = (MinLocalTableSize * MyProc);
-      break;
-
-    /* number of processes is not a power 2 (too many shifts may introduce negative values or 0) */
-
-    }
-    else if (i > NumProcs || i <= 0) {
-      PowerofTwo = HPCC_FALSE;
-      /* Minimum local table size --- some processors have an additional entry */
-      MinLocalTableSize = (TableSize / NumProcs);
-      /* Number of processors with (LocalTableSize + 1) entries */
-      Remainder = TableSize  - (MinLocalTableSize * NumProcs);
-      /* Number of table entries in top of Table */
-      Top = (MinLocalTableSize + 1) * Remainder;
-      /* Local table size */
-      if (MyProc < Remainder) {
-          LocalTableSize = (MinLocalTableSize + 1);
-          GlobalStartMyProc = ( (MinLocalTableSize + 1) * MyProc);
-        }
-        else {
-          LocalTableSize = MinLocalTableSize;
-          GlobalStartMyProc = ( (MinLocalTableSize * MyProc) + Remainder );
-        }
-      break;
-
-    } /* end else if */
-  } /* end for i */
-
-
-  HPCC_Table = XMALLOC( u64Int, LocalTableSize);
-  sAbort = 0; if (! HPCC_Table) sAbort = 1;
-
-  MPI_Allreduce( &sAbort, &rAbort, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD );
-  if (rAbort > 0) {
-    if (MyProc == 0) fprintf(outFile, "Failed to allocate memory for the main table.\n");
-    goto failed_table;
-  }
-
-  params->MPIRandomAccess_N = (s64Int)TableSize;
-
-  /* Default number of global updates to table: 4x number of table entries */
-  NumUpdates_Default = 4 * TableSize;
-
-#ifdef RA_TIME_BOUND
-  /* estimate number of updates such that execution time does not exceed time bound */
-  /* time_bound should be a parameter */
-  /* max run time in seconds */
-  timeBound = Mmax( 0.25 * params->HPLrdata.time, (double)TIME_BOUND );
-  if (PowerofTwo) {
-    HPCC_Power2NodesTime(logTableSize, TableSize, LocalTableSize,
-                    MinLocalTableSize, GlobalStartMyProc, Top,
-                    logNumProcs, NumProcs, Remainder,
-                    MyProc, INT64_DT, timeBound, (u64Int *)&ProcNumUpdates);
-
-  } else {
-    HPCC_AnyNodesTime(logTableSize, TableSize, LocalTableSize,
-                 MinLocalTableSize, GlobalStartMyProc, Top,
-                 logNumProcs, NumProcs, Remainder,
-                 MyProc, INT64_DT, timeBound, (u64Int *)&ProcNumUpdates);
-  }
-  /* be conservative: get the smallest number of updates among all procs */
-  MPI_Reduce( &ProcNumUpdates, &GlbNumUpdates, 1, INT64_DT,
-              MPI_MIN, 0, MPI_COMM_WORLD );
-  /* distribute number of updates per proc to all procs */
-  MPI_Bcast( &GlbNumUpdates, 1, INT64_DT, 0, MPI_COMM_WORLD );
-  ProcNumUpdates = Mmin(GlbNumUpdates, (4*LocalTableSize));
-  /* works for both PowerofTwo and AnyNodes */
-  NumUpdates = Mmin((ProcNumUpdates*NumProcs), NumUpdates_Default);
-
-#else
-  ProcNumUpdates = 4*LocalTableSize;
-  NumUpdates = NumUpdates_Default;
-#endif
-
-  if (MyProc == 0) {
-    fprintf( outFile, "Running on %d processors%s\n", NumProcs, PowerofTwo ? " (PowerofTwo)" : "");
-    fprintf( outFile, "Total Main table size = 2^" FSTR64 " = " FSTR64 " words\n",
-             logTableSize, TableSize );
-    if (PowerofTwo)
-        fprintf( outFile, "PE Main table size = 2^" FSTR64 " = " FSTR64 " words/PE\n",
-                 (logTableSize - logNumProcs), TableSize/NumProcs );
-      else
-        fprintf( outFile, "PE Main table size = (2^" FSTR64 ")/%d  = " FSTR64 " words/PE MAX\n",
-                 logTableSize, NumProcs, LocalTableSize);
-
-    fprintf( outFile, "Default number of updates (RECOMMENDED) = " FSTR64 "\n", NumUpdates_Default);
-#ifdef RA_TIME_BOUND
-    fprintf( outFile, "Number of updates EXECUTED = " FSTR64 " (for a TIME BOUND of %.2f secs)\n",
-             NumUpdates, timeBound);
-#endif
-    params->MPIRandomAccess_ExeUpdates = NumUpdates;
-    params->MPIRandomAccess_TimeBound = timeBound;
-  }
-
-  MPI_Barrier( MPI_COMM_WORLD );
-
-  CPUTime = -CPUSEC();
-  RealTime = -RTSEC();
-
-  if (PowerofTwo) {
-    Power2NodesMPIRandomAccessUpdate(logTableSize, TableSize, LocalTableSize,
-                                     MinLocalTableSize, GlobalStartMyProc, Top,
-                                     logNumProcs, NumProcs, Remainder,
-                                     MyProc, ProcNumUpdates, INT64_DT);
-  } else {
-    AnyNodesMPIRandomAccessUpdate(logTableSize, TableSize, LocalTableSize,
-                                  MinLocalTableSize, GlobalStartMyProc, Top,
-                                  logNumProcs, NumProcs, Remainder,
-                                  MyProc, ProcNumUpdates, INT64_DT);
-  }
-
-
-  MPI_Barrier( MPI_COMM_WORLD );
-
-  /* End timed section */
-  CPUTime += CPUSEC();
-  RealTime += RTSEC();
-
-  /* Print timing results */
-  if (MyProc == 0){
-    params->MPIRandomAccess_time = RealTime;
-    *GUPs = 1e-9*NumUpdates / RealTime;
-    fprintf( outFile, "CPU time used = %.6f seconds\n", CPUTime );
-    fprintf( outFile, "Real time used = %.6f seconds\n", RealTime );
-    fprintf( outFile, "%.9f Billion(10^9) Updates    per second [GUP/s]\n",
-             *GUPs );
-    fprintf( outFile, "%.9f Billion(10^9) Updates/PE per second [GUP/s]\n",
-             *GUPs / NumProcs );
-    /* No longer reporting per CPU number */
-    /* *GUPs /= NumProcs; */
-  }
-  /* distribute result to all nodes */
-  MPI_Bcast( GUPs, 1, MPI_INT, 0, MPI_COMM_WORLD );
-
-
-  /* Verification phase */
-
-  /* Begin timing here */
-  CPUTime = -CPUSEC();
-  RealTime = -RTSEC();
-
-  if (PowerofTwo) {
-    HPCC_Power2NodesMPIRandomAccessCheck(logTableSize, TableSize, LocalTableSize,
-                                    GlobalStartMyProc,
-                                    logNumProcs, NumProcs,
-                                    MyProc, ProcNumUpdates,
-                                    INT64_DT, &NumErrors);
-  }
-  else {
-    HPCC_AnyNodesMPIRandomAccessCheck(logTableSize, TableSize, LocalTableSize,
-                                 MinLocalTableSize, GlobalStartMyProc, Top,
-                                 logNumProcs, NumProcs, Remainder,
-                                 MyProc, ProcNumUpdates,
-                                 INT64_DT, &NumErrors);
-  }
-
-
-#ifdef LONG_IS_64BITS
-  MPI_Reduce( &NumErrors, &GlbNumErrors, 1, MPI_LONG, MPI_SUM, 0, MPI_COMM_WORLD );
-#else
-  /* MPI 1.1 standard (obsolete at this point) doesn't define MPI_SUM
-    to work on `long long':
-    http://www.mpi-forum.org/docs/mpi-11-html/node78.html and
-    therefore LAM 6.5.6 chooses not to implement it (even though there
-    is code for it in LAM and for other reductions work OK,
-    e.g. MPI_MAX). MPICH 1.2.5 doesn't complain about MPI_SUM but it
-    doesn't have MPI_UNSIGNED_LONG_LONG (but has MPI_LONG_LONG_INT):
-    http://www.mpi-forum.org/docs/mpi-20-html/node84.htm So I need to
-    create a trivial summation operation. */
-  MPI_Op_create( Sum64, 1, &sum64 );
-  MPI_Reduce( &NumErrors, &GlbNumErrors, 1, INT64_DT, sum64, 0, MPI_COMM_WORLD );
-  MPI_Op_free( &sum64 );
-#endif
-
-  /* End timed section */
-  CPUTime += CPUSEC();
-  RealTime += RTSEC();
-
-  if(MyProc == 0){
-    params->MPIRandomAccess_CheckTime = RealTime;
-    fprintf( outFile, "Verification:  CPU time used = %.6f seconds\n", CPUTime);
-    fprintf( outFile, "Verification:  Real time used = %.6f seconds\n", RealTime);
-    fprintf( outFile, "Found " FSTR64 " errors in " FSTR64 " locations (%s).\n",
-             GlbNumErrors, TableSize, (GlbNumErrors <= 0.01*TableSize) ?
-             "passed" : "failed");
-    if (GlbNumErrors > 0.01*TableSize) params->Failure = 1;
-    params->MPIRandomAccess_Errors = (s64Int)GlbNumErrors;
-    params->MPIRandomAccess_ErrorsFraction = (double)GlbNumErrors / (double)TableSize;
-  }
-  /* End verification phase */
-
-
-  /* Deallocate memory (in reverse order of allocation which should
-     help fragmentation) */
-
-  free( HPCC_Table );
-
-  failed_table:
-
-  if (0 == MyProc) if (outFile != stderr) fclose( outFile );
-
-  MPI_Barrier( MPI_COMM_WORLD );
-
-  return 0;
-}

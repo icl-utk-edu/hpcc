@@ -75,7 +75,7 @@ allDeps = (
                           "../../../../RandomAccess/pool.h", "../../../../RandomAccess/time_bound.h",
                           "../../../../RandomAccess/verification.h"),
      ("MPIRandomAccess", "buckets", "core_single_cpu", "heap", "pool", "single_cpu", "star_single_cpu",
-      "time_bound", "utility", "verification"), "-I../../../../include $(CCFLAGS)"),
+      "time_bound", "utility", "verification", "MPIRandomAccess_vanilla"), "-I../../../../include $(CCFLAGS)"),
 
     ("../STREAM/", (hhpcc, hhpl),
      ("onecpu", "stream"), "-I../../../../include $(CCFLAGS)"),
