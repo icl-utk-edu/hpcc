@@ -1384,6 +1384,7 @@ main_bench_lat_bw(HPCC_Params *params) {
     }
   } else OutFile = stderr;
 
+  if (commSize > 1)
   bench_lat_bw_print( &params->MaxPingPongLatency, &params->RandomlyOrderedRingLatency,
                       &params->MinPingPongBandwidth, &params->NaturallyOrderedRingBandwidth,
                       &params->RandomlyOrderedRingBandwidth,
