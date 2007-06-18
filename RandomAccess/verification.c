@@ -117,14 +117,16 @@ HPCC_Power2NodesMPIRandomAccessCheck(u64Int logTableSize,
 
   *NumErrors = errors;
 
-  failed_localbuckets:
+  free( PeCheckDone );
+
+  free( GlobalBuckets );
+
   failed_globalbuckets:
 
+  free( LocalBuckets );
 
-  free (PeCheckDone);
-  free(GlobalBuckets);
-  free(LocalBuckets);
-
+  failed_localbuckets:
+  return;
 }
 
 void
@@ -246,12 +248,15 @@ HPCC_AnyNodesMPIRandomAccessCheck(u64Int logTableSize,
   
   *NumErrors = errors;
 
-  failed_localbuckets:
+  free( PeCheckDone );  
+
+  free( GlobalBuckets );
+
   failed_globalbuckets:
 
-  
-  free (PeCheckDone);  
-  free(GlobalBuckets);
-  free(LocalBuckets);
+  free( LocalBuckets );
 
+  failed_localbuckets:
+
+  return;
 }

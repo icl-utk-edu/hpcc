@@ -209,13 +209,15 @@ ErrorReduce(FILE *f, char *str, int eCode, MPI_Comm comm) {
 int
 HPCC_Init(HPCC_Params *params) {
   int myRank, commSize;
-  int i, nMax, procCur, procMax, procMin, errCode;
+  int i, nMax, nbMax, procCur, procMax, procMin, errCode;
   double totalMem;
   char inFname[12] = "hpccinf.txt", outFname[13] = "hpccoutf.txt";
   FILE *outputFile;
   MPI_Comm comm = MPI_COMM_WORLD;
   time_t currentTime;
   char hostname[MPI_MAX_PROCESSOR_NAME + 1]; int hostnameLen;
+  size_t hpl_mem, ptrans_mem;
+  long dMemSize;
 
   outputFile = NULL;
 
@@ -273,10 +275,9 @@ HPCC_Init(HPCC_Params *params) {
   params->RunMPIFFT = 0;
   params->RunHPL = params->RunStarDGEMM = params->RunSingleDGEMM =
   params->RunPTRANS = params->RunStarStream = params->RunSingleStream =
-  params->RunMPIRandomAccess = params->RunStarRandomAccess = params->RunSingleRandomAccess = 
-  params->RunMPIFFT = params->RunStarFFT = params->RunSingleFFT = 
-  params->RunLatencyBandwidth = 0;
-  params->RunPTRANS = 1;
+  params->RunMPIRandomAccess = params->RunStarRandomAccess = params->RunSingleRandomAccess =
+  params->RunMPIFFT = params->RunStarFFT = params->RunSingleFFT =
+  params->RunLatencyBandwidth = 1;
 
   params->MPIGUPs = params->StarGUPs = params->SingleGUPs =
   params->StarDGEMMGflops = params->SingleDGEMMGflops = -1.0;
@@ -338,6 +339,16 @@ HPCC_Init(HPCC_Params *params) {
   for (i = 0; i < MPIFFT_TIMING_COUNT; i++)
     params->MPIFFTtimingsForward[i] = 0.0;
 
+  i = iiamax( params->PTRANSnbs, params->PTRANSnbval, 1 );
+  nbMax = params->PTRANSnbval[i];
+
+#ifdef HPCC_MEMALLCTR
+  MaxMem( commSize, 0, 0, params->PTRANSns, params->PTRANSnval, params->PTRANSnval, params->PTRANSnbs, params->PTRANSnbval, params->PTRANSnbval, params->PTRANSnpqs, params->PTRANSpval, params->PTRANSqval, &dMemSize );
+  ptrans_mem = dMemSize * sizeof(double) + 3 * commSize * sizeof(int);
+  hpl_mem = params->HPLMaxProcMem + (nMax + nbMax) * sizeof(double) * nbMax;
+  HPCC_alloc_init( Mmax( ptrans_mem, hpl_mem ) );
+#endif
+
   return 0;
 }
 
@@ -348,6 +359,10 @@ HPCC_Finalize(HPCC_Params *params) {
   FILE *outputFile;
   MPI_Comm comm = MPI_COMM_WORLD;
   time_t currentTime;
+
+#ifdef HPCC_MEMALLCTR
+  HPCC_alloc_finalize();
+#endif
 
   time( &currentTime );
 
@@ -717,5 +732,188 @@ F77xerbla(char *srname, F77_INTEGER *info, long srname_len) {
   */
   printf("xerbla()\n");
   fflush(stdout);
+}
+#endif
+
+#ifdef HPCC_MEMALLCTR
+#define MEM_MAXCNT 7
+
+typedef double Mem_t;
+
+static Mem_t *Mem_base;
+static size_t Mem_dsize;
+
+/*
+  Each entry can be in one of three states:
+  1. Full (holds a block of allocated memory) if:
+     ptr != NULL; size > 0; free == 0
+  2. Free (holds block of unallocated memory) if:
+     ptr != NULL; free = 1
+  3  Empty (doesn't hold a block of memory) if:
+     ptr == NULL; free = 1
+ */
+typedef struct {
+  Mem_t *Mem_ptr;
+  size_t Mem_size;
+  int Mem_free;
+} Mem_entry_t;
+
+static Mem_entry_t Mem_blocks[MEM_MAXCNT];
+
+static void
+HPCC_alloc_set_empty(int idx) {
+  int i, n0, n;
+
+  if (MEM_MAXCNT == idx) {
+    n0 = 0;
+    n = idx;
+  } else {
+    n0 = idx;
+    n = idx + 1;
+  }
+
+  /* initialize all blocks to empty */
+  for (i = n0; i < n; ++i) {
+    Mem_blocks[i].Mem_ptr = (Mem_t *)(NULL);
+    Mem_blocks[i].Mem_size = 0;
+    Mem_blocks[i].Mem_free = 1;
+  }
+}
+
+static void
+HPCC_alloc_set_free(int idx, Mem_t *dptr, size_t size) {
+  Mem_blocks[idx].Mem_ptr = dptr;
+  Mem_blocks[idx].Mem_size = size;
+  Mem_blocks[idx].Mem_free = 1;
+}
+
+int
+HPCC_alloc_init(size_t total_size) {
+  size_t dsize;
+
+  Mem_dsize = dsize = Mceil( total_size, sizeof(Mem_t) );
+
+  Mem_base = (Mem_t *)malloc( dsize * sizeof(Mem_t) );
+
+  HPCC_alloc_set_empty( MEM_MAXCNT );
+
+  if (Mem_base) {
+    HPCC_alloc_set_free( 0, Mem_base, dsize );
+    return 0;
+  }
+
+  return -1;
+}
+
+int
+HPCC_alloc_finalize() {
+  free( Mem_base );
+  HPCC_alloc_set_empty( MEM_MAXCNT );
+  return 0;
+}
+
+void *
+HPCC_malloc(size_t size) {
+  size_t dsize, diff_size, cur_diff_size;
+  int i, cur_best, cur_free;
+
+  dsize = Mceil( size, sizeof(Mem_t) );
+
+  cur_diff_size = Mem_dsize + 1;
+  cur_free = cur_best = MEM_MAXCNT;
+
+  for (i = 0; i < MEM_MAXCNT; ++i) {
+    /* skip full spots */
+    if (! Mem_blocks[i].Mem_free)
+      continue;
+
+    /* find empty spot */
+    if (! Mem_blocks[i].Mem_ptr) {
+      cur_free = i;
+      continue;
+    }
+
+    diff_size = Mem_blocks[i].Mem_size - dsize;
+
+    if (Mem_blocks[i].Mem_size >= dsize && diff_size < cur_diff_size) {
+      /* a match that's the best (so far) was found */
+      cur_diff_size = diff_size;
+      cur_best = i;
+    }
+  }
+
+  /* found a match */
+  if (cur_best < MEM_MAXCNT) {
+    if (cur_free < MEM_MAXCNT && cur_diff_size > 0) {
+      /* create a new free block */
+      HPCC_alloc_set_free( cur_free, Mem_blocks[cur_best].Mem_ptr + dsize,
+                           cur_diff_size );
+
+      Mem_blocks[cur_best].Mem_size = dsize; /* shrink the best match */
+    }
+
+    Mem_blocks[cur_best].Mem_free = 0;
+
+    return (void *)(Mem_blocks[cur_best].Mem_ptr);
+  }
+
+  return NULL;
+}
+
+void
+HPCC_free(void *ptr) {
+  Mem_t *dptr = (Mem_t *)ptr;
+  int cur_blk = MEM_MAXCNT, made_changes, i, j;
+
+  /* look for the block being freed */
+  for (i = 0; i < MEM_MAXCNT; ++i) {
+    if (Mem_blocks[i].Mem_free)
+      continue;
+
+    if (Mem_blocks[i].Mem_ptr == dptr) {
+      cur_blk = i;
+      break;
+    }
+  }
+
+  /* not finding the pointer (including NULL) causes abort */
+  if (MEM_MAXCNT == cur_blk) {
+    HPL_pabort( __LINE__, "HPCC_free", "Unknown pointer in HPCC_free()." );
+  }
+
+  /* double-free causes abort */
+  if (1 == Mem_blocks[cur_blk].Mem_free) {
+    HPL_pabort( __LINE__, "HPCC_free", "Second call to HPCC_free() with the same pointer." );
+  }
+
+  Mem_blocks[cur_blk].Mem_free = 1;
+
+  /* merge as many blocks as possible */
+  for (made_changes = 1; made_changes;) {
+    made_changes = 0;
+
+    for (i = 0; i < MEM_MAXCNT; ++i) {
+
+      /* empty or full blocks can't be merged */
+      if (! Mem_blocks[i].Mem_free || ! Mem_blocks[i].Mem_ptr)
+        continue;
+
+      for (j = 0; j < MEM_MAXCNT; ++j) {
+
+        /* empty or occupied blocks can't be merged */
+        if (! Mem_blocks[j].Mem_free || ! Mem_blocks[j].Mem_ptr)
+          continue;
+
+        if (Mem_blocks[i].Mem_ptr + Mem_blocks[i].Mem_size ==
+            Mem_blocks[j].Mem_ptr) {
+          Mem_blocks[i].Mem_size += Mem_blocks[j].Mem_size;
+
+          HPCC_alloc_set_empty( j );
+
+          made_changes = 1;
+        }
+      }
+    }
+  }
 }
 #endif

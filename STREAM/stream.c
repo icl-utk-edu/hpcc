@@ -241,14 +241,14 @@ HPCC_Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, do
     VectorSize = HPCC_LocalVectorSize( params, 3, sizeof(double), 0 ); /* Need 3 vectors */
     params->StreamVectorSize = VectorSize;
 
-    a = XMALLOC( double, VectorSize );
-    b = XMALLOC( double, VectorSize );
-    c = XMALLOC( double, VectorSize );
+    a = HPCC_XMALLOC( double, VectorSize );
+    b = HPCC_XMALLOC( double, VectorSize );
+    c = HPCC_XMALLOC( double, VectorSize );
 
     if (!a || !b || !c) {
-      if (c) free(c);
-      if (b) free(b);
-      if (a) free(a);
+      if (c) HPCC_free(c);
+      if (b) HPCC_free(b);
+      if (a) HPCC_free(a);
       if (doIO) {
         fprintf( outFile, "Failed to allocate memory (%d).\n", VectorSize );
         fflush( outFile );
@@ -422,9 +422,9 @@ HPCC_Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, do
     checkSTREAMresults( outFile, doIO, failure );
     if (doIO) fprintf( outFile, HLINE);
 
-    free(c);
-    free(b);
-    free(a);
+    HPCC_free(c);
+    HPCC_free(b);
+    HPCC_free(a);
 
     if (doIO) {
       fflush( outFile );

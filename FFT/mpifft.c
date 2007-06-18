@@ -49,8 +49,8 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
 
   fftw_mpi_local_sizes( p, &locn, &loc0, &alocn, &aloc0, &tls );
 
-  inout = (fftw_complex *)fftw_malloc( tls * (sizeof *inout) );
-  work  = (fftw_complex *)fftw_malloc( tls * (sizeof *work) );
+  inout = (fftw_complex *)HPCC_fftw_malloc( tls * (sizeof *inout) );
+  work  = (fftw_complex *)HPCC_fftw_malloc( tls * (sizeof *work) );
 
   if (! inout || ! work) {
     fftw_mpi_destroy_plan( p );
@@ -113,8 +113,8 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
 
   comp_end:
 
-  if (work) fftw_free( work );
-  if (inout) fftw_free( inout );
+  if (work) HPCC_fftw_free( work );
+  if (inout) HPCC_fftw_free( inout );
 
   no_plan:
 

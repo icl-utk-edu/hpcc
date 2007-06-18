@@ -183,6 +183,8 @@ extern int xjumpm_(int *, int *, int *, int *, int *, int *, int *);
 #define BEGIN_IO(r,fn,f) if(0==r){f=fopen(fn,"a");if(!f)fprintf(f=stderr,"Problem with appending to file '%s'\n",fn)
 #define END_IO(r,f) fflush(f); if (f!=stdout && f!=stderr) fclose(f);} f=(FILE*)(NULL)
 
+#include <hpccmema.h>
+
 #define XMALLOC(t,s) ((t*)malloc(sizeof(t)*(s)))
 #define XCALLOC(t,s) ((t*)calloc((s),sizeof(t)))
 

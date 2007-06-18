@@ -110,7 +110,7 @@ HPCC_RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
        totalMem *= 0.5, logTableSize++, TableSize <<= 1)
     ; /* EMPTY */
 
-  Table = XMALLOC( u64Int, TableSize );
+  Table = HPCC_XMALLOC( u64Int, TableSize );
   if (! Table) {
     if (doIO) {
       fprintf( outFile, "Failed to allocate memory for the update table (" FSTR64 ").\n", TableSize);
@@ -168,7 +168,7 @@ HPCC_RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
   if (temp <= 0.01*TableSize) *failure = 0;
   else *failure = 1;
 
-  free( Table );
+  HPCC_free( Table );
 
   if (doIO) {
     fflush( outFile );

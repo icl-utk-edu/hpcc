@@ -26,6 +26,7 @@ htimer = "../../../include/hpl_timer.h"
 hhpl = "../../../include/hpl.h"
 hhpcc = "../../../../include/hpcc.h"
 hhpccv = "../../../../include/hpccver.h"
+hhpccm = "../../../include/hpccmema.h"
 
 allDeps = (
     ("src/auxil/HPL_", (hmisc, hblas, hauxil, htest),
@@ -83,7 +84,7 @@ allDeps = (
     ("../PTRANS/", (hhpcc, hhpl, "../../../../PTRANS/cblacslt.h"),
      ("pmatgeninc", "pdmatgen", "pdtransdriver", "pdmatcmp", "pdtrans", "sclapack", "cblacslt", "mem"), "-I../../../../include $(CCFLAGS)"),
 
-    ("../src/", (hhpcc, hhpccv, hhpl),
+    ("../src/", (hhpcc, hhpccv, hhpccm, hhpl),
      ("bench_lat_bw_1.5.2",  "hpcc",  "io"), "-I../../../../include $(CCFLAGS)"),
 
     ("../src/", (hhpcc, hhpl),

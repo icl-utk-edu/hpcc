@@ -32,8 +32,8 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
 
   /* need to use fftw_malloc() so that the returned pointers will be aligned properly for SSE
      instructions on Intel/AMD systems */
-  in  = (fftw_complex *)fftw_malloc( (sizeof *in)  * n );
-  out = (fftw_complex *)fftw_malloc( (sizeof *out) * n );
+  in  = (fftw_complex *)HPCC_fftw_malloc( (sizeof *in)  * n );
+  out = (fftw_complex *)HPCC_fftw_malloc( (sizeof *out) * n );
 
   if (! in || ! out) goto comp_end;
 
@@ -104,8 +104,8 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
 
   comp_end:
 
-  if (out) fftw_free( out );
-  if (in)  fftw_free( in );
+  if (out) HPCC_fftw_free( out );
+  if (in)  HPCC_fftw_free( in );
 
   *UGflops = Gflops;
   *Un = n;

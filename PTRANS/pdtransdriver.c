@@ -147,15 +147,15 @@ PTRANS(HPCC_Params *params) {
   MaxMem( nprocs, imrow, imcol, nmat, mval, nval, nbmat, mbval, nbval, ngrids, npval, nqval, &dMemSize );
   mem = NULL; imem = NULL;
   if (dMemSize > 0) {
-    mem = XMALLOC( double, dMemSize );
-    imem = XMALLOC( int, (3 * nprocs) );
+    mem = HPCC_XMALLOC( double, dMemSize );
+    imem = HPCC_XMALLOC( int, (3 * nprocs) );
     if (mem && imem) AllocSuccessful = 1;
   }
 
   MPI_Allreduce( &AllocSuccessful, ierr, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD );
   if (ierr[0] < 1) {
-    if (imem) free(imem);
-    if (mem) free(mem);
+    if (imem) HPCC_free(imem);
+    if (mem) HPCC_free(mem);
     if (0 == iam) fprintf( outFile, "Failed to allocate %ld doubles\n", dMemSize );
     goto mem_failure;
   }
@@ -506,8 +506,8 @@ PTRANS(HPCC_Params *params) {
     }
   }
 
-  if (imem) free( imem );
-  if (mem) free( mem );
+  if (imem) HPCC_free( imem );
+  if (mem) HPCC_free( mem );
 
   mem_failure:
 

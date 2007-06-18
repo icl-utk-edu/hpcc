@@ -73,13 +73,13 @@ HPCC_TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufa
   l_n = n;
   lda = ldb = ldc = n;
 
-  a = XMALLOC( double, l_n * l_n );
-  b = XMALLOC( double, l_n * l_n );
-  c = XMALLOC( double, l_n * l_n );
+  a = HPCC_XMALLOC( double, l_n * l_n );
+  b = HPCC_XMALLOC( double, l_n * l_n );
+  c = HPCC_XMALLOC( double, l_n * l_n );
 
-  x = XMALLOC( double, l_n );
-  y = XMALLOC( double, l_n );
-  z = XMALLOC( double, l_n );
+  x = HPCC_XMALLOC( double, l_n );
+  y = HPCC_XMALLOC( double, l_n );
+  z = HPCC_XMALLOC( double, l_n );
 
   if (! a || ! b || ! c || ! x || ! y || ! z) {
     goto comp_end;
@@ -137,12 +137,12 @@ HPCC_TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufa
 
   comp_end:
 
-  if (z) free( z );
-  if (y) free( y );
-  if (x) free( x );
-  if (c) free( c );
-  if (b) free( b );
-  if (a) free( a );
+  if (z) HPCC_free( z );
+  if (y) HPCC_free( y );
+  if (x) HPCC_free( x );
+  if (c) HPCC_free( c );
+  if (b) HPCC_free( b );
+  if (a) HPCC_free( a );
 
   if (doIO) {
     fflush( outFile );

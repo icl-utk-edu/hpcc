@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <hpccmema.h>
+
 #include "hpccfft.h"
 #include "wrapmpifftw.h"
 
@@ -45,10 +47,10 @@ HPCC_fftw_mpi_create_plan(MPI_Comm comm, s64Int_t n, fftw_direction dir, int fla
 
   nxyz = GetNXYZ( n, size );
 
-  p->wx = (fftw_complex *)fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wx) );
-  p->wy = (fftw_complex *)fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wy) );
-  p->wz = (fftw_complex *)fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wz) );
-  p->work = (fftw_complex *)fftw_malloc( n / size * 3 / 2 * (sizeof *p->work) );
+  p->wx = (fftw_complex *)HPCC_fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wx) );
+  p->wy = (fftw_complex *)HPCC_fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wy) );
+  p->wz = (fftw_complex *)HPCC_fftw_malloc( (nxyz/2 + FFTE_NP) * (sizeof *p->wz) );
+  p->work = (fftw_complex *)HPCC_fftw_malloc( n / size * 3 / 2 * (sizeof *p->work) );
 
   p->c_size = (nxyz+FFTE_NP) * (FFTE_NBLK + 1) + FFTE_NP;
 #ifdef _OPENMP
@@ -58,19 +60,19 @@ HPCC_fftw_mpi_create_plan(MPI_Comm comm, s64Int_t n, fftw_direction dir, int fla
     {
       int i;
       i = omp_get_num_threads();
-      p->c = (fftw_complex *)fftw_malloc( p->c_size * (sizeof *p->c) * i );
+      p->c = (fftw_complex *)HPCC_fftw_malloc( p->c_size * (sizeof *p->c) * i );
     }
   }
 #else
-  p->c = (fftw_complex *)fftw_malloc( p->c_size * (sizeof *p->c) );
+  p->c = (fftw_complex *)HPCC_fftw_malloc( p->c_size * (sizeof *p->c) );
 #endif
 
   if (! p->wx || ! p->wy || ! p->wz || ! p->work || ! p->c) {
-    if (p->c) fftw_free( p->c );
-    if (p->work) fftw_free( p->work );
-    if (p->wz) fftw_free( p->wz );
-    if (p->wy) fftw_free( p->wy );
-    if (p->wx) fftw_free( p->wx );
+    if (p->c) HPCC_fftw_free( p->c );
+    if (p->work) HPCC_fftw_free( p->work );
+    if (p->wz) HPCC_fftw_free( p->wz );
+    if (p->wy) HPCC_fftw_free( p->wy );
+    if (p->wx) HPCC_fftw_free( p->wx );
     fftw_free( p );
     return NULL;
   }
@@ -99,11 +101,11 @@ HPCC_fftw_mpi_destroy_plan(hpcc_fftw_mpi_plan p) {
 
   MPI_Type_free( &p->cmplx );
 
-  fftw_free( p->work );
-  fftw_free( p->c );
-  fftw_free( p->wz );
-  fftw_free( p->wy );
-  fftw_free( p->wx );
+  HPCC_fftw_free( p->work );
+  HPCC_fftw_free( p->c );
+  HPCC_fftw_free( p->wz );
+  HPCC_fftw_free( p->wy );
+  HPCC_fftw_free( p->wx );
   fftw_free( p );
 }
 

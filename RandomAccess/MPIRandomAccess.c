@@ -760,7 +760,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   sAbort = 0;
   finish_statuses = XMALLOC( MPI_Status, NumProcs );
   finish_req = XMALLOC( MPI_Request, NumProcs );
-  HPCC_Table = XMALLOC( u64Int, LocalTableSize );
+  HPCC_Table = HPCC_XMALLOC( u64Int, LocalTableSize );
 
   if (! finish_statuses || ! finish_req || ! HPCC_Table) sAbort = 1;
 
@@ -770,7 +770,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
     /* check all allocations in case there are new added and their order changes */
     if (finish_statuses) free( finish_statuses );
     if (finish_req) free( finish_req );
-    if (HPCC_Table) free( HPCC_Table );
+    if (HPCC_Table) HPCC_free( HPCC_Table );
 
     goto failed_table;
   }
@@ -943,8 +943,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   /* Deallocate memory (in reverse order of allocation which should
      help fragmentation) */
 
-  free( HPCC_Table );
-
+  HPCC_free( HPCC_Table );
   failed_table:
 
   if (0 == MyProc) if (outFile != stderr) fclose( outFile );
