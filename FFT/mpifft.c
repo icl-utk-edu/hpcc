@@ -99,6 +99,8 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
   }
   if (maxErr / log(n) / deps < params->test.thrsh) failure = 0;
 
+  if (t2 > 0.0) Gflops = 1e-9 * (5.0 * n * log(n) / log(2.0)) / t2;
+
   if (doIO) {
     fprintf( outFile, "Number of nodes: %d\n", commSize );
     fprintf( outFile, "Vector size: %20.0f\n", tmp1 = (double)n );
@@ -107,9 +109,8 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
     fprintf( outFile, "Computing: %9.3f\n", t2 );
     fprintf( outFile, "Inverse FFT: %9.3f\n", t3 );
     fprintf( outFile, "max(|x-x0|): %9.3e\n", maxErr );
+    fprintf( outFile, "Gflop/s: %9.3f\n", Gflops );
   }
-
-  if (t2 > 0.0) Gflops = 1e-9 * (5.0 * n * log(n) / log(2.0)) / t2;
 
   comp_end:
 
