@@ -1,5 +1,11 @@
 % -*- LaTeX -*-
+%
+% This is the master README. Translation to text and HTML files is done
+% with HeVeA.
+%
 \documentclass[twocolumn]{article}
+\usepackage{pslatex}
+\usepackage[margin=2cm]{geometry}
 \begin{document}
 \title{DARPA/DOE HPC~Challenge Benchmark}
 \author{Piotr Luszczek\footnote{University of Tennessee Knoxville, Innovative
@@ -47,7 +53,56 @@ directory~(not in the \texttt{hpl} directory). It will look in the
 \texttt{hpl} directory for the build script file and use it to build
 the benchmark executable.
 
-\section{Configuration}
+The runtime behavior of the HPC~Challenge source code may be
+configured at compiled time by defining a few C preprocessor
+symbols. They can be defined by adding appropriate options to
+\texttt{CCNOOPT} and \texttt{CCFLAGS} make variables. The former
+controls options for source code files that need to be compiled
+without aggressive optimizations to ensure accurate generation of
+system-specific parameters. The latter applies to the rest of the
+files that need good compiler optimization for best performance. To
+define a symbol \texttt{S}, the majority of compilers requires option
+\texttt{-DS} to be used. Currently, the following options are
+available in the HPC~Challenge source code:
+\begin{itemize}
+\item \texttt{HPCC\_FFT\_235}: if this symbol is defined the FFTE
+code (an FFT implementation) will use vector sizes and processor
+counts that are not limited to powers of 2. Instead, the vector sizes
+and processor counts to be used will be a product of powers of 2, 3,
+and 5.
+\item \texttt{HPCC\_FFTW\_ESTIMATE}: if this symbol is defined it will
+affect the way external FFTW library is called~(it does not have any
+effect if the FFTW library is not used). When defined, this symbol
+will call the FFTW planning routine with \texttt{FFTW\_ESTIMATE}
+flag~(instead of \texttt{FFTW\_MEASURE}). This might result with worse
+performance results but shorter execution time of the
+benchmark. Defining this symbol may also positively affect the memory
+fragmentation caused by the FFTW's planning routine.
+\item \texttt{HPCC\_MEMALLCTR}: if this symbol is defined a custom
+memory allocator will be used to alleviate effects of memory
+fragmentation and allow for larger data sets to be used which may
+result in obtaining better performance.
+\item \texttt{HPL\_USE\_GETPROCESSTIMES}: if this symbol is defined
+then Windows-specific \texttt{GetProcessTimes()} function will be used
+to measure the elapsed CPU time.
+\item \texttt{RA\_SANDIA\_NOPT}: if this symbol is defined the
+HPC~Challenge standard algorithm for Global RandomAccess will not be
+used. Instead, instead an alternative implementation from Sandia
+National Laboratory will be used.
+\item \texttt{RA\_SANDIA\_OPT2}: if this symbol is defined the
+HPC~Challenge standard algorithm for Global RandomAccess will not be
+used. Instead, instead an alternative implementation from Sandia
+National Laboratory will be used. This implementation is optimized for
+number of processors being powers of two.
+\item \texttt{USING\_FFTW}: if this symbol is defined the standard
+HPC~Challenge FFT implemenation~(called FFTE) will not be used.
+Instead, FFTW library will be called. Defining the
+\texttt{USING\_FFTW} symbol is not sufficient: appropriate flags have
+to be added in the make script so that FFTW headers files can be found
+at compile time and the FFTW libraries at link time.
+\end{itemize}
+
+\section{Runtime Configuration}
 The HPC~Challenge is driven by a short input file named
 \texttt{hpccinf.txt} that is almost the same as the input file for
 HPL~(customarily called \texttt{HPL.dat}). Refer to the directory
@@ -119,8 +174,8 @@ Challenge's input file and brief description of their meaning:
 \end{itemize}
 
 \section{Running}
-The exact way how to run the HPC~Challenge benchmark depends on the
-MPI implementation and system details.  An example command to run the
+The exact way to run the HPC~Challenge benchmark depends on the MPI
+implementation and system details.  An example command to run the
 benchmark could like like this: \texttt{mpirun -np 4 hpcc}. The
 meaning of the command's components is as follows:
 \begin{itemize}
