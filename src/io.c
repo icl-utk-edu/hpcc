@@ -511,6 +511,52 @@ HPCC_Finalize(HPCC_Params *params) {
 
   for (i = 0; i < MPIFFT_TIMING_COUNT - 1; i++)
     fprintf( outputFile, "MPIFFT_time%d=%g\n", i, params->MPIFFTtimingsForward[i+1] - params->MPIFFTtimingsForward[i] );
+
+  /* CPS: C Preprocessor Symbols */
+  
+  i = 0;
+#ifdef HPCC_FFT_235
+  i = 1;
+#endif
+  fprintf( outputFile, "CPS_HPCC_FFT_235=%d\n", i );
+
+  i = 0;
+#ifdef HPCC_FFTW_ESTIMATE
+  i = 1;
+#endif
+  fprintf( outputFile, "CPS_HPCC_FFTW_ESTIMATE=%d\n", i );
+
+  i = 0;
+#ifdef HPCC_MEMALLCTR
+  i = 1;
+#endif
+  fprintf( outputFile, "CPS_HPCC_MEMALLCTR=%d\n", i );
+
+  i = 0;
+#ifdef HPL_USE_GETPROCESSTIMES
+  i = 1;
+#endif
+  fprintf( outputFile, "CPS_HPL_USE_GETPROCESSTIMES=%d\n", i );
+
+
+  i = 0;
+#ifdef RA_SANDIA_NOPT
+  i = 1;
+#endif
+  fprintf( outputFile, "CPS_RA_SANDIA_NOPT=%d\n", i );
+
+  i = 0;
+#ifdef RA_SANDIA_OPT2
+  i = 1;
+#endif
+  fprintf( outputFile, "CPS_RA_SANDIA_OPT2=%d\n", i );
+ 
+  i = 0;
+#ifdef USING_FFTW
+  i = 1;
+#endif
+  fprintf( outputFile, "CPS_USING_FFTW=%d\n", i );
+
   fprintf( outputFile, "End of Summary section.%s\n", "" );
   fprintf( outputFile,
             "########################################################################\n" );
