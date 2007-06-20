@@ -27,7 +27,7 @@ build script file~(input for \texttt{make(1)} command) and the input
 file that you already have for HPL. The HPC~Challenge benchmark
 includes HPL and uses its build script and input files with only
 slight modifications. The most important change must be done to the
-line that sets the \texttt{TOPdir} variable. For HPC~Challenge the
+line that sets the \texttt{TOPdir} variable. For HPC~Challenge, the
 variable's value should always be \texttt{../../..} regardless of what
 it was in the HPL build script file.
 
@@ -37,10 +37,10 @@ characteristics of your machine. This file is reused by all the
 components of the HPC~Challenge suite. The build script file should be
 created in the \texttt{hpl} directory. This directory contains
 instructions (the files \texttt{README} and \texttt{INSTALL}) on how
-to create the build script file for your system. The directory
-\texttt{hpl/setup} contains many examples of build script files. A
-recommended approach is to copy one of them to the \texttt{hpl}
-directory and if it doesn't work then change it.
+to create the build script file for your system. The
+\texttt{hpl/setup} directory contains many examples of build script
+files. A recommended approach is to copy one of them to the
+\texttt{hpl} directory and if it doesn't work then change it.
 
 The build script file has a name that starts with \texttt{Make.}
 prefix and usally ends with a suffix that identifies the target
