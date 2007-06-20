@@ -191,7 +191,7 @@ def TraverseDirs(prfx, items):
 def Dist(deps, prfx="hpcc"):
     allPrfx = prfx + "/"
 
-    addItems = ["Makefile", "README.xml", "README.html", "README.txt", "_hpccinf.txt",
+    addItems = ["Makefile", "README.html", "README.txt", "_hpccinf.txt",
                 "hpl/Make.UNKNOWN", "hpl/BUGS", "hpl/COPYRIGHT", "hpl/HISTORY",
                 "hpl/HPL.build.log.220120040613", "hpl/INSTALL", "hpl/Make.top", "hpl/Makefile",
                 "hpl/README", "hpl/TODO", "hpl/TUNING", "hpl/lib/arch/build/Makefile.hpcc",
@@ -200,12 +200,12 @@ def Dist(deps, prfx="hpcc"):
     addItems = TraverseDirs(prfx, addItems)
     #print string.join(addItems, "\n")
 
-    mf = os.path.join(prfx, "README.xml")
+    mf = os.path.join(prfx, "README.txt")
     mt = os.path.getmtime(mf)
-    for f in ("README.html", "README.txt"):
+    for f in ("README.html",):
         t = os.path.getmtime(os.path.join(prfx, f))
         if mt >= t:
-            raise RuntimeError, "File " + f + " is newer than " + mf
+            raise RuntimeError, "File " + f + " is older than " + mf
 
 
     allFiles = []
