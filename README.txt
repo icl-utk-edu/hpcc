@@ -51,6 +51,8 @@ Version 1.2 Changes
    - Added new algorithms: new algorithms from Sandia based on hypercube
    network topology can now be chosen at compile time which results on much
    better performance results on many types of parallel systems.
+   - Fixed potential resource leaks by adding function calls rquired by the MPI
+   standard.
 4. Changes in the HPL component:
    - Cleaned up reporting of numerics: more accurate printing of scaled
    residual formula.
