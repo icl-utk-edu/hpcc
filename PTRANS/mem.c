@@ -3,7 +3,7 @@
 #include <hpcc.h>
 
 static int
-CheckNode(int imrow, int imcol, int nmat, int *mval, int *nval, int nbmat, int *mbval, int *nbval, 
+CheckNode(int imrow, int imcol, int nmat, int *mval, int *nval, int nbmat, int *mbval, int *nbval,
           int myrow, int mycol, int nprow, int npcol, long *maxMem) {
   int i__, ii, m, n, mb, nb, ierr[1];
   int lcm, np0, nq0, mp0, mq0, mg, ng, np, nq, mp, mq;

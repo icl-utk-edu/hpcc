@@ -3,7 +3,7 @@
 #include <hpcc.h>
 
 int
-pdmatgen(int *ictxt, char *aform, char *diag, int *m, int *n, int *mb, int *nb, double *aMat, 
+pdmatgen(int *ictxt, char *aform, char *diag, int *m, int *n, int *mb, int *nb, double *aMat,
   int *lda, int *iarow, int *iacol, int *iseed, int *iroff, int *irnum, int *icoff, int *icnum,
   int * myrow, int *mycol, int *nprow, int *npcol, double alpha) {
   /* System generated locals */
@@ -12,8 +12,8 @@ pdmatgen(int *ictxt, char *aform, char *diag, int *m, int *n, int *mb, int *nb, 
   double d__1, d_tmp;
 
     /* Local variables */
-    static int i__, j, ic, ik, jk, ir, mp, nq, ia1[2], ia2[2], ia3[2], 
-	    ia4[2], ia5[2], ib1[2], ib2[2], ib3[2], ic1[2], ic2[2], ic3[2], 
+    static int i__, j, ic, ik, jk, ir, mp, nq, ia1[2], ia2[2], ia3[2],
+	    ia4[2], ia5[2], ib1[2], ib2[2], ib3[2], ic1[2], ic2[2], ic3[2],
 	    ic4[2], ic5[2], iadd[2], mend, nend, moff, noff;
     static int herm;
     static int info, npmb, nqnb;

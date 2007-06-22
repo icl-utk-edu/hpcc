@@ -1,4 +1,4 @@
-/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*- 
+/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*-
  *
  * This file provides utility functions for the RandomAccess benchmark suite.
  */

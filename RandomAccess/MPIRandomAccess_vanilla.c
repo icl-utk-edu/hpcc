@@ -178,7 +178,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
       nupper = npartition - nlower;
       procmid = proclo + nlower;
       indexmid = offsets[procmid];
-      
+
       nkeep = nsend = 0;
       if (MyProc < procmid) {
         for (i = 0; i < ndata; i++) {
@@ -191,7 +191,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
           else data[nkeep++] = data[i];
         }
       }
-      
+
       if (nlower == nupper) {
         if (MyProc < procmid) ipartner = MyProc + nlower;
         else ipartner = MyProc - nlower;
@@ -233,21 +233,21 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
           ndata = nkeep + nrecv;
         }
       }
-      
+
       if (MyProc < procmid) npartition = nlower;
       else {
         proclo = procmid;
         npartition = nupper;
       }
     }
-    
+
     for (i = 0; i < ndata; i++) {
       datum = data[i];
       index = (datum & nglobalm1) - GlobalStartMyProc;
       HPCC_Table[index] ^= datum;
     }
   }
-  
+
   /* clean up: should not really be part of this timed routine */
 
   free(data);
@@ -313,7 +313,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
           else send[nsend++] = data[i];
         }
       }
-      
+
       MPI_Sendrecv(send,nsend,INT64_DT,ipartner,0,
                    &data[nkeep],CHUNKBIG,INT64_DT,
                    ipartner,0,MPI_COMM_WORLD,&status);

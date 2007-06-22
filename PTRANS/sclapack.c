@@ -278,9 +278,9 @@ sltimer_(int *i__) {
 
 /*        Stop timer and add interval to count */
 
-	sltimer00_1.cpusec[*i__ - 1] = sltimer00_1.cpusec[*i__ - 1] + 
+	sltimer00_1.cpusec[*i__ - 1] = sltimer00_1.cpusec[*i__ - 1] +
 		dcputime00() - sltimer00_1.cpustart[*i__ - 1];
-	sltimer00_1.wallsec[*i__ - 1] = sltimer00_1.wallsec[*i__ - 1] + 
+	sltimer00_1.wallsec[*i__ - 1] = sltimer00_1.wallsec[*i__ - 1] +
 		dwalltime00() - sltimer00_1.wallstart[*i__ - 1];
 	sltimer00_1.wallstart[*i__ - 1] = -5.;
 

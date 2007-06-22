@@ -195,7 +195,7 @@ Cblacs_get(int ConTxt, int what, int *val) {
   }
 }
 
-static int 
+static int
 CblacsGridNew(int nprow, int npcol, int *ConTxt, MPI_Comm *comm) {
   int size;
 

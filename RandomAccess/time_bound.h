@@ -6,14 +6,14 @@
 #define TIME_BOUND 60
 
 
-/* _RA_SAMPLE_FACTOR determines the fraction of the total number 
- * of updates used (in time_bound.c) to empirically derive an 
- * upper bound for the  number of updates executed by the benchmark. 
+/* _RA_SAMPLE_FACTOR determines the fraction of the total number
+ * of updates used (in time_bound.c) to empirically derive an
+ * upper bound for the  number of updates executed by the benchmark.
  * This upper bound must be such that the total execution time of the
- * benchmark does not exceed a specified time bound. 
- * _RA_SAMPLE_FACTOR may need to be adjusted for each architecture 
- * since the dafault number of updates depends on the total 
- * memory size. 
+ * benchmark does not exceed a specified time bound.
+ * _RA_SAMPLE_FACTOR may need to be adjusted for each architecture
+ * since the dafault number of updates depends on the total
+ * memory size.
  */
 /* 1% of total number of updates */
 #define _RA_SAMPLE_FACTOR 100

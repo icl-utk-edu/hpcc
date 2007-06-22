@@ -204,7 +204,7 @@ dtr2mx_(double *a, int *lda, double *beta, double *t, int *ldt, int *nrow, int *
 } /* dtr2mx_ */
 
 static int
-dtr2bf_(double *a, int *lda, double *t, int *ldt, int *nrow, int *ncol, int *mb, int *nb, 
+dtr2bf_(double *a, int *lda, double *t, int *ldt, int *nrow, int *ncol, int *mb, int *nb,
 	int *ilt, int *jlt) {
     /* System generated locals */
     long a_dim1, a_offset, t_dim1, t_offset;
@@ -552,14 +552,14 @@ dmv2mx_(double *t, int *ldt, double *beta, double *a, int *lda, int *nrow, int *
 } /* dmv2mx_ */
 
 int
-pdtrans(char *trans, int *m, int *n, int * mb, int *nb, double *a, int *lda, double *beta, 
+pdtrans(char *trans, int *m, int *n, int * mb, int *nb, double *a, int *lda, double *beta,
 	double *c__, int *ldc, int *imrow, int *imcol, double *work, int *iwork) {
     /* System generated locals */
     long a_dim1, a_offset, c_dim1, c_offset;
     int i__1, i__2, i__3, i__4;
 
     /* Local variables */
-    int j1, k1, k2, ml, nl, mp, mq, np, nq, mb0, mb1, mb2, nb0, 
+    int j1, k1, k2, ml, nl, mp, mq, np, nq, mb0, mb1, mb2, nb0,
 	    nb1, nb2, kia, kja, kic, kjc, lbm, lbn, lcm, ldt, lbm0, lbm1,
 	     lbm2, lbn0, lbn1, lbn2, igcd;
     long ipt;
@@ -914,7 +914,7 @@ L10:
 		    i__3 = np - kic;
 		    i__4 = mq - kjc;
 		    dmv2mx_(&work[ipt], &ldt, &tbeta, &c__[kic + 1 + (kjc + 1)
-			     * c_dim1], ldc, &lbn2, &lbm2, &nb2, &mb2, &i__3, 
+			     * c_dim1], ldc, &lbn2, &lbm2, &nb2, &mb2, &i__3,
 			    &i__4);
 		}
 	    }

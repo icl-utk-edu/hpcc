@@ -1,10 +1,10 @@
-/* heap.c 
- * Maintains a heap of records such that the key of each node is 
+/* heap.c
+ * Maintains a heap of records such that the key of each node is
  * larger or equal than those of its children
  *
- * The heap is used to maintain an ordering for the local buckets 
+ * The heap is used to maintain an ordering for the local buckets
  * (one bucket for each destination PE) that have pending updates.
- * The bucket with the largest number of pending updates is 
+ * The bucket with the largest number of pending updates is
  * always at the root of the heap.
  */
 
@@ -38,7 +38,7 @@ void HPCC_ra_Heap_Init (int size)
 
   /* initialize memory pool for heap nodes */
   Heap_Pool = HPCC_PoolInit (size, sizeof(Heap_Record));
-  
+
 }
 
 
@@ -48,10 +48,10 @@ void HPCC_ra_Heap_Insert (int index, int key)
   Heap_Record_Ptr newNode;
   int node, parent;
 
-  newNode = (Heap_Record*) HPCC_PoolGetObj(Heap_Pool); 
+  newNode = (Heap_Record*) HPCC_PoolGetObj(Heap_Pool);
   newNode->index  = index;
   newNode->key = key;
-  
+
   node = heapNodes;
   parent = PARENT(node);
   heapNodes ++;
@@ -61,26 +61,26 @@ void HPCC_ra_Heap_Insert (int index, int key)
     node = parent;
     parent = PARENT(node);
   }
-  
+
   heap[node] = newNode;
-  IndexToHeapNode[index] = node; 
+  IndexToHeapNode[index] = node;
 
 }
 
 void HPCC_ra_Heap_IncrementKey (int index, int key)
 {
-  
+
   int node;
-  
+
   int parent;
   int child;
   int done;
   Heap_Record_Ptr tmp;
 
-  node = IndexToHeapNode[index]; 
+  node = IndexToHeapNode[index];
   if (node != NOT_A_NODE) {
     heap[node]->key = heap[node]->key + 1;
-   
+
     /* _ra_Heapify (node); */
     done = 0;
     child = node;
@@ -107,12 +107,12 @@ void HPCC_ra_Heap_ExtractMax (int *index, int *key)
 {
   Heap_Record_Ptr nodePtr;
   int parent, child;
-  
+
   nodePtr = heap[HEAP_ROOT];
   *index = nodePtr->index;
   *key = nodePtr->key;
   HPCC_PoolReturnObj(Heap_Pool, nodePtr);
- 
+
   heapNodes --;
   nodePtr = heap[heapNodes];
   parent = HEAP_ROOT;
@@ -120,14 +120,14 @@ void HPCC_ra_Heap_ExtractMax (int *index, int *key)
   while (child <= heapNodes) {
     if (child < heapNodes && heap[child]->key < heap[child+1]->key)
       child ++;
-    if (nodePtr->key >= heap[child]->key)  
+    if (nodePtr->key >= heap[child]->key)
       break;
     heap[parent] = heap[child];
     MAP_INDEX_TO_HEAP_NODE(parent);
     parent = child;
-    child  = LEFT(child); 
+    child  = LEFT(child);
   }
-  
+
   heap[parent] = nodePtr;
   MAP_INDEX_TO_HEAP_NODE(parent);
 }
@@ -161,7 +161,7 @@ void HPCC_ra_Heapify(int node)
 void HPCC_ra_Heapify_r(int node)
 {
   /* assumes that the key of a given entry can only be increased */
-  
+
   int parent;
   int child;
   Heap_Record_Ptr tmp;

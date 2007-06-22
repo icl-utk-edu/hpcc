@@ -9,8 +9,8 @@ typedef struct Pool_s {        /* used to minimize the use of malloc */
   char *poolBase;              /* pointer to block of memory allocated for pool */
 } POOL;
 
-extern POOL* HPCC_PoolInit(int numObjs, int objSize); 
-extern char *HPCC_PoolGetObj(POOL *poolPtr);                    
-extern void HPCC_PoolReturnObj(POOL *poolPtr, void *objPtr);    
-extern void HPCC_PoolFree(POOL *poolPtr);                      
+extern POOL* HPCC_PoolInit(int numObjs, int objSize);
+extern char *HPCC_PoolGetObj(POOL *poolPtr);
+extern void HPCC_PoolReturnObj(POOL *poolPtr, void *objPtr);
+extern void HPCC_PoolFree(POOL *poolPtr);
 

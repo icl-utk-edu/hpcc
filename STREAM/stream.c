@@ -394,7 +394,7 @@ HPCC_Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs, do
         maxtime[j] = Mmax(maxtime[j], times[j][k]);
       }
     }
- 
+
     if (doIO)
     fprintf( outFile, "Function      Rate (GB/s)   Avg time     Min time     Max time\n");
     for (j=0; j<4; j++) {

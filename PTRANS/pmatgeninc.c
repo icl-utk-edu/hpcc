@@ -11,7 +11,7 @@ static struct {
 #define rancom_1 rancom_
 
 int
-xjumpm_(int *jumpm, int *mult, int *iadd, 
+xjumpm_(int *jumpm, int *mult, int *iadd,
 	int *irann, int *iranm, int *iam, int *icm) {
     /* System generated locals */
     int i__1;

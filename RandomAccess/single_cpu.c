@@ -1,4 +1,4 @@
-/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*- 
+/* -*- mode: C; tab-width: 2; indent-tabs-mode: nil; -*-
  *
  * This file contains the interface for the single cpu RandomAccess test.  The
  * test is only run on a single (random) node in the MPI universe, with all

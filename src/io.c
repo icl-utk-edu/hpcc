@@ -513,7 +513,7 @@ HPCC_Finalize(HPCC_Params *params) {
     fprintf( outputFile, "MPIFFT_time%d=%g\n", i, params->MPIFFTtimingsForward[i+1] - params->MPIFFTtimingsForward[i] );
 
   /* CPS: C Preprocessor Symbols */
-  
+
   i = 0;
 #ifdef HPCC_FFT_235
   i = 1;
@@ -550,7 +550,7 @@ HPCC_Finalize(HPCC_Params *params) {
   i = 1;
 #endif
   fprintf( outputFile, "CPS_RA_SANDIA_OPT2=%d\n", i );
- 
+
   i = 0;
 #ifdef USING_FFTW
   i = 1;

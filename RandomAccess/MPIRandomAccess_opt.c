@@ -184,7 +184,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
       nupper = npartition - nlower;
       procmid = proclo + nlower;
       indexmid = offsets[procmid];
-      
+
       nkeep = nsend = 0;
       if (MyProc < procmid) {
         for (i = 0; i < ndata; i++) {
@@ -197,7 +197,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
           else data[nkeep++] = data[i];
         }
       }
-      
+
       if (nlower == nupper) {
         if (MyProc < procmid) ipartner = MyProc + nlower;
         else ipartner = MyProc - nlower;
@@ -239,21 +239,21 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
           ndata = nkeep + nrecv;
         }
       }
-      
+
       if (MyProc < procmid) npartition = nlower;
       else {
         proclo = procmid;
         npartition = nupper;
       }
     }
-    
+
     for (i = 0; i < ndata; i++) {
       datum = data[i];
       index = (datum & nglobalm1) - GlobalStartMyProc;
       HPCC_Table[index] ^= datum;
     }
   }
-  
+
   /* clean up: should not really be part of this timed routine */
 
   free(data);
@@ -261,12 +261,12 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   free(offsets);
 }
 
-/* This sort is manually unrolled to make sure the compiler can see 
+/* This sort is manually unrolled to make sure the compiler can see
  * the parallelism -KDU
  */
 
 static
-void sort_data(u64Int *source, u64Int *nomatch, u64Int *match, int number, 
+void sort_data(u64Int *source, u64Int *nomatch, u64Int *match, int number,
                int *nnomatch, int *nmatch, int mask_shift)
 {
   int i,dindex,myselect[8],counts[2];
@@ -299,13 +299,13 @@ void sort_data(u64Int *source, u64Int *nomatch, u64Int *match, int number,
     buffers[myselect[6]][counts[myselect[6]]++] = source[dindex+6];
     buffers[myselect[7]][counts[myselect[7]]++] = source[dindex+7];
   }
-  
+
   for (i = loop_total; i < number; i++) {
     u64Int mydata = source[i];
     if (mydata & procmask) buffers[1][counts[1]++] = mydata;
     else buffers[0][counts[0]++] = mydata;
   }
-  
+
   *nnomatch = counts[0];
   *nmatch = counts[1];
 }
@@ -414,15 +414,15 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
     }
     nkept = CHUNK;
     nrecv = 0;
-    
-    if (iter_mod == 0) 
+
+    if (iter_mod == 0)
       for (k = 0; k < PITER; k++)
         for (j = 0; j < logNumProcs; j++) {
           ipartner = (1 << j) ^ MyProc;
           MPI_Irecv(recv[k][j],RCHUNK,INT64_DT,ipartner,0,MPI_COMM_WORLD,
                     &request[k][j]);
         }
-    
+
     for (j = 0; j < logNumProcs; j++) {
       nkeep = nsend = 0;
       send = (send == send1) ? send2 : send1;
@@ -433,7 +433,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
         if (j > 0) {
           MPI_Wait(&request[iter_mod][j-1],&status);
           MPI_Get_count(&status,INT64_DT,&nrecv);
-      	  sort_data(recv[iter_mod][j-1],data,send,nrecv,&nkeep, 
+      	  sort_data(recv[iter_mod][j-1],data,send,nrecv,&nkeep,
                     &nsend,logTableLocal+j);
         }
       } else {
@@ -450,7 +450,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
       if (j == (logNumProcs - 1)) update_table(data,HPCC_Table,nkeep,nlocalm1);
       nkept = nkeep;
     }
-    
+
     if (logNumProcs == 0) update_table(data,HPCC_Table,nkept,nlocalm1);
     else {
       MPI_Wait(&request[iter_mod][j-1],&status);
@@ -458,10 +458,10 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
       update_table(recv[iter_mod][j-1],HPCC_Table,nrecv,nlocalm1);
       MPI_Wait(&srequest,&status);
     }
-    
+
     ndata = nkept + nrecv;
   }
-  
+
   /* clean up: should not really be part of this timed routine */
 
   for (j = 0; j < PITER; j++)

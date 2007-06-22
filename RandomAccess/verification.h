@@ -6,7 +6,7 @@ extern void HPCC_Power2NodesMPIRandomAccessCheck(u64Int logTableSize,
 				     int logNumProcs,
 				     int NumProcs,
 				     int MyProc,
-				     u64Int ProcNumUpdates, 
+				     u64Int ProcNumUpdates,
 				     MPI_Datatype UINT64_DT,
 				     s64Int *NumErrors);
 
@@ -21,7 +21,7 @@ extern void HPCC_AnyNodesMPIRandomAccessCheck(u64Int logTableSize,
 				  int NumProcs,
 				  int Remainder,
 				  int MyProc,
-				  u64Int ProcNumUpdates, 
+				  u64Int ProcNumUpdates,
 				  MPI_Datatype UINT64_DT,
 				  s64Int *NumErrors);
 

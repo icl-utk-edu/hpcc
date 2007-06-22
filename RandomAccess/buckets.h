@@ -8,7 +8,7 @@ typedef struct update_s {
 #define NULL_UPDATE_PTR ((Update_Ptr) NULL)
 
 typedef struct pe_bucket_s {
-  int numUpdates;  
+  int numUpdates;
   Update_Ptr updateList;
 } Bucket_T, *Bucket_Ptr;
 

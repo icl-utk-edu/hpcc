@@ -161,7 +161,7 @@ pzfft1d0(fftw_complex *a, fftw_complex *a2, fftw_complex *apxyz, fftw_complex *a
 
           /* reusing tmin2 from above */
           for (i = ii; i < tmin2; ++i) {
-            c_assgn( ARR4D( axyzp, i, j, k, l, ldaxyzp1, ldaxyzp2, ldaxyzp3 ), 
+            c_assgn( ARR4D( axyzp, i, j, k, l, ldaxyzp1, ldaxyzp2, ldaxyzp3 ),
                      ARR2D( cz, l + k*npu, i-ii, ldcz ) );
           }
         }
