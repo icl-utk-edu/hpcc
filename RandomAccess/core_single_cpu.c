@@ -52,7 +52,7 @@
 
 static void
 RandomAccessUpdate(u64Int TableSize, u64Int *Table) {
-  s64Int i;
+  u64Int i;
   u64Int ran[128];              /* Current random numbers */
   int j;
 
@@ -82,7 +82,7 @@ RandomAccessUpdate(u64Int TableSize, u64Int *Table) {
 
 int
 HPCC_RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure) {
-  s64Int i;
+  u64Int i;
   u64Int temp;
   double cputime;               /* CPU time to update table */
   double realtime;              /* Real time to update table */
