@@ -269,15 +269,14 @@ solution of the linear system is left replicated in every process row.<BR><BR>
 <H3><A NAME="check">Checking the Solution</A></H3>
 
 To verify the result obtained,  the input matrix  and right-hand side are
-regenerated. Three residuals are computed and a solution is considered as
-"numerically correct"  when  all  of these quantities  are  less  than  a 
-threshold value of the order of 1.0. In the expressions below, eps is the
-relative (distributed-memory) machine precision.
+regenerated.  The  normwise  backward  error  (see formula below) is then
+computed.  A solution  is  considered  as "numerically correct" when this
+quantity  is  less  than  a  threshold  value of the order of 1.0. In the
+expression   below,  eps  is  the  relative  (distributed-memory) machine
+precision.
 
 <UL>
-<LI>||Ax-b||_oo / ( eps * ||A||_1  * N        )
-<LI>||Ax-b||_oo / ( eps * ||A||_1  * ||x||_1  )
-<LI>||Ax-b||_oo / ( eps * ||A||_oo * ||x||_oo )
+<LI>|| Ax - b ||_oo / ( eps * ( || A ||_oo * || x ||_oo + || b ||_oo ) * n )
 </UL>
 
 <HR NOSHADE>

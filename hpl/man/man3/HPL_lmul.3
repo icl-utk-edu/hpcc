@@ -1,4 +1,4 @@
-.TH HPL_lmul 3 "January 20, 2004" "HPL 1.0a" "HPL Library Functions"
+.TH HPL_lmul 3 "September 10, 2008" "HPL 2.0" "HPL Library Functions"
 .SH NAME
 HPL_lmul \- multiplies 2 long positive integers.
 .SH SYNOPSIS
@@ -16,9 +16,9 @@ HPL_lmul \- multiplies 2 long positive integers.
 .SH DESCRIPTION
 \fB\&HPL_lmul\fR
 multiplies  without carry two long positive integers K and J
-and put the result into I.  The long integers  I, J, K are encoded on
-31 bits using an array of 2 integers. The 16-lower bits are stored in
-the first entry of each array, the 15-higher bits in the second entry
+and puts the result into I. The long integers  I, J, K are encoded on
+64 bits using an array of 2 integers. The 32-lower bits are stored in
+the first entry of each array, the 32-higher bits in the second entry
 of each array. For efficiency purposes, the  intrisic modulo function
 is inlined.
 .SH ARGUMENTS

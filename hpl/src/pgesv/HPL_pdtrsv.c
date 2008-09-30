@@ -1,10 +1,10 @@
 /* 
  * -- High Performance Computing Linpack Benchmark (HPL)                
- *    HPL - 1.0a - January 20, 2004                          
+ *    HPL - 2.0 - September 10, 2008                          
  *    Antoine P. Petitet                                                
  *    University of Tennessee, Knoxville                                
- *    Innovative Computing Laboratories                                 
- *    (C) Copyright 2000-2004 All Rights Reserved                       
+ *    Innovative Computing Laboratory                                 
+ *    (C) Copyright 2000-2008 All Rights Reserved                       
  *                                                                      
  * -- Copyright notice and Licensing terms:                             
  *                                                                      
@@ -22,7 +22,7 @@
  * 3. All  advertising  materials  mentioning  features  or  use of this
  * software must display the following acknowledgement:                 
  * This  product  includes  software  developed  at  the  University  of
- * Tennessee, Knoxville, Innovative Computing Laboratories.             
+ * Tennessee, Knoxville, Innovative Computing Laboratory.             
  *                                                                      
  * 4. The name of the  University,  the name of the  Laboratory,  or the
  * names  of  its  contributors  may  not  be used to endorse or promote
@@ -159,7 +159,7 @@ void HPL_pdtrsv
    n1 = ( npcol - 1 ) * nb; n1 = Mmax( n1, nb );
    if( Anp > 0 )
    {
-      W = (double*)malloc( Mmin( n1, Anp ) * sizeof( double ) );
+      W = (double*)malloc( (size_t)(Mmin( n1, Anp )) * sizeof( double ) );
       if( W == NULL )
       { HPL_pabort( __LINE__, "HPL_pdtrsv", "Memory allocation failed" ); }
       Wfr = 1;

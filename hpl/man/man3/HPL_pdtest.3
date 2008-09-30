@@ -1,4 +1,4 @@
-.TH HPL_pdtest 3 "January 20, 2004" "HPL 1.0a" "HPL Library Functions"
+.TH HPL_pdtest 3 "September 10, 2008" "HPL 2.0" "HPL Library Functions"
 .SH NAME
 HPL_pdtest \- Perform one test.
 .SH SYNOPSIS
@@ -31,11 +31,11 @@ On entry,  TEST  points  to a testing data structure:  outfp
 specifies the output file where the results will be printed.
 It is only defined and used by the process  0  of the  grid.
 thrsh  specifies  the  threshhold value  for the test ratio.
-Concretely, a test is declared "PASSED"  if and only if  all
-of the following inequalities are satisfied:
-||Ax-b||_oo / ( epsil * ||A||_1  * N        ) < thrsh,
-||Ax-b||_oo / ( epsil * ||A||_1  * ||x||_1  ) < thrsh,
-||Ax-b||_oo / ( epsil * ||A||_oo * ||x||_oo ) < thrsh.
+Concretely, a test is declared "PASSED"  if and only if  the
+following inequality is satisfied:
+||Ax-b||_oo / ( epsil *
+                ( || x ||_oo * || A ||_oo + || b ||_oo ) *
+                 N )  < thrsh.
 epsil  is the  relative machine precision of the distributed
 computer. Finally the test counters, kfail, kpass, kskip and
 ktest are updated as follows:  if the test passes,  kpass is

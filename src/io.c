@@ -398,6 +398,7 @@ HPCC_Finalize(HPCC_Params *params) {
   fprintf( outputFile, "HPL_AnormI=%g\n", params->HPLrdata.AnormI );
   fprintf( outputFile, "HPL_Xnorm1=%g\n", params->HPLrdata.Xnorm1 );
   fprintf( outputFile, "HPL_XnormI=%g\n", params->HPLrdata.XnormI );
+  fprintf( outputFile, "HPL_BnormI=%g\n", params->HPLrdata.BnormI );
   fprintf( outputFile, "HPL_N=%d\n", params->HPLrdata.N );
   fprintf( outputFile, "HPL_NB=%d\n", params->HPLrdata.NB );
   fprintf( outputFile, "HPL_nprow=%d\n", params->HPLrdata.nprow );

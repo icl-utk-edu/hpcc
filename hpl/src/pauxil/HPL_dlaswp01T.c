@@ -1,10 +1,10 @@
 /* 
  * -- High Performance Computing Linpack Benchmark (HPL)                
- *    HPL - 1.0a - January 20, 2004                          
+ *    HPL - 2.0 - September 10, 2008                          
  *    Antoine P. Petitet                                                
  *    University of Tennessee, Knoxville                                
- *    Innovative Computing Laboratories                                 
- *    (C) Copyright 2000-2004 All Rights Reserved                       
+ *    Innovative Computing Laboratory                                 
+ *    (C) Copyright 2000-2008 All Rights Reserved                       
  *                                                                      
  * -- Copyright notice and Licensing terms:                             
  *                                                                      
@@ -22,7 +22,7 @@
  * 3. All  advertising  materials  mentioning  features  or  use of this
  * software must display the following acknowledgement:                 
  * This  product  includes  software  developed  at  the  University  of
- * Tennessee, Knoxville, Innovative Computing Laboratories.             
+ * Tennessee, Knoxville, Innovative Computing Laboratory.             
  *                                                                      
  * 4. The name of the  University,  the name of the  Laboratory,  or the
  * names  of  its  contributors  may  not  be used to endorse or promote
@@ -159,11 +159,11 @@ void HPL_dlaswp01T
    {
       for( i = 0; i < M; i++ )
       {
-         a0 = A + LINDXA[i];
+         a0 = A + (size_t)(LINDXA[i]);
 
          if( LINDXAU[i] >= 0 )
          {
-            a1 = U + LINDXAU[i] * LDU;
+            a1 = U + (size_t)(LINDXAU[i]) * (size_t)(LDU);
 
             a1[ 0] = *a0; a0 += LDA;
 #if ( HPL_LASWP01T_DEPTH >  1 )
@@ -195,7 +195,7 @@ void HPL_dlaswp01T
          }
          else
          {
-            a1 = A - LINDXAU[i];
+            a1 = A - (size_t)(LINDXAU[i]);
 
             *a1 = *a0; a1 += LDA; a0 += LDA;
 #if ( HPL_LASWP01T_DEPTH >  1 )
@@ -232,16 +232,16 @@ void HPL_dlaswp01T
    {
       for( i = 0; i < M; i++ )
       {
-         a0 = A + LINDXA[i];
+         a0 = A + (size_t)(LINDXA[i]);
 
          if( LINDXAU[i] >= 0 )
          {
-            a1 = U + LINDXAU[i] * LDU;
+            a1 = U + (size_t)(LINDXAU[i]) * (size_t)(LDU);
             for( j = 0; j < nr; j++, a0 += LDA ) { a1[j] = *a0; }
          }
          else
          {
-            a1 = A - LINDXAU[i];
+            a1 = A - (size_t)(LINDXAU[i]);
             for( j = 0; j < nr; j++, a1 += LDA, a0 += LDA ) { *a1 = *a0; }
          }
       }

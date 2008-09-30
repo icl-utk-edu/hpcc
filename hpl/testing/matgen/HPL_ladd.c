@@ -1,10 +1,10 @@
 /* 
  * -- High Performance Computing Linpack Benchmark (HPL)                
- *    HPL - 1.0a - January 20, 2004                          
+ *    HPL - 2.0 - September 10, 2008                          
  *    Antoine P. Petitet                                                
  *    University of Tennessee, Knoxville                                
- *    Innovative Computing Laboratories                                 
- *    (C) Copyright 2000-2004 All Rights Reserved                       
+ *    Innovative Computing Laboratory                                 
+ *    (C) Copyright 2000-2008 All Rights Reserved                       
  *                                                                      
  * -- Copyright notice and Licensing terms:                             
  *                                                                      
@@ -22,7 +22,7 @@
  * 3. All  advertising  materials  mentioning  features  or  use of this
  * software must display the following acknowledgement:                 
  * This  product  includes  software  developed  at  the  University  of
- * Tennessee, Knoxville, Innovative Computing Laboratories.             
+ * Tennessee, Knoxville, Innovative Computing Laboratory.             
  *                                                                      
  * 4. The name of the  University,  the name of the  Laboratory,  or the
  * names  of  its  contributors  may  not  be used to endorse or promote
@@ -49,7 +49,7 @@
  */
 #include "hpl.h"
 
-#ifdef HPL_STDC_HEADERS
+#ifdef STDC_HEADERS
 void HPL_ladd
 (
    int *                            J,
@@ -68,10 +68,10 @@ void HPL_ladd
  * Purpose
  * =======
  *
- * HPL_ladd adds  without carry two long positive integers  K and J  an
- * put the result into I.  The long integers  I, J, K are encoded on 31
- * bits using an array of 2 integers.  The 16-lower bits  are stored  i
- * the  first  entry  of each array,  the 15-higher bits  in the second
+ * HPL_ladd adds  without carry two long positive integers  K and J and
+ * puts the result into I. The long integers  I, J, K are encoded on 64
+ * bits using an array of 2 integers.  The 32-lower bits  are stored in
+ * the  first  entry  of each array,  the 32-higher bits  in the second
  * entry.
  *
  * Arguments
@@ -94,22 +94,32 @@ void HPL_ladd
 /*
  * .. Local Variables ..
  */
-   int                        itmp0 = K[0] + J[0], itmp1;
+   unsigned int        itmp0, itmp1;
+   unsigned int        ktmp0 = K[0] & 65535, ktmp1 = (unsigned)K[0] >> 16;
+   unsigned int        ktmp2 = K[1] & 65535, ktmp3 = (unsigned)K[1] >> 16;
+   unsigned int        jtmp0 = J[0] & 65535, jtmp1 = (unsigned)J[0] >> 16;
+   unsigned int        jtmp2 = J[1] & 65535, jtmp3 = (unsigned)J[1] >> 16;
+
 /* ..
  * .. Executable Statements ..
  */
 /*
- *    K[1] K[0] K  I[0]  = (K[0]+J[0]) % 2^16
- *    0XXX XXXX    carry = (K[0]+J[0]) / 2^16
+ *    K[1] K[0] K  I[0]  = (K[0]+J[0]) % 2^32
+ *    XXXX XXXX    carry = (K[0]+J[0]) / 2^32
  *
  * +  J[1] J[0] J  I[1] = K[1] + J[1] + carry
- *    0XXX XXXX    I[1] = I[1] % 2^15
+ *    XXXX XXXX    I[1] = I[1] % 2^32
  *    -------------
  *    I[1] I[0]
  *    0XXX XXXX I
  */
-   itmp1 = itmp0 >> 16;         I[0] = itmp0 - ( itmp1 << 16 );
-   itmp0 = itmp1 + K[1] + J[1]; I[1] = itmp0 - (( itmp0 >> 15 ) << 15);
+   itmp0 = ktmp0 + jtmp0;
+   itmp1 = itmp0 >> 16;         I[0] = itmp0 - (itmp1 << 16 );
+   itmp1 += ktmp1 + jtmp1;      I[0] |= (itmp1 & 65535) << 16;
+   itmp0 = (itmp1 >> 16) + ktmp2 + jtmp2;
+   I[1] = itmp0 - ((itmp0 >> 16 ) << 16);
+   itmp1 = (itmp0 >> 16) + ktmp3 + jtmp3;
+   I[1] |= (itmp1 & 65535) << 16;
 /*
  * End of HPL_ladd
  */

@@ -1,10 +1,10 @@
 /* 
  * -- High Performance Computing Linpack Benchmark (HPL)                
- *    HPL - 1.0a - January 20, 2004                          
+ *    HPL - 2.0 - September 10, 2008                          
  *    Antoine P. Petitet                                                
  *    University of Tennessee, Knoxville                                
- *    Innovative Computing Laboratories                                 
- *    (C) Copyright 2000-2004 All Rights Reserved                       
+ *    Innovative Computing Laboratory                                 
+ *    (C) Copyright 2000-2008 All Rights Reserved                       
  *                                                                      
  * -- Copyright notice and Licensing terms:                             
  *                                                                      
@@ -22,7 +22,7 @@
  * 3. All  advertising  materials  mentioning  features  or  use of this
  * software must display the following acknowledgement:                 
  * This  product  includes  software  developed  at  the  University  of
- * Tennessee, Knoxville, Innovative Computing Laboratories.             
+ * Tennessee, Knoxville, Innovative Computing Laboratory.             
  *                                                                      
  * 4. The name of the  University,  the name of the  Laboratory,  or the
  * names  of  its  contributors  may  not  be used to endorse or promote
@@ -49,7 +49,7 @@
  */
 #include "hpl.h"
 
-#ifdef HPL_STDC_HEADERS
+#ifdef STDC_HEADERS
 void HPL_lmul
 (
    int *                            K,
@@ -69,9 +69,9 @@ void HPL_lmul
  * =======
  *
  * HPL_lmul multiplies  without carry two long positive integers K and J
- * and put the result into I.  The long integers  I, J, K are encoded on
- * 31 bits using an array of 2 integers. The 16-lower bits are stored in
- * the first entry of each array, the 15-higher bits in the second entry
+ * and puts the result into I. The long integers  I, J, K are encoded on
+ * 64 bits using an array of 2 integers. The 32-lower bits are stored in
+ * the first entry of each array, the 32-higher bits in the second entry
  * of each array. For efficiency purposes, the  intrisic modulo function
  * is inlined.
  *
@@ -95,29 +95,36 @@ void HPL_lmul
 /*
  * .. Local Variables ..
  */
-   static int                 ipow30 = ( 1 << 30 );
-   int                        kt, lt;
+   int                        r, c;
+   unsigned int               kk[4], jj[4], res[5];
 /* ..
  * .. Executable Statements ..
  */
 /*
- *    K[1] K[0] K  kt = K[0]*J[0]
- *    0XXX XXXX    if(kt < 0) kt += 2^31
- * x               I[0] = kt % 2^16
- *                 lt = K[0]*J[1] + K[1]*J[0]
- *    J[1] J[0] J  if(lt < 0) lt += 2^31
- *    0XXX XXXX    kt = (kt / 2^16) + lt
- * --------------  if(kt < 0) kt += 2^31
- *    I[1] I[0]    I[1] = kt % 2^15
- *    0XXX XXXX I
+ * Addition is done with 16 bits at a time. Multiplying two 16-bit
+ * integers yields a 32-bit result. The lower 16-bits of the result
+ * are kept in I, and the higher 16-bits are carried over to the
+ * next multiplication.
  */
-   kt   = K[0] * J[0]; if( kt < 0 ) kt = ( kt + ipow30 ) + ipow30;
-   I[0] = kt - ( ( kt >> 16 ) << 16 );
-   lt   = K[0] * J[1] + K[1] * J[0];
-   if( lt < 0 ) lt = ( lt + ipow30 ) + ipow30;
-   kt = ( kt >> 16 ) + lt;
-   if( kt < 0 ) kt = ( kt + ipow30 ) + ipow30;
-   I[1] = kt - ( ( kt >> 15 ) << 15 );
+   for (c = 0; c < 2; ++c) {
+     kk[2*c] = K[c] & 65535;
+     kk[2*c+1] = ((unsigned)K[c] >> 16) & 65535;
+     jj[2*c] = J[c] & 65535;
+     jj[2*c+1] = ((unsigned)J[c] >> 16) & 65535;
+   }
+
+   res[0] = 0;
+   for (c = 0; c < 4; ++c) {
+     res[c+1] = (res[c] >> 16) & 65535;
+     res[c] &= 65535;
+     for (r = 0; r < c+1; ++r) {
+       res[c] = kk[r] * jj[c-r] + (res[c] & 65535);
+       res[c+1] += (res[c] >> 16) & 65535;
+     }
+   }
+
+   for (c = 0; c < 2; ++c)
+     I[c] = (int)(((res[2*c+1] & 65535) << 16) | (res[2*c] & 65535));
 /*
  * End of HPL_lmul
  */

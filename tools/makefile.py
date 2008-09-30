@@ -193,7 +193,7 @@ def Dist(deps, prfx="hpcc"):
 
     addItems = ["Makefile", "README.html", "README.txt", "_hpccinf.txt",
                 "hpl/Make.UNKNOWN", "hpl/BUGS", "hpl/COPYRIGHT", "hpl/HISTORY",
-                "hpl/HPL.build.log.220120040613", "hpl/INSTALL", "hpl/Make.top", "hpl/Makefile",
+                "hpl/INSTALL", "hpl/Make.top", "hpl/Makefile",
                 "hpl/README", "hpl/TODO", "hpl/TUNING", "hpl/lib/arch/build/Makefile.hpcc",
                 "hpl/makes", "hpl/man", "hpl/setup", "hpl/www"]
 

@@ -1,10 +1,10 @@
 /* 
  * -- High Performance Computing Linpack Benchmark (HPL)                
- *    HPL - 1.0a - January 20, 2004                          
+ *    HPL - 2.0 - September 10, 2008                          
  *    Antoine P. Petitet                                                
  *    University of Tennessee, Knoxville                                
- *    Innovative Computing Laboratories                                 
- *    (C) Copyright 2000-2004 All Rights Reserved                       
+ *    Innovative Computing Laboratory                                 
+ *    (C) Copyright 2000-2008 All Rights Reserved                       
  *                                                                      
  * -- Copyright notice and Licensing terms:                             
  *                                                                      
@@ -22,7 +22,7 @@
  * 3. All  advertising  materials  mentioning  features  or  use of this
  * software must display the following acknowledgement:                 
  * This  product  includes  software  developed  at  the  University  of
- * Tennessee, Knoxville, Innovative Computing Laboratories.             
+ * Tennessee, Knoxville, Innovative Computing Laboratory.             
  *                                                                      
  * 4. The name of the  University,  the name of the  Laboratory,  or the
  * names  of  its  contributors  may  not  be used to endorse or promote
@@ -249,13 +249,13 @@ label_end_of_npqs: ;
       test.ktest = test.kpass + test.kfail + test.kskip;
 #ifndef HPL_DETAILED_TIMING
       HPL_fprintf( test.outfp, "%s%s\n",
-                   "======================================",
-                   "======================================" );
+                   "========================================",
+                   "========================================" );
 #else
       if( test.thrsh > HPL_rzero )
          HPL_fprintf( test.outfp, "%s%s\n",
-                      "======================================",
-                      "======================================" );
+                      "========================================",
+                      "========================================" );
 #endif
 
       HPL_fprintf( test.outfp, "\n%s %6d %s\n", "Finished", test.ktest,
@@ -278,12 +278,12 @@ label_end_of_npqs: ;
       }
 
       HPL_fprintf( test.outfp, "%s%s\n",
-                   "--------------------------------------",
-                   "--------------------------------------" );
+                   "----------------------------------------",
+                   "----------------------------------------" );
       HPL_fprintf( test.outfp, "\nEnd of Tests.\n" );
       HPL_fprintf( test.outfp, "%s%s\n",
-                   "======================================",
-                   "======================================" );
+                   "========================================",
+                   "========================================" );
 
       if( ( test.outfp != stdout ) && ( test.outfp != stderr ) )
          (void) fclose( test.outfp );

@@ -1,10 +1,10 @@
 /* 
  * -- High Performance Computing Linpack Benchmark (HPL)                
- *    HPL - 1.0a - January 20, 2004                          
+ *    HPL - 2.0 - September 10, 2008                          
  *    Antoine P. Petitet                                                
  *    University of Tennessee, Knoxville                                
- *    Innovative Computing Laboratories                                 
- *    (C) Copyright 2000-2004 All Rights Reserved                       
+ *    Innovative Computing Laboratory                                 
+ *    (C) Copyright 2000-2008 All Rights Reserved                       
  *                                                                      
  * -- Copyright notice and Licensing terms:                             
  *                                                                      
@@ -22,7 +22,7 @@
  * 3. All  advertising  materials  mentioning  features  or  use of this
  * software must display the following acknowledgement:                 
  * This  product  includes  software  developed  at  the  University  of
- * Tennessee, Knoxville, Innovative Computing Laboratories.             
+ * Tennessee, Knoxville, Innovative Computing Laboratory.             
  *                                                                      
  * 4. The name of the  University,  the name of the  Laboratory,  or the
  * names  of  its  contributors  may  not  be used to endorse or promote
@@ -209,7 +209,8 @@ void HPL_pdpanel_init
       if( nprow > 1 )                                 /* space for U */
       { nu = nq - JB; lwork += JB * Mmax( 0, nu ); }
 
-      if( !( PANEL->WORK = (double *)malloc( lwork * sizeof( double ) ) ) )
+      if( !( PANEL->WORK = (void *)malloc( (size_t)(lwork) * 
+                                           sizeof( double ) ) ) )
       {
          HPL_pabort( __LINE__, "HPL_pdpanel_init",
                      "Memory allocation failed" );
@@ -240,7 +241,8 @@ void HPL_pdpanel_init
          lwork += JB * Mmax( 0, nu );
       }
 
-      if( !( PANEL->WORK = (double *)malloc( lwork * sizeof( double ) ) ) )
+      if( !( PANEL->WORK = (void *)malloc( (size_t)(lwork) *
+                                           sizeof( double ) ) ) )
       {
          HPL_pabort( __LINE__, "HPL_pdpanel_init",
                      "Memory allocation failed" );
@@ -334,7 +336,7 @@ void HPL_pdpanel_init
       lwork = 4 + (9 * JB) + (3 * nprow) + itmp1;
    }
 
-   PANEL->IWORK = (int *)malloc( lwork * sizeof( int ) );
+   PANEL->IWORK = (int *)malloc( (size_t)(lwork) * sizeof( int ) );
 
    if( PANEL->IWORK == NULL )
    { HPL_pabort( __LINE__, "HPL_pdpanel_init", "Memory allocation failed" ); }

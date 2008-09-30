@@ -1,10 +1,10 @@
 /* 
  * -- High Performance Computing Linpack Benchmark (HPL)                
- *    HPL - 1.0a - January 20, 2004                          
+ *    HPL - 2.0 - September 10, 2008                          
  *    Antoine P. Petitet                                                
  *    University of Tennessee, Knoxville                                
- *    Innovative Computing Laboratories                                 
- *    (C) Copyright 2000-2004 All Rights Reserved                       
+ *    Innovative Computing Laboratory                                 
+ *    (C) Copyright 2000-2008 All Rights Reserved                       
  *                                                                      
  * -- Copyright notice and Licensing terms:                             
  *                                                                      
@@ -22,7 +22,7 @@
  * 3. All  advertising  materials  mentioning  features  or  use of this
  * software must display the following acknowledgement:                 
  * This  product  includes  software  developed  at  the  University  of
- * Tennessee, Knoxville, Innovative Computing Laboratories.             
+ * Tennessee, Knoxville, Innovative Computing Laboratory.             
  *                                                                      
  * 4. The name of the  University,  the name of the  Laboratory,  or the
  * names  of  its  contributors  may  not  be used to endorse or promote
@@ -49,7 +49,7 @@
  */
 #include "hpl.h"
 
-#ifdef HPL_STDC_HEADERS
+#ifdef STDC_HEADERS
 double HPL_rand( void )
 #else
 double HPL_rand()
@@ -64,13 +64,13 @@ double HPL_rand()
  *  
  * The static array irand contains the information (2 integers) required
  * to generate the  next number  in the sequence  X(n).  This  number is
- * computed as X(n) = (2^16 * irand[1] + irand[0]) / d - 0.5,  where the
- * constant d is the largest 32 bit positive integer. The array irand is
- * then  updated  for the generation of the next number  X(n+1)  in  the
- * random sequence as follows X(n+1) = a * X(n) + c. The constants a and
- * c  should have been preliminarily stored in the arrays ias and ics as
- * 2 pairs of integers.  The initialization of  ias,  ics and  irand  is
- * performed by the function HPL_setran.
+ * computed as X(n) = (2^32 * irand[1] + irand[0]) / d - 0.5,  where the
+ * constant d is the largest 64 bit positive unsigned integer. The array
+ * irand is then  updated  for the generation of the next number  X(n+1)
+ * in  the  random   sequence  as   follows  X(n+1) = a * X(n) + c.  The
+ * constants a and c should have been preliminarily stored in the arrays
+ * ias and ics as 2 pairs of integers.  The initialization of  ias,  ics
+ * and  irand  is performed by the function HPL_setran.
  *
  * ---------------------------------------------------------------------
  */ 
@@ -86,7 +86,8 @@ double HPL_rand()
  * return number between -0.5 and 0.5
  */
    return( HPL_HALF -
-           (((double)(j[0]) + HPL_POW16*(double)(j[1])) / HPL_DIVFAC) );
+           (((j[0] & 65535) + ((unsigned)j[0] >> 16) * HPL_POW16) / HPL_DIVFAC * HPL_HALF +
+           (j[1] & 65535) + ((unsigned)j[1] >> 16) * HPL_POW16) / HPL_DIVFAC * HPL_HALF );
 /*
  * End of HPL_rand
  */

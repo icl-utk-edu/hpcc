@@ -1,10 +1,10 @@
 /* 
  * -- High Performance Computing Linpack Benchmark (HPL)                
- *    HPL - 1.0a - January 20, 2004                          
+ *    HPL - 2.0 - September 10, 2008                          
  *    Antoine P. Petitet                                                
  *    University of Tennessee, Knoxville                                
- *    Innovative Computing Laboratories                                 
- *    (C) Copyright 2000-2004 All Rights Reserved                       
+ *    Innovative Computing Laboratory                                 
+ *    (C) Copyright 2000-2008 All Rights Reserved                       
  *                                                                      
  * -- Copyright notice and Licensing terms:                             
  *                                                                      
@@ -22,7 +22,7 @@
  * 3. All  advertising  materials  mentioning  features  or  use of this
  * software must display the following acknowledgement:                 
  * This  product  includes  software  developed  at  the  University  of
- * Tennessee, Knoxville, Innovative Computing Laboratories.             
+ * Tennessee, Knoxville, Innovative Computing Laboratory.             
  *                                                                      
  * 4. The name of the  University,  the name of the  Laboratory,  or the
  * names  of  its  contributors  may  not  be used to endorse or promote
@@ -163,7 +163,7 @@ double HPL_pdlange
  */
       if( nq > 0 )
       {
-         work = (double*)malloc( nq * sizeof( double ) );
+         work = (double*)malloc( (size_t)(nq) * sizeof( double ) );
          if( work == NULL )
          { HPL_pabort( __LINE__, "HPL_pdlange", "Memory allocation failed" ); }
 
@@ -199,7 +199,7 @@ double HPL_pdlange
  */
       if( mp > 0 )
       {
-         work = (double*)malloc( mp * sizeof( double ) );
+         work = (double*)malloc( (size_t)(mp) * sizeof( double ) );
          if( work == NULL )
          { HPL_pabort( __LINE__, "HPL_pdlange", "Memory allocation failed" ); }
 

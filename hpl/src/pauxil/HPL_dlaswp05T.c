@@ -1,10 +1,10 @@
 /* 
  * -- High Performance Computing Linpack Benchmark (HPL)                
- *    HPL - 1.0a - January 20, 2004                          
+ *    HPL - 2.0 - September 10, 2008                          
  *    Antoine P. Petitet                                                
  *    University of Tennessee, Knoxville                                
- *    Innovative Computing Laboratories                                 
- *    (C) Copyright 2000-2004 All Rights Reserved                       
+ *    Innovative Computing Laboratory                                 
+ *    (C) Copyright 2000-2008 All Rights Reserved                       
  *                                                                      
  * -- Copyright notice and Licensing terms:                             
  *                                                                      
@@ -22,7 +22,7 @@
  * 3. All  advertising  materials  mentioning  features  or  use of this
  * software must display the following acknowledgement:                 
  * This  product  includes  software  developed  at  the  University  of
- * Tennessee, Knoxville, Innovative Computing Laboratories.             
+ * Tennessee, Knoxville, Innovative Computing Laboratory.             
  *                                                                      
  * 4. The name of the  University,  the name of the  Laboratory,  or the
  * names  of  its  contributors  may  not  be used to endorse or promote
@@ -148,7 +148,8 @@ void HPL_dlaswp05T
    {
       for( i = 0; i < M; i++ )
       {
-         a0 = A + LINDXA[i]; u0 = U0 + LINDXAU[i] * LDU;
+         a0 = A  + (size_t)(LINDXA[ i]);
+         u0 = U0 + (size_t)(LINDXAU[i]) * (size_t)(LDU);
 
          *a0 = u0[ 0]; a0 += LDA;
 #if ( HPL_LASWP05T_DEPTH >  1 )
@@ -184,7 +185,8 @@ void HPL_dlaswp05T
    {
       for( i = 0; i < M; i++ )
       {
-         a0 = A + LINDXA[i]; u0 = U0 + LINDXAU[i] * LDU;
+         a0 = A  + (size_t)(LINDXA[ i]);
+         u0 = U0 + (size_t)(LINDXAU[i]) * (size_t)(LDU);
          for( j = 0; j < nr; j++, a0 += LDA ) { *a0 = u0[j]; }
       }
    }
