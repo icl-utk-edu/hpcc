@@ -215,6 +215,9 @@ HPCC_MPIFFT(HPCC_Params *params) {
   params->FFTEnp = FFTE_NP;
   params->FFTEl2size = FFTE_L2SIZE;
 
+  if (failure)
+    params->Failure = 1;
+
   if (doIO) if (outFile != stderr) fclose( outFile );
 
   return 0;
