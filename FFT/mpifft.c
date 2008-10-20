@@ -20,6 +20,7 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
   fftw_complex *inout, *work;
   fftw_mpi_plan p;
   hpcc_fftw_mpi_plan ip;
+  int sAbort, rAbort;
 
   failure = 1;
   Gflops = -1.0;
@@ -52,7 +53,10 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
   inout = (fftw_complex *)HPCC_fftw_malloc( tls * (sizeof *inout) );
   work  = (fftw_complex *)HPCC_fftw_malloc( tls * (sizeof *work) );
 
-  if (! inout || ! work) {
+  sAbort = 0;
+  if (! inout || ! work) sAbort = 1;
+  MPI_Allreduce( &sAbort, &rAbort, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD );
+  if (rAbort > 0) {
     fftw_mpi_destroy_plan( p );
     goto comp_end;
   }
@@ -150,9 +154,9 @@ HPCC_MPIFFT(HPCC_Params *params) {
 
   FFTE requires that the global vector size 'n' has to be at least
   as big as square of number of processes. The square is calculated
-  in each factor independently. In other words, 'n' has to have as
+  in each factor independently. In other words, 'n' has to have
   at least twice as many 2 factors as the process count, twice as many
-  3 factors and 5 factors.
+  3 factors and twice as many 5 factors.
   */
 
 #ifdef HPCC_FFT_235
