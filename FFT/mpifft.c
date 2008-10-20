@@ -132,7 +132,7 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
 int
 HPCC_MPIFFT(HPCC_Params *params) {
   int commRank, commSize;
-  int locN, procCnt, isComputing, doIO, failure;
+  int locN, procCnt, isComputing, doIO, failure = 0;
   s64Int_t n;
   double Gflops = -1.0, maxErr = -1.0;
   MPI_Comm comm;
