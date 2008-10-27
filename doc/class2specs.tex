@@ -87,16 +87,14 @@ Until solution to~(\ref{eqn:axb}) is obtained.
 
 \subsection{Verification}
 Correctness of the solution is ascertained by calculating the following scaled
-residuals:
-\begin{eqnarray}
-r_1 = & \frac{\|Ax-b\|_{\infty}}{\epsilon \|A\|_1 n} \\
-r_2 = &\frac{\|Ax-b\|_{\infty}}{\epsilon \|A\|_1 \|x\|_1} \\
-r_3 = &\frac{\|Ax-b\|_{\infty}}{\epsilon \|A\|_{\infty} \|x\|_{\infty} n}
-\end{eqnarray}
+residual:
+\begin{equation}
+r = \frac{\|Ax-b\|_{\infty}}{\epsilon (\|A\|_{\infty} \|x\|_{\infty}+\|b\|_{\infty}) n}
+\end{equation}
 where $\epsilon$ is machine precision for 64-bit floating-point values and~$n$
 is the size of the problem. The solution is valid if the following holds:
 \begin{equation}
-  \max(r_1, r_2, r_3) < 16
+  r < 16
 \end{equation}
 
 \subsection{Performance}
@@ -145,8 +143,8 @@ Table elements are set such that:
 \end{equation}
 
 \subsection{Timed Region}
-The timed region consists of initialization~(\ref{eqn:raset}) and
-computation~(\ref{eqn:raupdate}).
+The timed region consists of computation~(\ref{eqn:raupdate}).
+The initialization~(\ref{eqn:raset}) is not timed.
 
 \subsection{Duration}
 Ideally, $2^{n+2}$ updates should be performed to the main
