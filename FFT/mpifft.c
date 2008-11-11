@@ -21,10 +21,14 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
   fftw_mpi_plan p;
   hpcc_fftw_mpi_plan ip;
   int sAbort, rAbort;
+#ifdef USING_FFTW
+  int ilocn, iloc0, ialocn, ialoc0, itls;
+#endif
 
   failure = 1;
   Gflops = -1.0;
   deps = HPL_dlamch( HPL_MACH_EPS );
+  maxErr = 1.0 / deps;
 
   MPI_Comm_size( comm, &commSize );
   MPI_Comm_rank( comm, &commRank );
@@ -36,6 +40,12 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
 
   n *= commSize; /* global vector size */
 
+#ifdef USING_FFTW
+  /* FFTW ver. 2 only supports vector sizes that fit in 'int' */
+  if (n > (1<<30)-1+(1<<30))
+    goto no_plan;
+#endif
+  
 #ifdef HPCC_FFTW_ESTIMATE
   flags = FFTW_ESTIMATE;
 #else
@@ -48,7 +58,16 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
 
   if (! p) goto no_plan;
 
+#ifdef USING_FFTW
+  fftw_mpi_local_sizes( p, &ilocn, &iloc0, &ialocn, &ialoc0, &itls );
+  locn = ilocn;
+  loc0 = iloc0;
+  alocn = ialocn;
+  aloc0 = ialoc0;
+  tls = itls;
+#else
   fftw_mpi_local_sizes( p, &locn, &loc0, &alocn, &aloc0, &tls );
+#endif
 
   inout = (fftw_complex *)HPCC_fftw_malloc( tls * (sizeof *inout) );
   work  = (fftw_complex *)HPCC_fftw_malloc( tls * (sizeof *work) );
