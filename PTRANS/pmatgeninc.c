@@ -2,7 +2,25 @@
 
 #include <hpcc.h>
 
-/* Common Block Declarations */
+static void
+PTRANS_ladd(int *J, int *K, int *I) {
+  int itmp0 = K[0] + J[0], itmp1;
+  itmp1 = itmp0 >> 16;         I[0] = itmp0 - ( itmp1 << 16 );
+  itmp0 = itmp1 + K[1] + J[1]; I[1] = itmp0 - (( itmp0 >> 15 ) << 15);
+}
+
+static void
+PTRANS_lmul(int *K, int *J, int *I) {
+  static int ipow30 = ( 1 << 30 );
+  int kt, lt;
+  kt   = K[0] * J[0]; if( kt < 0 ) kt = ( kt + ipow30 ) + ipow30;
+  I[0] = kt - ( ( kt >> 16 ) << 16 );
+  lt   = K[0] * J[1] + K[1] * J[0];
+  if( lt < 0 ) lt = ( lt + ipow30 ) + ipow30;
+  kt = ( kt >> 16 ) + lt;
+  if( kt < 0 ) kt = ( kt + ipow30 ) + ipow30;
+  I[1] = kt - ( ( kt >> 15 ) << 15 );
+}
 
 static struct {
     int irand[2], ias[2], ics[2];
@@ -10,116 +28,81 @@ static struct {
 
 #define rancom_1 rancom_
 
+/*  -- ScaLAPACK routines (version 1.7) -- */
+/*     University of Tennessee, Knoxville, Oak Ridge National Laboratory, */
+/*     and University of California, Berkeley. */
+/*     May 1, 1997 */
+
 int
 xjumpm_(int *jumpm, int *mult, int *iadd,
 	int *irann, int *iranm, int *iam, int *icm) {
-    /* System generated locals */
-    int i__1;
+  int i__1;
 
-    int i__, j[2];
+  int i, j[2];
 
-/*  -- ScaLAPACK routine (version 1.7) -- */
-/*     University of Tennessee, Knoxville, Oak Ridge National Laboratory, */
-/*     and University of California, Berkeley. */
-/*     May 1, 1997 */
+  if (*jumpm > 0) {
+	  for (i = 0; i < 2; ++i) {
+	    iam[i] = mult[i];
+	    icm[i] = iadd[i];
+	  }
+	  i__1 = *jumpm - 1;
+	  for (i = 0; i < i__1; ++i) {
+	    PTRANS_lmul( iam, mult, j);
+	    iam[0] = j[0];
+	    iam[1] = j[1];
+	    PTRANS_lmul( icm, mult, j );
+	    PTRANS_ladd( iadd, j, icm );
+	  }
+	  PTRANS_lmul( irann, iam, j );
+	  PTRANS_ladd( j, icm, iranm );
+  } else {
+	  iranm[0] = irann[0];
+	  iranm[1] = irann[1];
+  }
 
-    /* Parameter adjustments */
-    --icm;
-    --iam;
-    --iranm;
-    --irann;
-    --iadd;
-    --mult;
-
-    if (*jumpm > 0) {
-	for (i__ = 1; i__ <= 2; ++i__) {
-	    iam[i__] = mult[i__];
-	    icm[i__] = iadd[i__];
-/* L10: */
-	}
-	i__1 = *jumpm - 1;
-	for (i__ = 1; i__ <= i__1; ++i__) {
-	    HPL_lmul(&iam[1], &mult[1], j);
-	    iam[1] = j[0];
-	    iam[2] = j[1];
-	    HPL_lmul(&icm[1], &mult[1], j);
-	    HPL_ladd(&iadd[1], j, &icm[1]);
-/* L20: */
-	}
-	HPL_lmul(&irann[1], &iam[1], j);
-	HPL_ladd(j, &icm[1], &iranm[1]);
-    } else {
-	iranm[1] = irann[1];
-	iranm[2] = irann[2];
-    }
-
-    return 0;
+  return 0;
 } /* xjumpm_ */
 
+int
+setran_(int *iran, int *ia, int *ic) {
+  int i;
 
-int setran_(int *iran, int *ia, int *ic) {
-    int i__;
-/*  -- ScaLAPACK routine (version 1.7) -- */
-/*     University of Tennessee, Knoxville, Oak Ridge National Laboratory, */
-/*     and University of California, Berkeley. */
-/*     May 1, 1997 */
+  for (i = 0; i < 2; ++i) {
+    rancom_1.irand[i] = iran[i];
+    rancom_1.ias[i] = ia[i];
+    rancom_1.ics[i] = ic[i];
+  }
 
-    /* Parameter adjustments */
-    --ic;
-    --ia;
-    --iran;
-
-    for (i__ = 1; i__ <= 2; ++i__) {
-	rancom_1.irand[i__ - 1] = iran[i__];
-	rancom_1.ias[i__ - 1] = ia[i__];
-	rancom_1.ics[i__ - 1] = ic[i__];
-/* L10: */
-    }
-
-    return 0;
+  return 0;
 } /* setran_ */
 
 
-int jumpit_(int *mult, int *iadd, int *irann, int *iranm) {
-    int j[2];
+int
+jumpit_(int *mult, int *iadd, int *irann, int *iranm) {
+  int j[2];
 
-/*  -- ScaLAPACK routine (version 1.7) -- */
-/*     University of Tennessee, Knoxville, Oak Ridge National Laboratory, */
-/*     and University of California, Berkeley. */
-/*     May 1, 1997 */
+  PTRANS_lmul( irann, mult, j);
+  PTRANS_ladd( j, iadd, iranm );
 
-    /* Parameter adjustments */
-    --iranm;
-    --irann;
-    --iadd;
-    --mult;
+  rancom_1.irand[0] = iranm[0];
+  rancom_1.irand[1] = iranm[1];
 
-    HPL_lmul(&irann[1], &mult[1], j);
-    HPL_ladd(j, &iadd[1], &iranm[1]);
-
-    rancom_1.irand[0] = iranm[1];
-    rancom_1.irand[1] = iranm[2];
-
-    return 0;
+  return 0;
 } /* jumpit_ */
 
 double
 pdrand() {
-    /* System generated locals */
-    double ret_val;
+  /* System generated locals */
+  double ret_val;
 
-    /* Local variables */
-    int j[2];
-/*  -- ScaLAPACK routine (version 1.7) -- */
-/*     University of Tennessee, Knoxville, Oak Ridge National Laboratory, */
-/*     and University of California, Berkeley. */
-/*     May 1, 1997 */
+  /* Local variables */
+  int j[2];
 
-    ret_val = ((double) rancom_1.irand[0] + (double) rancom_1.irand[1]
-	     * 65536.) / 2147483648.;
+  ret_val = ((double) rancom_1.irand[0] + (double) rancom_1.irand[1]
+	     * 65536.0) / 2147483648.0;
 
-    HPL_lmul(rancom_1.irand, rancom_1.ias, j);
-    HPL_ladd(j, rancom_1.ics, rancom_1.irand);
+  PTRANS_lmul(rancom_1.irand, rancom_1.ias, j);
+  PTRANS_ladd(j, rancom_1.ics, rancom_1.irand);
 
-    return ret_val;
+  return ret_val;
 } /* pdrand */
