@@ -74,7 +74,7 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
 
   sAbort = 0;
   if (! inout || ! work) sAbort = 1;
-  MPI_Allreduce( &sAbort, &rAbort, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD );
+  MPI_Allreduce( &sAbort, &rAbort, 1, MPI_INT, MPI_SUM, comm );
   if (rAbort > 0) {
     fftw_mpi_destroy_plan( p );
     goto comp_end;
