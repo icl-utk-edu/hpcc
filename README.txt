@@ -1,7 +1,7 @@
 DARPA/DOE HPC Challenge Benchmark
 =================================
 Piotr Luszczek <luszczek@cs_utk_edu>
-v1.2, June 2006
+v1.3.1, June 2006
 
 footnote:[University of Tennessee Knoxville, Innovative Computing Laboratory]
 
@@ -28,8 +28,24 @@ HPL build script file.
 Source Code Changes
 -------------------
 
-Version 1.2 Changes
-~~~~~~~~~~~~~~~~~~~
+Version 1.3.1 (2008-12-09)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Fixed a dead-lock problem in FFT component due to use of wrong communicator
+- Fixed the 32-bit random number generator in PTRANS that was using 64-bit
+routines from HPL
+
+Version 1.3.0 (2008-11-13)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Updated HPL component to use HPL 2.0 source code
+  - Replaced 32-bit Pseudo Random Number Generator (PRNG) with a 64-bit one.
+  - Removed 3 numerical checks of the solution residual with a single one.
+  - Added support for 64-bit systems with large memory sizes (before they would
+  overflow during index calculations 32-bit integers.)
+- Introduced a limit on FFT vector size so they fit in a 32-bit integer (only
+applicable when using FFTW version 2.)
+
+Version 1.2.0 (2007-06-25)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Changes in the FFT component:
    - Added flexibility in choosing vector sizes and processor counts:
@@ -65,6 +81,30 @@ Version 1.2 Changes
    - Added custom memory allocator to deal with memory fragmentation on some
    systems.
    - Added better reporting of configuration options in the output file.
+
+Version 1.0.0 (2005-06-11)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Version 0.8beta (2004-10-19)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Version 0.8alpha (2004-10-15)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Version 0.6beta (2004-08-21)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Version 0.6alpha (2004-05-31)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Version 0.5beta (2003-12-01)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Version 0.4alpha (2003-11-13)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Version 0.3alpha (2004-11-05)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Compiling
 ---------
@@ -120,13 +160,16 @@ result in obtaining better performance.
 - `HPL_USE_GETPROCESSTIMES`: if this symbol is defined
 then Windows-specific `GetProcessTimes()` function will be used
 to measure the elapsed CPU time.
+- `USE_MULTIPLE_RECV`: if this symbol is defined then multiple non-blocking
+receives will be posted simultaneously. By default only one non-blocking
+receive is posted.
 - `RA_SANDIA_NOPT`: if this symbol is defined the
 HPC Challenge standard algorithm for Global RandomAccess will not be
-used. Instead, instead an alternative implementation from Sandia
+used. Instead, an alternative implementation from Sandia
 National Laboratory will be used.
 - `RA_SANDIA_OPT2`: if this symbol is defined the
 HPC Challenge standard algorithm for Global RandomAccess will not be
-used. Instead, instead an alternative implementation from Sandia
+used. Instead, an alternative implementation from Sandia
 National Laboratory will be used. This implementation is optimized for
 number of processors being powers of two.
 - `USING_FFTW`: if this symbol is defined the standard
