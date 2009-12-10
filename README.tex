@@ -3,11 +3,18 @@
 % This is the master README. Translation to text and HTML files is done
 % with HeVeA.
 %
+% Postprocessing - replace </STYLE> with:
+% TT {color:navy}
+% H2, H3, H4 {color: #527bbd;}
+% H2 {border-bottom: 2px solid silver;}
+% </STYLE>
+
 \documentclass[twocolumn]{article}
-\usepackage{pslatex}
+\usepackage{mathptmx}
+\usepackage{url}
 \usepackage[margin=2cm]{geometry}
 \begin{document}
-\title{DARPA/DOE HPC~Challenge Benchmark}
+\title{DARPA/DOE HPC~Challenge Benchmark version 1.3.1}
 \author{Piotr Luszczek\footnote{University of Tennessee Knoxville, Innovative
 Computing Laboratory}}
 \maketitle
@@ -15,7 +22,7 @@ Computing Laboratory}}
 \section{Introduction}
 This is a suite of benchmarks that measure performance of processor,
 memory subsytem, and the interconnect. For details refer to the
-HPC~Challenge web site (\texttt{http://icl.cs.utk.edu/hpcc/}.)
+HPC~Challenge web site (\url{http://icl.cs.utk.edu/hpcc/}.)
 
 In essence, HPC~Challenge consists of a number of subbenchmarks each
 of which tests a different aspect of the system.
@@ -85,6 +92,9 @@ result in obtaining better performance.
 \item \texttt{HPL\_USE\_GETPROCESSTIMES}: if this symbol is defined
 then Windows-specific \texttt{GetProcessTimes()} function will be used
 to measure the elapsed CPU time.
+\item \texttt{USE\_MULTIPLE\_RECV}: if this symbol is defined then multiple non-blocking
+receives will be posted simultaneously. By default only one non-blocking
+receive is posted.
 \item \texttt{RA\_SANDIA\_NOPT}: if this symbol is defined the
 HPC~Challenge standard algorithm for Global RandomAccess will not be
 used. Instead, instead an alternative implementation from Sandia
@@ -196,4 +206,94 @@ run.
 After the run, a file called \texttt{hpccoutf.txt} is created. It
 contains results of the benchmark. This file should be uploaded
 through the web form at the HPC~Challenge website.
+
+\section{Source Code Changes across Versions (ChangeLog)}
+
+\subsection{Version 1.3.1 (2008-12-09)}
+\begin{enumerate}
+\item Fixed a dead-lock problem in FFT component due to use of wrong communicator
+\item Fixed the 32-bit random number generator in PTRANS that was using 64-bit
+routines from HPL
+\end{enumerate}
+
+\subsection{Version 1.3.0 (2008-11-13)}
+\begin{enumerate}
+\item Updated HPL component to use HPL 2.0 source code
+  \begin{enumerate}
+  \item Replaced 32-bit Pseudo Random Number Generator (PRNG) with a 64-bit one.
+  \item Removed 3 numerical checks of the solution residual with a single one.
+  \item Added support for 64-bit systems with large memory sizes (before they would
+  overflow during index calculations 32-bit integers.)
+  \end{enumerate}
+\item Introduced a limit on FFT vector size so they fit in a 32-bit integer (only
+applicable when using FFTW version 2.)
+\end{enumerate}
+
+\subsection{Version 1.2.0 (2007-06-25)}
+
+\begin{enumerate}
+\item Changes in the FFT component:
+   \begin{enumerate}
+   \item Added flexibility in choosing vector sizes and processor counts:
+   now the code can do powers of 2, 3, and 5 both sequentially and in parallel
+   tests.
+   \item FFTW can now run with ESTIMATE (not just MEASURE) flag: it might produce
+   worse performance results but often reduces time to run the test and cuases
+   less memory fragmentation.
+   \end{enumerate}
+\item Changes in the DGEMM component:
+   \begin{enumerate}
+   \item Added more comprehensive checking of the numerical properties of the
+   test's results.
+   \end{enumerate}
+\item Changes in the RandomAccess component:
+   \begin{enumerate}
+   \item Removed time-bound functionality: only runs that perform complete
+   computation are now possible.
+   \item Made the timing more accurate: main array initialization is not counted
+   towards performance timing.
+   \item Cleaned up the code: some non-portable C language constructs have been
+   removed.
+   \item Added new algorithms: new algorithms from Sandia based on hypercube
+   network topology can now be chosen at compile time which results on much
+   better performance results on many types of parallel systems.
+   \item Fixed potential resource leaks by adding function calls rquired by the MPI
+   standard.
+   \end{enumerate}
+\item Changes in the HPL component:
+   \begin{enumerate}
+   \item Cleaned up reporting of numerics: more accurate printing of scaled
+   residual formula.
+   \end{enumerate}
+\item Changes in the PTRANS component:
+   \begin{enumerate}
+   \item Added randomization of virtual process grids to measure bandwidth of the
+   network more accurately.
+   \end{enumerate}
+\item Miscellaneous changes:
+   \begin{enumerate}
+   \item Added better support for Windows-based clusters by taking advantage of
+   Win32 API.
+   \item Added custom memory allocator to deal with memory fragmentation on some
+   systems.
+   \item Added better reporting of configuration options in the output file.
+   \end{enumerate}
+\end{enumerate}
+
+\subsection{Version 1.0.0 (2005-06-11)}
+
+\subsection{Version 0.8beta (2004-10-19)}
+
+\subsection{Version 0.8alpha (2004-10-15)}
+
+\subsection{Version 0.6beta (2004-08-21)}
+
+\subsection{Version 0.6alpha (2004-05-31)}
+
+\subsection{Version 0.5beta (2003-12-01)}
+
+\subsection{Version 0.4alpha (2003-11-13)}
+
+\subsection{Version 0.3alpha (2004-11-05)}
+
 \end{document}
