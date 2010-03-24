@@ -944,6 +944,9 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
      help fragmentation) */
 
   HPCC_free( HPCC_Table );
+  free( finish_req );
+  free( finish_statuses );
+
   failed_table:
 
   if (0 == MyProc) if (outFile != stderr) fclose( outFile );
