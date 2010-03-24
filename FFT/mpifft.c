@@ -42,10 +42,17 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
 
 #ifdef USING_FFTW
   /* FFTW ver. 2 only supports vector sizes that fit in 'int' */
-  if (n > (1<<30)-1+(1<<30))
+  if (n > (1<<30)-1+(1<<30)) {
+#ifdef HPCC_FFTW_CHECK32
     goto no_plan;
+#else
+  if (doIO) {
+    fprintf( outFile, "Warning: problem size too large: %ld*%d*%d\n", (long)(n / commSize / commSize), commSize, commSize );
+  }
 #endif
-  
+  }
+#endif
+
 #ifdef HPCC_FFTW_ESTIMATE
   flags = FFTW_ESTIMATE;
 #else
