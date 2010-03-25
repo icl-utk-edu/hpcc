@@ -200,9 +200,9 @@ def Dist(deps, prfx="hpcc"):
     addItems = TraverseDirs(prfx, addItems)
     #print string.join(addItems, "\n")
 
-    mf = os.path.join(prfx, "README.txt")
+    mf = os.path.join(prfx, "README.tex")
     mt = os.path.getmtime(mf)
-    for f in ("README.html",):
+    for f in ("README.html", "README.txt"):
         t = os.path.getmtime(os.path.join(prfx, f))
         if mt >= t:
             raise RuntimeError, "File " + f + " is older than " + mf
