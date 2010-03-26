@@ -129,6 +129,10 @@ va_dcl
       HPL_fprintf( STREAM, "%s %s %d, %s %s:\n>>> %s <<<\n\n",
                    "HPL ERROR", "from process #", rank, "in function",
                    SRNAME, cline );
+   else if( LINE >  (1 << 30) )
+      HPL_fprintf( STREAM, "%s %s %d, %s %d %s %s:\n>>> %s <<<\n\n",
+                   "HPL WARNING", "from process #", rank, "on line", LINE - (1 << 30),
+                   "of function", SRNAME, cline );
    else
       HPL_fprintf( STREAM, "%s %s %d, %s %d %s %s:\n>>> %s <<<\n\n",
                    "HPL ERROR", "from process #", rank, "on line", LINE,
