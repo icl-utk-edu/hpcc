@@ -17,9 +17,6 @@ main(int argc, char *argv[]) {
 
   MPI_Init( &argc, &argv );
 
-  if (HPCC_external_init( argc, argv, &extdata ))
-    goto hpcc_end;
-
   if (HPCC_Init( &params ))
     goto hpcc_end;
 
@@ -317,8 +314,6 @@ main(int argc, char *argv[]) {
   hpcc_end:
 
   HPCC_Finalize( &params );
-
-  HPCC_external_finalize( argc, argv, extdata );
 
   MPI_Finalize();
   return 0;

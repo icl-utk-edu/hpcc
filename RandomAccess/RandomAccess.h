@@ -14,6 +14,7 @@
 #define RTSEC() (MPI_Wtime())
 
 extern u64Int HPCC_starts (s64Int);
+extern u64Int HPCC_starts_LCG (s64Int);
 
 #define WANT_MPI2_TEST 0
 
@@ -76,6 +77,9 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
                                  MPI_Datatype INT64_DT,
                                  MPI_Status *finish_statuses,
                                  MPI_Request *finish_req);
+
+extern int HPCC_RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure);
+extern int HPCC_RandomAccess_LCG(HPCC_Params *params, int doIO, double *GUPs, int *failure);
 
 #if defined( RA_SANDIA_NOPT )
 #define HPCC_RA_ALGORITHM 1
