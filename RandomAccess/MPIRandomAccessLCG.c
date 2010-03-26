@@ -49,7 +49,7 @@
  * "look ahead" and "stored updates" are being implemented to assure that the
  * benchmark meets the intent to profile memory architecture and not induce
  * significant artificial data locality. For the purpose of measuring GUPS,
- * we will stipulate that each process is permitted to look ahead no more than
+ * we will stipulate that each thread is permitted to look ahead no more than
  * 1024 random address stream samples with the same number of update messages
  * stored before processing.
  *
@@ -118,12 +118,6 @@
 #include "time_bound.h"
 #include "verification.h"
 
-/* Allocate main table (in global memory) */
-u64Int *HPCC_Table;
-
-u64Int LocalSendBuffer[LOCAL_BUFFER_SIZE];
-u64Int LocalRecvBuffer[MAX_RECV*LOCAL_BUFFER_SIZE];
-
 #ifndef LONG_IS_64BITS
 static void
 Sum64(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
@@ -132,9 +126,8 @@ Sum64(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
 }
 #endif
 
-#ifdef HPCC_RA_STDALG
 void
-AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
+HPCC_AnyNodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
                               u64Int TableSize,
                               s64Int LocalTableSize,
                               u64Int MinLocalTableSize,
@@ -188,13 +181,13 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
    *     u64Int Ran;
    *     Ran = 1;
    *     for (i=0; i<NUPDATE; i++) {
-   *       Ran = (Ran << 1) ^ (((s64Int) Ran < 0) ? POLY : 0);
-   *       Table[Ran & (TABSIZE-1)] ^= Ran;
+   *       Ran = LCG_MUL64 * Ran + LCG_ADD64;
+   *       Table[Ran >> 64 - LOG2_TABSIZE] ^= Ran;
    *     }
    */
 
   SendCnt = ProcNumUpdates; /* SendCnt = (4 * LocalTableSize); */
-  Ran = HPCC_starts (4 * GlobalStartMyProc);
+  Ran = HPCC_starts_LCG(4 * GlobalStartMyProc);
 
   i = 0;
 
@@ -228,7 +221,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 #endif
           for (j=0; j < recvUpdates; j ++) {
             inmsg = LocalRecvBuffer[bufferBase+j];
-            LocalOffset = (inmsg & (TableSize - 1)) - GlobalStartMyProc;
+            LocalOffset = (inmsg >> (64 - logTableSize)) - GlobalStartMyProc;
             HPCC_Table[LocalOffset] ^= inmsg;
           }
 
@@ -251,15 +244,15 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 
 
     if (pendingUpdates < maxPendingUpdates) {
-      Ran = (Ran << 1) ^ ((s64Int) Ran < ZERO64B ? POLY : ZERO64B);
-      GlobalOffset = Ran & (TableSize-1);
+      Ran = LCG_MUL64 * Ran + LCG_ADD64;
+      GlobalOffset = Ran >> (64 - logTableSize);
       if ( GlobalOffset < Top)
         WhichPe = ( GlobalOffset / (MinLocalTableSize + 1) );
       else
         WhichPe = ( (GlobalOffset - Remainder) / MinLocalTableSize );
 
       if (WhichPe == MyProc) {
-        LocalOffset = (Ran & (TableSize - 1)) - GlobalStartMyProc;
+        LocalOffset = (Ran >> (64 - logTableSize)) - GlobalStartMyProc;
         HPCC_Table[LocalOffset] ^= Ran;
       }
       else {
@@ -302,7 +295,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 #endif
           for (j=0; j < recvUpdates; j ++) {
             inmsg = LocalRecvBuffer[bufferBase+j];
-            LocalOffset = (inmsg & (TableSize - 1)) - GlobalStartMyProc;
+            LocalOffset = (inmsg >> (64 - logTableSize)) - GlobalStartMyProc;
             HPCC_Table[LocalOffset] ^= inmsg;
           }
 
@@ -359,7 +352,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 #endif
       for (j=0; j < recvUpdates; j ++) {
         inmsg = LocalRecvBuffer[bufferBase+j];
-        LocalOffset = (inmsg & (TableSize - 1)) - GlobalStartMyProc;
+        LocalOffset = (inmsg >> (64 - logTableSize)) - GlobalStartMyProc;
         HPCC_Table[LocalOffset] ^= inmsg;
       }
 
@@ -398,7 +391,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 }
 
 void
-Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
+HPCC_Power2NodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
                                  u64Int TableSize,
                                  s64Int LocalTableSize,
                                  u64Int MinLocalTableSize,
@@ -453,13 +446,13 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
    *     u64Int Ran;
    *     Ran = 1;
    *     for (i=0; i<NUPDATE; i++) {
-   *       Ran = (Ran << 1) ^ (((s64Int) Ran < 0) ? POLY : 0);
-   *       Table[Ran & (TABSIZE-1)] ^= Ran;
+   *       Ran = LCG_MUL64 * Ran + LCG_ADD64;
+   *       Table[Ran >> 64 - LOG2_TABSIZE] ^= Ran;
    *     }
    */
 
   SendCnt = ProcNumUpdates; /*  SendCnt = (4 * LocalTableSize); */
-  Ran = HPCC_starts (4 * GlobalStartMyProc);
+  Ran = HPCC_starts_LCG(4 * GlobalStartMyProc);
 
   i = 0;
 
@@ -493,7 +486,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 #endif
           for (j=0; j < recvUpdates; j ++) {
             inmsg = LocalRecvBuffer[bufferBase+j];
-            HPCC_Table[inmsg & (LocalTableSize-1)] ^= inmsg;
+            HPCC_Table[(inmsg >> (64 - logTableSize)) & (LocalTableSize-1)] ^= inmsg;
           }
 
         } else if (status.MPI_TAG == FINISHED_TAG) {
@@ -515,10 +508,10 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 
 
     if (pendingUpdates < maxPendingUpdates) {
-      Ran = (Ran << 1) ^ ((s64Int) Ran < ZERO64B ? POLY : ZERO64B);
-      WhichPe = (Ran >> logLocalTableSize) & (NumProcs - 1);
+      Ran = LCG_MUL64 * Ran + LCG_ADD64;
+      WhichPe = (Ran >> (64 - logTableSize + logLocalTableSize)) & (NumProcs - 1);
       if (WhichPe == MyProc) {
-        LocalOffset = (Ran & (TableSize - 1)) - GlobalStartMyProc;
+        LocalOffset = (Ran >> (64 - logTableSize)) - GlobalStartMyProc;
         HPCC_Table[LocalOffset] ^= Ran;
       }
       else {
@@ -562,7 +555,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 #endif
           for (j=0; j < recvUpdates; j ++) {
             inmsg = LocalRecvBuffer[bufferBase+j];
-            HPCC_Table[inmsg & (LocalTableSize-1)] ^= inmsg;
+            HPCC_Table[(inmsg >> (64 - logTableSize)) & (LocalTableSize-1)] ^= inmsg;
           }
         } else if (status.MPI_TAG == FINISHED_TAG) {
           /* we got a done message.  Thanks for playing... */
@@ -617,7 +610,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 #endif
       for (j=0; j < recvUpdates; j ++) {
         inmsg = LocalRecvBuffer[bufferBase+j];
-        HPCC_Table[inmsg & (LocalTableSize-1)] ^= inmsg;
+        HPCC_Table[(inmsg >> (64 - logTableSize)) & (LocalTableSize-1)] ^= inmsg;
       }
 
     } else if (status.MPI_TAG == FINISHED_TAG) {
@@ -653,10 +646,9 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 
   /* end multiprocessor code */
 }
-#endif
 
 int
-HPCC_MPIRandomAccess(HPCC_Params *params) {
+HPCC_MPIRandomAccess_LCG(HPCC_Params *params) {
   s64Int i;
   s64Int NumErrors, GlbNumErrors;
 
@@ -700,7 +692,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   INT64_DT = MPI_LONG_LONG_INT;
 #endif
 
-  GUPs = &params->MPIRandomAccess_GUPs;
+  GUPs = &params->MPIRandomAccess_LCG_GUPs;
 
   MPI_Comm_size( MPI_COMM_WORLD, &NumProcs );
   MPI_Comm_rank( MPI_COMM_WORLD, &MyProc );
@@ -775,7 +767,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
     goto failed_table;
   }
 
-  params->MPIRandomAccess_N = (s64Int)TableSize;
+  params->MPIRandomAccess_LCG_N = (s64Int)TableSize;
 
   /* Default number of global updates to table: 4x number of table entries */
   NumUpdates_Default = 4 * TableSize;
@@ -831,8 +823,8 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
     fprintf( outFile, "Number of updates EXECUTED = " FSTR64 " (for a TIME BOUND of %.2f secs)\n",
              NumUpdates, timeBound);
 #endif
-    params->MPIRandomAccess_ExeUpdates = NumUpdates;
-    params->MPIRandomAccess_TimeBound = timeBound;
+    params->MPIRandomAccess_LCG_ExeUpdates = NumUpdates;
+    params->MPIRandomAccess_LCG_TimeBound = timeBound;
   }
 
   /* Initialize main table */
@@ -845,13 +837,13 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   RealTime = -RTSEC();
 
   if (PowerofTwo) {
-    Power2NodesMPIRandomAccessUpdate(logTableSize, TableSize, LocalTableSize,
+    HPCC_Power2NodesMPIRandomAccessUpdate_LCG(logTableSize, TableSize, LocalTableSize,
                                      MinLocalTableSize, GlobalStartMyProc, Top,
                                      logNumProcs, NumProcs, Remainder,
                                      MyProc, ProcNumUpdates, INT64_DT,
                                      finish_statuses, finish_req);
   } else {
-    AnyNodesMPIRandomAccessUpdate(logTableSize, TableSize, LocalTableSize,
+    HPCC_AnyNodesMPIRandomAccessUpdate_LCG(logTableSize, TableSize, LocalTableSize,
                                   MinLocalTableSize, GlobalStartMyProc, Top,
                                   logNumProcs, NumProcs, Remainder,
                                   MyProc, ProcNumUpdates, INT64_DT,
@@ -867,7 +859,7 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
 
   /* Print timing results */
   if (MyProc == 0){
-    params->MPIRandomAccess_time = RealTime;
+    params->MPIRandomAccess_LCG_time = RealTime;
     *GUPs = 1e-9*NumUpdates / RealTime;
     fprintf( outFile, "CPU time used = %.6f seconds\n", CPUTime );
     fprintf( outFile, "Real time used = %.6f seconds\n", RealTime );
@@ -889,14 +881,14 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   RealTime = -RTSEC();
 
   if (PowerofTwo) {
-    HPCC_Power2NodesMPIRandomAccessCheck(logTableSize, TableSize, LocalTableSize,
+    HPCC_Power2NodesMPIRandomAccessCheck_LCG(logTableSize, TableSize, LocalTableSize,
                                     GlobalStartMyProc,
                                     logNumProcs, NumProcs,
                                     MyProc, ProcNumUpdates,
                                     INT64_DT, &NumErrors);
   }
   else {
-    HPCC_AnyNodesMPIRandomAccessCheck(logTableSize, TableSize, LocalTableSize,
+    HPCC_AnyNodesMPIRandomAccessCheck_LCG(logTableSize, TableSize, LocalTableSize,
                                  MinLocalTableSize, GlobalStartMyProc, Top,
                                  logNumProcs, NumProcs, Remainder,
                                  MyProc, ProcNumUpdates,
@@ -926,16 +918,16 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   RealTime += RTSEC();
 
   if(MyProc == 0){
-    params->MPIRandomAccess_CheckTime = RealTime;
+    params->MPIRandomAccess_LCG_CheckTime = RealTime;
     fprintf( outFile, "Verification:  CPU time used = %.6f seconds\n", CPUTime);
     fprintf( outFile, "Verification:  Real time used = %.6f seconds\n", RealTime);
     fprintf( outFile, "Found " FSTR64 " errors in " FSTR64 " locations (%s).\n",
              GlbNumErrors, TableSize, (GlbNumErrors <= 0.01*TableSize) ?
              "passed" : "failed");
     if (GlbNumErrors > 0.01*TableSize) params->Failure = 1;
-    params->MPIRandomAccess_Errors = (s64Int)GlbNumErrors;
-    params->MPIRandomAccess_ErrorsFraction = (double)GlbNumErrors / (double)TableSize;
-    params->MPIRandomAccess_Algorithm = HPCC_RA_ALGORITHM;
+    params->MPIRandomAccess_LCG_Errors = (s64Int)GlbNumErrors;
+    params->MPIRandomAccess_LCG_ErrorsFraction = (double)GlbNumErrors / (double)TableSize;
+    params->MPIRandomAccess_LCG_Algorithm = HPCC_RA_ALGORITHM;
   }
   /* End verification phase */
 

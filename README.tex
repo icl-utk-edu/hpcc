@@ -210,6 +210,16 @@ through the web form at the HPC~Challenge website.
 
 \section{Source Code Changes across Versions (ChangeLog)}
 
+\subsection{Version 1.4.0 (2009-03-26)}
+\begin{enumerate}
+\item Added new variant of RandomAccess that uses Linear Congruential Generator for random number generation.
+\item Rearranged the order of benchmarks so that HPL component runs last and may be aborted
+if the performance of other components was not satisfactory. RandomAccess is now first to assist in tuning
+the code.
+\item Added global initialization and finalization routine that allows to properly initialize
+and finalize external software and hardware components without changing the rest of the HPCC testing harness.
+\end{enumerate}
+
 \subsection{Version 1.3.2 (2009-03-24)}
 \begin{enumerate}
 \item Fixed memory leaks in G-RandomAccess driver routine.

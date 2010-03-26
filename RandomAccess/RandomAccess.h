@@ -37,6 +37,9 @@ extern u64Int HPCC_starts (s64Int);
 #define MAX_RECV					1
 #endif
 
+#define LCG_MUL64 6364136223846793005ULL
+#define LCG_ADD64 1
+
 extern u64Int *HPCC_Table;
 
 extern u64Int LocalSendBuffer[LOCAL_BUFFER_SIZE];
