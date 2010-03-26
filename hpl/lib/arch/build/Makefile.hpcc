@@ -38,7 +38,7 @@ OBJS16 = ../../../../STREAM/onecpu.o ../../../../STREAM/stream.o
 HDEP17 = ../../../../include/hpcc.h ../../../include/hpl.h ../../../../PTRANS/cblacslt.h
 OBJS17 = ../../../../PTRANS/pmatgeninc.o ../../../../PTRANS/pdmatgen.o ../../../../PTRANS/pdtransdriver.o ../../../../PTRANS/pdmatcmp.o ../../../../PTRANS/pdtrans.o ../../../../PTRANS/sclapack.o ../../../../PTRANS/cblacslt.o ../../../../PTRANS/mem.o
 HDEP18 = ../../../../include/hpcc.h ../../../../include/hpccver.h ../../../include/hpccmema.h ../../../include/hpl.h
-OBJS18 = ../../../../src/bench_lat_bw_1.5.2.o ../../../../src/hpcc.o ../../../../src/io.o
+OBJS18 = ../../../../src/bench_lat_bw_1.5.2.o ../../../../src/hpcc.o ../../../../src/io.o ../../../../src/extinit.o ../../../../src/extfinalize.o
 HDEP19 = ../../../../include/hpcc.h ../../../include/hpl.h
 OBJS19 = ../../../../src/HPL_slamch.o ../../../../src/noopt.o
 HDEP20 = ../../../../include/hpcc.h ../../../include/hpl.h
@@ -533,6 +533,12 @@ clean:
 
 ../../../../src/io.o : ../../../../src/io.c $(HDEP18)
 	$(CC) -o ../../../../src/io.o -c ../../../../src/io.c -I../../../../include $(CCFLAGS)
+
+../../../../src/extinit.o : ../../../../src/extinit.c $(HDEP18)
+	$(CC) -o ../../../../src/extinit.o -c ../../../../src/extinit.c -I../../../../include $(CCFLAGS)
+
+../../../../src/extfinalize.o : ../../../../src/extfinalize.c $(HDEP18)
+	$(CC) -o ../../../../src/extfinalize.o -c ../../../../src/extfinalize.c -I../../../../include $(CCFLAGS)
 
 ../../../../src/HPL_slamch.o : ../../../../src/HPL_slamch.c $(HDEP19)
 	$(CC) -o ../../../../src/HPL_slamch.o -c ../../../../src/HPL_slamch.c -I../../../../include $(CCNOOPT)

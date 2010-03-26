@@ -86,7 +86,7 @@ allDeps = (
      ("pmatgeninc", "pdmatgen", "pdtransdriver", "pdmatcmp", "pdtrans", "sclapack", "cblacslt", "mem"), "-I../../../../include $(CCFLAGS)"),
 
     ("../src/", (hhpcc, hhpccv, hhpccm, hhpl),
-     ("bench_lat_bw_1.5.2",  "hpcc",  "io"), "-I../../../../include $(CCFLAGS)"),
+     ("bench_lat_bw_1.5.2",  "hpcc",  "io", "extinit", "extfinalize"), "-I../../../../include $(CCFLAGS)"),
 
     ("../src/", (hhpcc, hhpl),
      ("HPL_slamch", "noopt"), "-I../../../../include $(CCNOOPT)"),
