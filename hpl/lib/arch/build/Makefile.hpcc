@@ -32,13 +32,13 @@ OBJS13 = ../../../testing/ptimer/HPL_ptimer.o ../../../testing/ptimer/HPL_ptimer
 HDEP14 = ../../../include/hpl_misc.h ../../../include/hpl_blas.h ../../../include/hpl_auxil.h ../../../include/hpl_gesv.h ../../../include/hpl_pmisc.h ../../../include/hpl_pauxil.h ../../../include/hpl_panel.h ../../../include/hpl_pmatgen.h ../../../include/hpl_pgesv.h ../../../include/hpl_ptimer.h ../../../include/hpl_ptest.h
 OBJS14 = ../../../testing/ptest/HPL_pddriver.o ../../../testing/ptest/HPL_pdinfo.o ../../../testing/ptest/HPL_pdtest.o
 HDEP15 = ../../../../include/hpcc.h ../../../include/hpl.h ../../../../RandomAccess/RandomAccess.h ../../../../RandomAccess/buckets.h ../../../../RandomAccess/heap.h ../../../../RandomAccess/pool.h ../../../../RandomAccess/time_bound.h ../../../../RandomAccess/verification.h
-OBJS15 = ../../../../RandomAccess/MPIRandomAccess.o ../../../../RandomAccess/buckets.o ../../../../RandomAccess/core_single_cpu.o ../../../../RandomAccess/heap.o ../../../../RandomAccess/pool.o ../../../../RandomAccess/single_cpu.o ../../../../RandomAccess/star_single_cpu.o ../../../../RandomAccess/time_bound.o ../../../../RandomAccess/utility.o ../../../../RandomAccess/verification.o ../../../../RandomAccess/MPIRandomAccess_vanilla.o ../../../../RandomAccess/MPIRandomAccess_opt.o
+OBJS15 = ../../../../RandomAccess/MPIRandomAccess.o ../../../../RandomAccess/buckets.o ../../../../RandomAccess/core_single_cpu_lcg.o ../../../../RandomAccess/core_single_cpu.o ../../../../RandomAccess/heap.o ../../../../RandomAccess/pool.o ../../../../RandomAccess/single_cpu_lcg.o ../../../../RandomAccess/single_cpu.o ../../../../RandomAccess/star_single_cpu_lcg.o ../../../../RandomAccess/star_single_cpu.o ../../../../RandomAccess/time_bound.o ../../../../RandomAccess/utility.o ../../../../RandomAccess/verification_lcg.o ../../../../RandomAccess/verification.o ../../../../RandomAccess/MPIRandomAccess_vanilla.o ../../../../RandomAccess/MPIRandomAccess_opt.o ../../../../RandomAccess/MPIRandomAccessLCG.o
 HDEP16 = ../../../../include/hpcc.h ../../../include/hpl.h
 OBJS16 = ../../../../STREAM/onecpu.o ../../../../STREAM/stream.o
 HDEP17 = ../../../../include/hpcc.h ../../../include/hpl.h ../../../../PTRANS/cblacslt.h
 OBJS17 = ../../../../PTRANS/pmatgeninc.o ../../../../PTRANS/pdmatgen.o ../../../../PTRANS/pdtransdriver.o ../../../../PTRANS/pdmatcmp.o ../../../../PTRANS/pdtrans.o ../../../../PTRANS/sclapack.o ../../../../PTRANS/cblacslt.o ../../../../PTRANS/mem.o
 HDEP18 = ../../../../include/hpcc.h ../../../../include/hpccver.h ../../../include/hpccmema.h ../../../include/hpl.h
-OBJS18 = ../../../../src/bench_lat_bw_1.5.2.o ../../../../src/hpcc.o ../../../../src/io.o
+OBJS18 = ../../../../src/bench_lat_bw_1.5.2.o ../../../../src/hpcc.o ../../../../src/io.o ../../../../src/extinit.o ../../../../src/extfinalize.o
 HDEP19 = ../../../../include/hpcc.h ../../../include/hpl.h
 OBJS19 = ../../../../src/HPL_slamch.o ../../../../src/noopt.o
 HDEP20 = ../../../../include/hpcc.h ../../../include/hpl.h
@@ -450,6 +450,9 @@ clean:
 ../../../../RandomAccess/buckets.o : ../../../../RandomAccess/buckets.c $(HDEP15)
 	$(CC) -o ../../../../RandomAccess/buckets.o -c ../../../../RandomAccess/buckets.c -I../../../../include $(CCFLAGS)
 
+../../../../RandomAccess/core_single_cpu_lcg.o : ../../../../RandomAccess/core_single_cpu_lcg.c $(HDEP15)
+	$(CC) -o ../../../../RandomAccess/core_single_cpu_lcg.o -c ../../../../RandomAccess/core_single_cpu_lcg.c -I../../../../include $(CCFLAGS)
+
 ../../../../RandomAccess/core_single_cpu.o : ../../../../RandomAccess/core_single_cpu.c $(HDEP15)
 	$(CC) -o ../../../../RandomAccess/core_single_cpu.o -c ../../../../RandomAccess/core_single_cpu.c -I../../../../include $(CCFLAGS)
 
@@ -459,8 +462,14 @@ clean:
 ../../../../RandomAccess/pool.o : ../../../../RandomAccess/pool.c $(HDEP15)
 	$(CC) -o ../../../../RandomAccess/pool.o -c ../../../../RandomAccess/pool.c -I../../../../include $(CCFLAGS)
 
+../../../../RandomAccess/single_cpu_lcg.o : ../../../../RandomAccess/single_cpu_lcg.c $(HDEP15)
+	$(CC) -o ../../../../RandomAccess/single_cpu_lcg.o -c ../../../../RandomAccess/single_cpu_lcg.c -I../../../../include $(CCFLAGS)
+
 ../../../../RandomAccess/single_cpu.o : ../../../../RandomAccess/single_cpu.c $(HDEP15)
 	$(CC) -o ../../../../RandomAccess/single_cpu.o -c ../../../../RandomAccess/single_cpu.c -I../../../../include $(CCFLAGS)
+
+../../../../RandomAccess/star_single_cpu_lcg.o : ../../../../RandomAccess/star_single_cpu_lcg.c $(HDEP15)
+	$(CC) -o ../../../../RandomAccess/star_single_cpu_lcg.o -c ../../../../RandomAccess/star_single_cpu_lcg.c -I../../../../include $(CCFLAGS)
 
 ../../../../RandomAccess/star_single_cpu.o : ../../../../RandomAccess/star_single_cpu.c $(HDEP15)
 	$(CC) -o ../../../../RandomAccess/star_single_cpu.o -c ../../../../RandomAccess/star_single_cpu.c -I../../../../include $(CCFLAGS)
@@ -471,6 +480,9 @@ clean:
 ../../../../RandomAccess/utility.o : ../../../../RandomAccess/utility.c $(HDEP15)
 	$(CC) -o ../../../../RandomAccess/utility.o -c ../../../../RandomAccess/utility.c -I../../../../include $(CCFLAGS)
 
+../../../../RandomAccess/verification_lcg.o : ../../../../RandomAccess/verification_lcg.c $(HDEP15)
+	$(CC) -o ../../../../RandomAccess/verification_lcg.o -c ../../../../RandomAccess/verification_lcg.c -I../../../../include $(CCFLAGS)
+
 ../../../../RandomAccess/verification.o : ../../../../RandomAccess/verification.c $(HDEP15)
 	$(CC) -o ../../../../RandomAccess/verification.o -c ../../../../RandomAccess/verification.c -I../../../../include $(CCFLAGS)
 
@@ -479,6 +491,9 @@ clean:
 
 ../../../../RandomAccess/MPIRandomAccess_opt.o : ../../../../RandomAccess/MPIRandomAccess_opt.c $(HDEP15)
 	$(CC) -o ../../../../RandomAccess/MPIRandomAccess_opt.o -c ../../../../RandomAccess/MPIRandomAccess_opt.c -I../../../../include $(CCFLAGS)
+
+../../../../RandomAccess/MPIRandomAccessLCG.o : ../../../../RandomAccess/MPIRandomAccessLCG.c $(HDEP15)
+	$(CC) -o ../../../../RandomAccess/MPIRandomAccessLCG.o -c ../../../../RandomAccess/MPIRandomAccessLCG.c -I../../../../include $(CCFLAGS)
 
 ../../../../STREAM/onecpu.o : ../../../../STREAM/onecpu.c $(HDEP16)
 	$(CC) -o ../../../../STREAM/onecpu.o -c ../../../../STREAM/onecpu.c -I../../../../include $(CCFLAGS)
@@ -518,6 +533,12 @@ clean:
 
 ../../../../src/io.o : ../../../../src/io.c $(HDEP18)
 	$(CC) -o ../../../../src/io.o -c ../../../../src/io.c -I../../../../include $(CCFLAGS)
+
+../../../../src/extinit.o : ../../../../src/extinit.c $(HDEP18)
+	$(CC) -o ../../../../src/extinit.o -c ../../../../src/extinit.c -I../../../../include $(CCFLAGS)
+
+../../../../src/extfinalize.o : ../../../../src/extfinalize.c $(HDEP18)
+	$(CC) -o ../../../../src/extfinalize.o -c ../../../../src/extfinalize.c -I../../../../include $(CCFLAGS)
 
 ../../../../src/HPL_slamch.o : ../../../../src/HPL_slamch.c $(HDEP19)
 	$(CC) -o ../../../../src/HPL_slamch.o -c ../../../../src/HPL_slamch.c -I../../../../include $(CCNOOPT)

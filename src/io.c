@@ -268,6 +268,9 @@ HPCC_Init(HPCC_Params *params) {
   params->RunPTRANS = 0;
   params->RunStarStream = 0;
   params->RunSingleStream = 0;
+  params->RunMPIRandomAccess_LCG = 0;
+  params->RunStarRandomAccess_LCG = 0;
+  params->RunSingleRandomAccess_LCG = 0;
   params->RunMPIRandomAccess = 0;
   params->RunStarRandomAccess = 0;
   params->RunSingleRandomAccess = 0;
@@ -275,11 +278,13 @@ HPCC_Init(HPCC_Params *params) {
   params->RunMPIFFT = 0;
   params->RunHPL = params->RunStarDGEMM = params->RunSingleDGEMM =
   params->RunPTRANS = params->RunStarStream = params->RunSingleStream =
+  params->RunMPIRandomAccess_LCG = params->RunStarRandomAccess_LCG = params->RunSingleRandomAccess_LCG =
   params->RunMPIRandomAccess = params->RunStarRandomAccess = params->RunSingleRandomAccess =
   params->RunMPIFFT = params->RunStarFFT = params->RunSingleFFT =
   params->RunLatencyBandwidth = 1;
 
-  params->MPIGUPs = params->StarGUPs = params->SingleGUPs =
+  params->MPIRandomAccess_LCG_GUPs =
+  params->MPIRandomAccess_GUPs = params->StarGUPs = params->SingleGUPs =
   params->StarDGEMMGflops = params->SingleDGEMMGflops = -1.0;
   params->StarStreamCopyGBs = params->StarStreamScaleGBs = params->StarStreamAddGBs =
   params->StarStreamTriadGBs = params->SingleStreamCopyGBs = params->SingleStreamScaleGBs =
@@ -299,13 +304,17 @@ HPCC_Init(HPCC_Params *params) {
   params->PTRANSrdata.n = params->PTRANSrdata.nb = params->PTRANSrdata.nprow =
   params->PTRANSrdata.npcol = -1;
 
+  params->MPIRandomAccess_LCG_ErrorsFraction =
   params->MPIRandomAccess_ErrorsFraction =
+  params->MPIRandomAccess_LCG_time = params->MPIRandomAccess_LCG_CheckTime =
   params->MPIRandomAccess_time = params->MPIRandomAccess_CheckTime =
+  params->MPIRandomAccess_LCG_TimeBound =
   params->MPIRandomAccess_TimeBound = -1.0;
 
   params->DGEMM_N =
   params->FFT_N =
   params->StreamVectorSize =
+  params->MPIRandomAccess_LCG_Algorithm =
   params->MPIRandomAccess_Algorithm =
   params->MPIFFT_Procs = -1;
 
@@ -314,9 +323,13 @@ HPCC_Init(HPCC_Params *params) {
   params->FFTEnblk = params->FFTEnp = params->FFTEl2size = -1;
 
   params->MPIFFT_N =
+  params->RandomAccess_LCG_N =
+  params->MPIRandomAccess_LCG_N =
+  params->MPIRandomAccess_LCG_Errors =
   params->RandomAccess_N =
   params->MPIRandomAccess_N =
   params->MPIRandomAccess_Errors =
+  params->MPIRandomAccess_LCG_ExeUpdates =
   params->MPIRandomAccess_ExeUpdates = (s64Int)(-1);
 
   procMax = procMin = params->pval[0] * params->qval[0];
@@ -444,15 +457,27 @@ HPCC_Finalize(HPCC_Params *params) {
   fprintf( outputFile, "PTRANS_nb=%d\n", params->PTRANSrdata.nb );
   fprintf( outputFile, "PTRANS_nprow=%d\n", params->PTRANSrdata.nprow );
   fprintf( outputFile, "PTRANS_npcol=%d\n", params->PTRANSrdata.npcol );
+  fprintf( outputFile, "MPIRandomAccess_LCG_N=" FSTR64 "\n", params->MPIRandomAccess_LCG_N );
+  fprintf( outputFile, "MPIRandomAccess_LCG_time=%g\n", params->MPIRandomAccess_LCG_time );
+  fprintf( outputFile, "MPIRandomAccess_LCG_CheckTime=%g\n", params->MPIRandomAccess_LCG_CheckTime );
+  fprintf( outputFile, "MPIRandomAccess_LCG_Errors=" FSTR64 "\n", params->MPIRandomAccess_LCG_Errors );
+  fprintf( outputFile, "MPIRandomAccess_LCG_ErrorsFraction=%g\n", params->MPIRandomAccess_LCG_ErrorsFraction );
+  fprintf( outputFile, "MPIRandomAccess_LCG_ExeUpdates=" FSTR64 "\n", params->MPIRandomAccess_LCG_ExeUpdates );
+  fprintf( outputFile, "MPIRandomAccess_LCG_GUPs=%g\n", params->MPIRandomAccess_LCG_GUPs );
+  fprintf( outputFile, "MPIRandomAccess_LCG_TimeBound=%g\n", params->MPIRandomAccess_LCG_TimeBound );
+  fprintf( outputFile, "MPIRandomAccess_LCG_Algorithm=%d\n", params->MPIRandomAccess_LCG_Algorithm );
   fprintf( outputFile, "MPIRandomAccess_N=" FSTR64 "\n", params->MPIRandomAccess_N );
   fprintf( outputFile, "MPIRandomAccess_time=%g\n", params->MPIRandomAccess_time );
   fprintf( outputFile, "MPIRandomAccess_CheckTime=%g\n", params->MPIRandomAccess_CheckTime );
   fprintf( outputFile, "MPIRandomAccess_Errors=" FSTR64 "\n", params->MPIRandomAccess_Errors );
   fprintf( outputFile, "MPIRandomAccess_ErrorsFraction=%g\n", params->MPIRandomAccess_ErrorsFraction );
   fprintf( outputFile, "MPIRandomAccess_ExeUpdates=" FSTR64 "\n", params->MPIRandomAccess_ExeUpdates );
-  fprintf( outputFile, "MPIRandomAccess_GUPs=%g\n", params->MPIGUPs );
+  fprintf( outputFile, "MPIRandomAccess_GUPs=%g\n", params->MPIRandomAccess_GUPs );
   fprintf( outputFile, "MPIRandomAccess_TimeBound=%g\n", params->MPIRandomAccess_TimeBound );
   fprintf( outputFile, "MPIRandomAccess_Algorithm=%d\n", params->MPIRandomAccess_Algorithm );
+  fprintf( outputFile, "RandomAccess_LCG_N=" FSTR64 "\n", params->RandomAccess_LCG_N );
+  fprintf( outputFile, "StarRandomAccess_LCG_GUPs=%g\n", params->Star_LCG_GUPs );
+  fprintf( outputFile, "SingleRandomAccess_LCG_GUPs=%g\n", params->Single_LCG_GUPs );
   fprintf( outputFile, "RandomAccess_N=" FSTR64 "\n", params->RandomAccess_N );
   fprintf( outputFile, "StarRandomAccess_GUPs=%g\n", params->StarGUPs );
   fprintf( outputFile, "SingleRandomAccess_GUPs=%g\n", params->SingleGUPs );

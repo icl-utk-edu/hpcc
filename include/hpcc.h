@@ -64,9 +64,11 @@ typedef struct {
   int PTRANSns, PTRANSnval[2 * HPL_MAX_PARAM];
   int PTRANSnbs, PTRANSnbval[2 * HPL_MAX_PARAM];
   int PTRANSnpqs, PTRANSpval[2 * HPL_MAX_PARAM], PTRANSqval[2 * HPL_MAX_PARAM];
-  double MPIGUPs, StarGUPs, SingleGUPs,
+  double MPIRandomAccess_LCG_GUPs, MPIRandomAccess_GUPs, Star_LCG_GUPs, Single_LCG_GUPs, StarGUPs, SingleGUPs,
     MPIRandomAccess_ErrorsFraction, MPIRandomAccess_time, MPIRandomAccess_CheckTime,
     MPIRandomAccess_TimeBound,
+    MPIRandomAccess_LCG_ErrorsFraction, MPIRandomAccess_LCG_time, MPIRandomAccess_LCG_CheckTime,
+    MPIRandomAccess_LCG_TimeBound,
     StarStreamCopyGBs, StarStreamScaleGBs,
     StarStreamAddGBs, StarStreamTriadGBs, SingleStreamCopyGBs, SingleStreamScaleGBs,
     SingleStreamAddGBs, SingleStreamTriadGBs, StarDGEMMGflops, SingleDGEMMGflops;
@@ -79,7 +81,7 @@ typedef struct {
   int StreamThreads, StreamVectorSize;
   int FFT_N;
   int MPIFFT_Procs;
-  int MPIRandomAccess_Algorithm;
+  int MPIRandomAccess_LCG_Algorithm, MPIRandomAccess_Algorithm;
 
   HPL_RuntimeData HPLrdata;
   PTRANS_RuntimeData PTRANSrdata;
@@ -90,12 +92,16 @@ typedef struct {
 
   size_t HPLMaxProcMem;
   int HPLMaxProc, HPLMinProc;
-  int RunHPL, RunStarDGEMM, RunSingleDGEMM, RunPTRANS, RunStarStream,
-    RunSingleStream, RunMPIRandomAccess, RunStarRandomAccess,
-    RunSingleRandomAccess, RunLatencyBandwidth, RunStarFFT, RunSingleFFT, RunMPIFFT;
+  int RunHPL, RunStarDGEMM, RunSingleDGEMM,
+    RunPTRANS, RunStarStream, RunSingleStream,
+    RunMPIRandomAccess_LCG, RunStarRandomAccess_LCG, RunSingleRandomAccess_LCG,
+    RunMPIRandomAccess, RunStarRandomAccess, RunSingleRandomAccess,
+    RunStarFFT, RunSingleFFT, RunMPIFFT,
+    RunLatencyBandwidth;
 
   int FFTEnblk, FFTEnp, FFTEl2size;
-  s64Int RandomAccess_N, MPIRandomAccess_ExeUpdates, MPIRandomAccess_N, MPIRandomAccess_Errors, MPIFFT_N;
+  s64Int RandomAccess_LCG_N, RandomAccess_N, MPIRandomAccess_LCG_ExeUpdates, MPIRandomAccess_ExeUpdates,
+    MPIRandomAccess_LCG_N, MPIRandomAccess_N, MPIRandomAccess_LCG_Errors, MPIRandomAccess_Errors, MPIFFT_N;
 } HPCC_Params;
 /*
 This is what needs to be done to add a new benchmark:
@@ -110,6 +116,9 @@ that performs the test returns a value (0 or 1) that indicates runtime failure a
 benchamark failure (due to wrong optimization that causes numerical error) by setting
 params->Failure.
 */
+
+int HPCC_external_init(int argc, char *argv[], void *extdata);
+int HPCC_external_finalize(int argc, char *argv[], void *extdata);
 
 extern int HPCC_Init(HPCC_Params *params);
 extern int HPCC_Finalize(HPCC_Params *params);
@@ -134,6 +143,9 @@ extern float HPCC_sweps();
 extern int HPCC_StarDGEMM(HPCC_Params *params);
 extern int HPCC_SingleDGEMM(HPCC_Params *params);
 extern int PTRANS(HPCC_Params *params);
+extern int HPCC_MPIRandomAccess_LCG(HPCC_Params *params);
+extern int HPCC_SingleRandomAccess_LCG(HPCC_Params *params);
+extern int HPCC_StarRandomAccess_LCG(HPCC_Params *params);
 extern int HPCC_MPIRandomAccess(HPCC_Params *params);
 extern int HPCC_SingleRandomAccess(HPCC_Params *params);
 extern int HPCC_StarRandomAccess(HPCC_Params *params);
@@ -147,7 +159,6 @@ extern int HPCC_TestFFT(HPCC_Params *params, int doIO, double *UGflops, int *Un,
 extern int HPCC_TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure);
 extern int MaxMem(int nprocs, int imrow, int imcol, int nmat, int *mval, int *nval, int nbmat,
   int *mbval, int *nbval, int ngrids, int *npval, int *nqval, long *maxMem);
-extern int HPCC_RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure);
 extern int HPCC_Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs,
   double *addGBs, double *triadGBs, int *failure);
 extern void main_bench_lat_bw(HPCC_Params *params);

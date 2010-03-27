@@ -75,8 +75,9 @@ allDeps = (
                           "../../../../RandomAccess/buckets.h", "../../../../RandomAccess/heap.h",
                           "../../../../RandomAccess/pool.h", "../../../../RandomAccess/time_bound.h",
                           "../../../../RandomAccess/verification.h"),
-     ("MPIRandomAccess", "buckets", "core_single_cpu", "heap", "pool", "single_cpu", "star_single_cpu",
-      "time_bound", "utility", "verification", "MPIRandomAccess_vanilla", "MPIRandomAccess_opt"), "-I../../../../include $(CCFLAGS)"),
+     ("MPIRandomAccess", "buckets", "core_single_cpu_lcg", "core_single_cpu", "heap", "pool", "single_cpu_lcg",
+      "single_cpu", "star_single_cpu_lcg", "star_single_cpu", "time_bound", "utility", "verification_lcg", "verification",
+      "MPIRandomAccess_vanilla", "MPIRandomAccess_opt", "MPIRandomAccessLCG"), "-I../../../../include $(CCFLAGS)"),
 
     ("../STREAM/", (hhpcc, hhpl),
      ("onecpu", "stream"), "-I../../../../include $(CCFLAGS)"),
@@ -85,7 +86,7 @@ allDeps = (
      ("pmatgeninc", "pdmatgen", "pdtransdriver", "pdmatcmp", "pdtrans", "sclapack", "cblacslt", "mem"), "-I../../../../include $(CCFLAGS)"),
 
     ("../src/", (hhpcc, hhpccv, hhpccm, hhpl),
-     ("bench_lat_bw_1.5.2",  "hpcc",  "io"), "-I../../../../include $(CCFLAGS)"),
+     ("bench_lat_bw_1.5.2",  "hpcc",  "io", "extinit", "extfinalize"), "-I../../../../include $(CCFLAGS)"),
 
     ("../src/", (hhpcc, hhpl),
      ("HPL_slamch", "noopt"), "-I../../../../include $(CCNOOPT)"),

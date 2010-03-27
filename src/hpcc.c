@@ -13,8 +13,12 @@ main(int argc, char *argv[]) {
   FILE *outputFile;
   HPCC_Params params;
   time_t currentTime;
+  void *extdata;
 
   MPI_Init( &argc, &argv );
+
+  if (HPCC_external_init( argc, argv, &extdata ))
+    goto hpcc_end;
 
   if (HPCC_Init( &params ))
     goto hpcc_end;
@@ -23,6 +27,114 @@ main(int argc, char *argv[]) {
   MPI_Comm_rank( MPI_COMM_WORLD, &myRank );
 
   outFname = params.outFname;
+
+  /* -------------------------------------------------- */
+  /*                 MPI RandomAccess                   */
+  /* -------------------------------------------------- */
+
+  MPI_Barrier( MPI_COMM_WORLD );
+
+  BEGIN_IO( myRank, outFname, outputFile);
+  fprintf( outputFile, "Begin of MPIRandomAccess section.\n" );
+  END_IO( myRank, outputFile );
+
+  if (params.RunMPIRandomAccess) HPCC_MPIRandomAccess( &params );
+
+  time( &currentTime );
+  BEGIN_IO(myRank, outFname, outputFile);
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of MPIRandomAccess section.\n" );
+  END_IO( myRank, outputFile );
+
+  /* -------------------------------------------------- */
+  /*                  StarRandomAccess                  */
+  /* -------------------------------------------------- */
+
+  MPI_Barrier( MPI_COMM_WORLD );
+
+  BEGIN_IO( myRank, outFname, outputFile);
+  fprintf( outputFile, "Begin of StarRandomAccess section.\n" );
+  END_IO( myRank, outputFile );
+
+  if (params.RunStarRandomAccess) HPCC_StarRandomAccess( &params );
+
+  time( &currentTime );
+  BEGIN_IO( myRank, outFname, outputFile);
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of StarRandomAccess section.\n" );
+  END_IO( myRank, outputFile );
+
+  /* -------------------------------------------------- */
+  /*                 SingleRandomAccess                 */
+  /* -------------------------------------------------- */
+
+  MPI_Barrier( MPI_COMM_WORLD );
+
+  BEGIN_IO( myRank, outFname, outputFile);
+  fprintf( outputFile, "Begin of SingleRandomAccess section.\n" );
+  END_IO( myRank, outputFile );
+
+  if (params.RunSingleRandomAccess) HPCC_SingleRandomAccess( &params );
+
+  time( &currentTime );
+  BEGIN_IO( myRank, outFname, outputFile);
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of SingleRandomAccess section.\n" );
+  END_IO( myRank, outputFile );
+
+  /* -------------------------------------------------- */
+  /*                 MPI RandomAccess LCG               */
+  /* -------------------------------------------------- */
+
+  MPI_Barrier( MPI_COMM_WORLD );
+
+  BEGIN_IO( myRank, outFname, outputFile);
+  fprintf( outputFile, "Begin of MPIRandomAccess_LCG section.\n" );
+  END_IO( myRank, outputFile );
+
+  if (params.RunMPIRandomAccess_LCG) HPCC_MPIRandomAccess_LCG( &params );
+
+  time( &currentTime );
+  BEGIN_IO(myRank, outFname, outputFile);
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of MPIRandomAccess_LCG section.\n" );
+  END_IO( myRank, outputFile );
+
+  /* -------------------------------------------------- */
+  /*                  StarRandomAccess LCG              */
+  /* -------------------------------------------------- */
+
+  MPI_Barrier( MPI_COMM_WORLD );
+
+  BEGIN_IO( myRank, outFname, outputFile);
+  fprintf( outputFile, "Begin of StarRandomAccess_LCG section.\n" );
+  END_IO( myRank, outputFile );
+
+  if (params.RunStarRandomAccess_LCG) HPCC_StarRandomAccess_LCG( &params );
+
+  time( &currentTime );
+  BEGIN_IO( myRank, outFname, outputFile);
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of StarRandomAccess_LCG section.\n" );
+  END_IO( myRank, outputFile );
+
+  /* -------------------------------------------------- */
+  /*                 SingleRandomAccess LCG             */
+  /* -------------------------------------------------- */
+
+  MPI_Barrier( MPI_COMM_WORLD );
+
+  BEGIN_IO( myRank, outFname, outputFile);
+  fprintf( outputFile, "Begin of SingleRandomAccess_LCG section.\n" );
+  END_IO( myRank, outputFile );
+
+  if (params.RunSingleRandomAccess_LCG) HPCC_SingleRandomAccess_LCG( &params );
+
+  time( &currentTime );
+  BEGIN_IO( myRank, outFname, outputFile);
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of SingleRandomAccess_LCG section.\n" );
+  END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
   /*                       PTRANS                       */
@@ -40,22 +152,6 @@ main(int argc, char *argv[]) {
   BEGIN_IO( myRank, outFname, outputFile);
   fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
   fprintf( outputFile, "End of PTRANS section.\n" );
-  END_IO( myRank, outputFile );
-
-  /* -------------------------------------------------- */
-  /*                        HPL                         */
-  /* -------------------------------------------------- */
-
-  BEGIN_IO( myRank, outFname, outputFile);
-  fprintf( outputFile, "Begin of HPL section.\n" );
-  END_IO( myRank, outputFile );
-
-  if (params.RunHPL) HPL_main( argc, argv, &params.HPLrdata, &params.Failure );
-
-  time( &currentTime );
-  BEGIN_IO( myRank, outFname, outputFile);
-  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
-  fprintf( outputFile, "End of HPL section.\n" );
   END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
@@ -131,60 +227,6 @@ main(int argc, char *argv[]) {
   END_IO( myRank, outputFile );
 
   /* -------------------------------------------------- */
-  /*                 MPI RandomAccess                   */
-  /* -------------------------------------------------- */
-
-  MPI_Barrier( MPI_COMM_WORLD );
-
-  BEGIN_IO( myRank, outFname, outputFile);
-  fprintf( outputFile, "Begin of MPIRandomAccess section.\n" );
-  END_IO( myRank, outputFile );
-
-  if (params.RunMPIRandomAccess) HPCC_MPIRandomAccess( &params );
-
-  time( &currentTime );
-  BEGIN_IO(myRank, outFname, outputFile);
-  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
-  fprintf( outputFile, "End of MPIRandomAccess section.\n" );
-  END_IO( myRank, outputFile );
-
-  /* -------------------------------------------------- */
-  /*                  StarRandomAccess                  */
-  /* -------------------------------------------------- */
-
-  MPI_Barrier( MPI_COMM_WORLD );
-
-  BEGIN_IO( myRank, outFname, outputFile);
-  fprintf( outputFile, "Begin of StarRandomAccess section.\n" );
-  END_IO( myRank, outputFile );
-
-  if (params.RunStarRandomAccess) HPCC_StarRandomAccess( &params );
-
-  time( &currentTime );
-  BEGIN_IO( myRank, outFname, outputFile);
-  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
-  fprintf( outputFile, "End of StarRandomAccess section.\n" );
-  END_IO( myRank, outputFile );
-
-  /* -------------------------------------------------- */
-  /*                 SingleRandomAccess                 */
-  /* -------------------------------------------------- */
-
-  MPI_Barrier( MPI_COMM_WORLD );
-
-  BEGIN_IO( myRank, outFname, outputFile);
-  fprintf( outputFile, "Begin of SingleRandomAccess section.\n" );
-  END_IO( myRank, outputFile );
-
-  if (params.RunSingleRandomAccess) HPCC_SingleRandomAccess( &params );
-
-  time( &currentTime );
-  BEGIN_IO( myRank, outFname, outputFile);
-  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
-  fprintf( outputFile, "End of SingleRandomAccess section.\n" );
-  END_IO( myRank, outputFile );
-
-  /* -------------------------------------------------- */
   /*                       MPIFFT                       */
   /* -------------------------------------------------- */
 
@@ -256,9 +298,27 @@ main(int argc, char *argv[]) {
   fprintf( outputFile, "End of LatencyBandwidth section.\n" );
   END_IO( myRank, outputFile );
 
+  /* -------------------------------------------------- */
+  /*                        HPL                         */
+  /* -------------------------------------------------- */
+
+  BEGIN_IO( myRank, outFname, outputFile);
+  fprintf( outputFile, "Begin of HPL section.\n" );
+  END_IO( myRank, outputFile );
+
+  if (params.RunHPL) HPL_main( argc, argv, &params.HPLrdata, &params.Failure );
+
+  time( &currentTime );
+  BEGIN_IO( myRank, outFname, outputFile);
+  fprintf( outputFile,"Current time (%ld) is %s\n",(long)currentTime,ctime(&currentTime));
+  fprintf( outputFile, "End of HPL section.\n" );
+  END_IO( myRank, outputFile );
+
   hpcc_end:
 
   HPCC_Finalize( &params );
+
+  HPCC_external_finalize( argc, argv, extdata );
 
   MPI_Finalize();
   return 0;

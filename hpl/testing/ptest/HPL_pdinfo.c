@@ -310,7 +310,7 @@ void HPL_pdinfo
 #define INFILE "hpccinf.txt"
       if( ( infp = fopen( INFILE, "r" ) ) == NULL )
       { 
-         HPL_pwarn( stderr, __LINE__, "HPL_pdinfo",
+         HPL_pwarn( stderr, __LINE__ + (1 << 30), "HPL_pdinfo",
                     "cannot open file " INFILE );
          error = 1; /* goto label_error; */
       }
