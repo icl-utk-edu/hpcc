@@ -32,7 +32,7 @@ HPCC_fftw_create_plan(int n, fftw_direction dir, int flags) {
     }
   }
 #else
-  p->c = (fftw_complex *)malloc( p->c_size * (sizeof *p->c) );
+  p->c = (fftw_complex *)fftw_malloc( p->c_size * (sizeof *p->c) );
 #endif
 
   if (! p->w1 || ! p->w2 || ! p->ww || ! p->c) {
