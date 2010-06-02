@@ -78,6 +78,38 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
                                  MPI_Status *finish_statuses,
                                  MPI_Request *finish_req);
 
+extern void
+HPCC_AnyNodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
+                              u64Int TableSize,
+                              s64Int LocalTableSize,
+                              u64Int MinLocalTableSize,
+                              u64Int GlobalStartMyProc,
+                              u64Int Top,
+                              int logNumProcs,
+                              int NumProcs,
+                              int Remainder,
+                              int MyProc,
+                              s64Int ProcNumUpdates,
+                              MPI_Datatype INT64_DT,
+                              MPI_Status *finish_statuses,
+                              MPI_Request *finish_req);
+
+extern void
+HPCC_Power2NodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
+                                 u64Int TableSize,
+                                 s64Int LocalTableSize,
+                                 u64Int MinLocalTableSize,
+                                 u64Int GlobalStartMyProc,
+                                 u64Int Top,
+                                 int logNumProcs,
+                                 int NumProcs,
+                                 int Remainder,
+                                 int MyProc,
+                                 s64Int ProcNumUpdates,
+                                 MPI_Datatype INT64_DT,
+                                 MPI_Status *finish_statuses,
+                                 MPI_Request *finish_req);
+
 extern int HPCC_RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure);
 extern int HPCC_RandomAccess_LCG(HPCC_Params *params, int doIO, double *GUPs, int *failure);
 

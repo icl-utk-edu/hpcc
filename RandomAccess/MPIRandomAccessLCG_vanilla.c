@@ -122,7 +122,7 @@
 
 #ifdef RA_SANDIA_NOPT
 void
-AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
+HPCC_AnyNodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
                               u64Int TableSize,
                               s64Int LocalTableSize,
                               u64Int MinLocalTableSize,
@@ -152,7 +152,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   data = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
   send = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
 
-  ran = HPCC_starts(4*GlobalStartMyProc);
+  ran = HPCC_starts_LCG(4*GlobalStartMyProc);
 
   offsets = (u64Int *) malloc((NumProcs+1)*sizeof(u64Int));
   MPI_Allgather(&GlobalStartMyProc,1,INT64_DT,offsets,1,INT64_DT,
@@ -160,13 +160,13 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   offsets[NumProcs] = TableSize;
 
   niterate = 4 * TableSize / NumProcs / CHUNK + 1;
-  nglobalm1 = TableSize - 1;
+  nglobalm1 = 64 - logTableSize;
 
   /* actual update loop: this is only section that should be timed */
 
   for (iterate = 0; iterate < niterate; iterate++) {
     for (i = 0; i < CHUNK; i++) {
-      ran = (ran << 1) ^ ((s64Int) ran < ZERO64B ? POLY : ZERO64B);
+      ran = LCG_MUL64 * ran + LCG_ADD64;
       data[i] = ran;
     }
     ndata = CHUNK;
@@ -182,12 +182,12 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
       nkeep = nsend = 0;
       if (MyProc < procmid) {
         for (i = 0; i < ndata; i++) {
-          if ((data[i] & nglobalm1) >= indexmid) send[nsend++] = data[i];
+          if ((data[i] >> nglobalm1) >= indexmid) send[nsend++] = data[i];
           else data[nkeep++] = data[i];
         }
       } else {
         for (i = 0; i < ndata; i++) {
-          if ((data[i] & nglobalm1) < indexmid) send[nsend++] = data[i];
+          if ((data[i] >> nglobalm1) < indexmid) send[nsend++] = data[i];
           else data[nkeep++] = data[i];
         }
       }
@@ -243,7 +243,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 
     for (i = 0; i < ndata; i++) {
       datum = data[i];
-      index = (datum & nglobalm1) - GlobalStartMyProc;
+      index = (datum >> nglobalm1) - GlobalStartMyProc;
       HPCC_Table[index] ^= datum;
     }
   }
@@ -256,7 +256,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 }
 
 void
-Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
+HPCC_Power2NodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
                                  u64Int TableSize,
                                  s64Int LocalTableSize,
                                  u64Int MinLocalTableSize,
@@ -273,7 +273,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 {
   int i,j;
   int logTableLocal,ipartner,iterate,niterate;
-  int ndata,nkeep,nsend,nrecv,index,nlocalm1;
+  int ndata,nkeep,nsend,nrecv,index, nglobalm1, nlocalm1;
   u64Int ran,datum,procmask;
   u64Int *data,*send;
   MPI_Status status;
@@ -283,17 +283,18 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
   data = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
   send = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
 
-  ran = HPCC_starts(4*GlobalStartMyProc);
+  ran = HPCC_starts_LCG(4*GlobalStartMyProc);
 
   niterate = ProcNumUpdates / CHUNK;
   logTableLocal = logTableSize - logNumProcs;
   nlocalm1 = LocalTableSize - 1;
+  nglobalm1 = 64 - logTableSize;
 
   /* actual update loop: this is only section that should be timed */
 
   for (iterate = 0; iterate < niterate; iterate++) {
     for (i = 0; i < CHUNK; i++) {
-      ran = (ran << 1) ^ ((s64Int) ran < ZERO64B ? POLY : ZERO64B);
+      ran = LCG_MUL64 * ran + LCG_ADD64;
       data[i] = ran;
     }
     ndata = CHUNK;
@@ -301,7 +302,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
     for (j = 0; j < logNumProcs; j++) {
       nkeep = nsend = 0;
       ipartner = (1 << j) ^ MyProc;
-      procmask = ((u64Int) 1) << (logTableLocal + j);
+      procmask = ((u64Int) 1) << (nglobalm1 + logTableLocal + j);
       if (ipartner > MyProc) {
         for (i = 0; i < ndata; i++) {
           if (data[i] & procmask) send[nsend++] = data[i];
@@ -323,8 +324,8 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 
     for (i = 0; i < ndata; i++) {
       datum = data[i];
-      index = datum & nlocalm1;
-      HPCC_Table[index] ^= datum;
+      index = datum >> nglobalm1;
+      HPCC_Table[index & nlocalm1] ^= datum;
     }
   }
 

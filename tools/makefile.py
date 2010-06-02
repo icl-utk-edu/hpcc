@@ -77,7 +77,8 @@ allDeps = (
                           "../../../../RandomAccess/verification.h"),
      ("MPIRandomAccess", "buckets", "core_single_cpu_lcg", "core_single_cpu", "heap", "pool", "single_cpu_lcg",
       "single_cpu", "star_single_cpu_lcg", "star_single_cpu", "time_bound", "utility", "verification_lcg", "verification",
-      "MPIRandomAccess_vanilla", "MPIRandomAccess_opt", "MPIRandomAccessLCG"), "-I../../../../include $(CCFLAGS)"),
+      "MPIRandomAccess_vanilla", "MPIRandomAccess_opt", "MPIRandomAccessLCG", "MPIRandomAccessLCG_vanilla",
+      "MPIRandomAccessLCG_opt"), "-I../../../../include $(CCFLAGS)"),
 
     ("../STREAM/", (hhpcc, hhpl),
      ("onecpu", "stream"), "-I../../../../include $(CCFLAGS)"),

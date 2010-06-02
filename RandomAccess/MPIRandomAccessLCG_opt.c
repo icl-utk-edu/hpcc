@@ -117,12 +117,15 @@
 #include "time_bound.h"
 #include "verification.h"
 
-#define CHUNK    MAX_TOTAL_PENDING_UPDATES
-#define CHUNKBIG (32*CHUNK)
+#define CHUNK       MAX_TOTAL_PENDING_UPDATES
+#define CHUNKBIG    (32*CHUNK)
+#define RCHUNK      (16384)
+#define PITER       8
+#define MAXLOGPROCS 20
 
-#ifdef RA_SANDIA_NOPT
+#ifdef RA_SANDIA_OPT2
 void
-AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
+HPCC_AnyNodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
                               u64Int TableSize,
                               s64Int LocalTableSize,
                               u64Int MinLocalTableSize,
@@ -152,7 +155,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   data = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
   send = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
 
-  ran = HPCC_starts(4*GlobalStartMyProc);
+  ran = HPCC_starts_LCG(4*GlobalStartMyProc);
 
   offsets = (u64Int *) malloc((NumProcs+1)*sizeof(u64Int));
   MPI_Allgather(&GlobalStartMyProc,1,INT64_DT,offsets,1,INT64_DT,
@@ -160,13 +163,13 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   offsets[NumProcs] = TableSize;
 
   niterate = 4 * TableSize / NumProcs / CHUNK + 1;
-  nglobalm1 = TableSize - 1;
+  nglobalm1 = 64 - logTableSize;
 
   /* actual update loop: this is only section that should be timed */
 
   for (iterate = 0; iterate < niterate; iterate++) {
     for (i = 0; i < CHUNK; i++) {
-      ran = (ran << 1) ^ ((s64Int) ran < ZERO64B ? POLY : ZERO64B);
+      ran = LCG_MUL64 * ran + LCG_ADD64;
       data[i] = ran;
     }
     ndata = CHUNK;
@@ -182,12 +185,12 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
       nkeep = nsend = 0;
       if (MyProc < procmid) {
         for (i = 0; i < ndata; i++) {
-          if ((data[i] & nglobalm1) >= indexmid) send[nsend++] = data[i];
+          if ((data[i] >> nglobalm1) >= indexmid) send[nsend++] = data[i];
           else data[nkeep++] = data[i];
         }
       } else {
         for (i = 0; i < ndata; i++) {
-          if ((data[i] & nglobalm1) < indexmid) send[nsend++] = data[i];
+          if ((data[i] >> nglobalm1) < indexmid) send[nsend++] = data[i];
           else data[nkeep++] = data[i];
         }
       }
@@ -243,7 +246,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 
     for (i = 0; i < ndata; i++) {
       datum = data[i];
-      index = (datum & nglobalm1) - GlobalStartMyProc;
+      index = (datum >> nglobalm1) - GlobalStartMyProc;
       HPCC_Table[index] ^= datum;
     }
   }
@@ -255,8 +258,105 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   free(offsets);
 }
 
+/* This sort is manually unrolled to make sure the compiler can see
+ * the parallelism -KDU
+ */
+
+static
+void sort_data(u64Int *source, u64Int *nomatch, u64Int *match, int number,
+               int *nnomatch, int *nmatch, int mask_shift)
+{
+  int i,dindex,myselect[8],counts[2];
+  int div_num = number / 8;
+  int loop_total = div_num * 8;
+  u64Int procmask = ((u64Int) 1) << mask_shift;
+  u64Int *buffers[2];
+
+  buffers[0] = nomatch;
+  counts[0] = *nnomatch;
+  buffers[1] = match;
+  counts[1] = *nmatch;
+
+  for (i = 0; i < div_num; i++) {
+    dindex = i*8;
+    myselect[0] = (source[dindex] & procmask) >> mask_shift;
+    myselect[1] = (source[dindex+1] & procmask) >> mask_shift;
+    myselect[2] = (source[dindex+2] & procmask) >> mask_shift;
+    myselect[3] = (source[dindex+3] & procmask) >> mask_shift;
+    myselect[4] = (source[dindex+4] & procmask) >> mask_shift;
+    myselect[5] = (source[dindex+5] & procmask) >> mask_shift;
+    myselect[6] = (source[dindex+6] & procmask) >> mask_shift;
+    myselect[7] = (source[dindex+7] & procmask) >> mask_shift;
+    buffers[myselect[0]][counts[myselect[0]]++] = source[dindex];
+    buffers[myselect[1]][counts[myselect[1]]++] = source[dindex+1];
+    buffers[myselect[2]][counts[myselect[2]]++] = source[dindex+2];
+    buffers[myselect[3]][counts[myselect[3]]++] = source[dindex+3];
+    buffers[myselect[4]][counts[myselect[4]]++] = source[dindex+4];
+    buffers[myselect[5]][counts[myselect[5]]++] = source[dindex+5];
+    buffers[myselect[6]][counts[myselect[6]]++] = source[dindex+6];
+    buffers[myselect[7]][counts[myselect[7]]++] = source[dindex+7];
+  }
+
+  for (i = loop_total; i < number; i++) {
+    u64Int mydata = source[i];
+    if (mydata & procmask) buffers[1][counts[1]++] = mydata;
+    else buffers[0][counts[0]++] = mydata;
+  }
+
+  *nnomatch = counts[0];
+  *nmatch = counts[1];
+}
+
+/* Manual unrolling is a significant win if -Msafeptr is used -KDU */
+
+static
+void update_table(u64Int *data, u64Int *table, int number, int nglobalm1, int nlocalm1)
+{
+  int i,dindex,index;
+  int div_num = number / 8;
+  int loop_total = div_num * 8;
+  u64Int index0,index1,index2,index3,index4,index5,index6,index7;
+  u64Int ltable0,ltable1,ltable2,ltable3,ltable4,ltable5,ltable6,ltable7;
+
+  for (i = 0; i < div_num; i++) {
+    dindex = i*8;
+
+    index0 = (data[dindex] >> nglobalm1) & nlocalm1;
+    index1 = (data[dindex+1] >> nglobalm1) & nlocalm1;
+    index2 = (data[dindex+2] >> nglobalm1) & nlocalm1;
+    index3 = (data[dindex+3] >> nglobalm1) & nlocalm1;
+    index4 = (data[dindex+4] >> nglobalm1) & nlocalm1;
+    index5 = (data[dindex+5] >> nglobalm1) & nlocalm1;
+    index6 = (data[dindex+6] >> nglobalm1) & nlocalm1;
+    index7 = (data[dindex+7] >> nglobalm1) & nlocalm1;
+    ltable0 = table[index0];
+    ltable1 = table[index1];
+    ltable2 = table[index2];
+    ltable3 = table[index3];
+    ltable4 = table[index4];
+    ltable5 = table[index5];
+    ltable6 = table[index6];
+    ltable7 = table[index7];
+
+    table[index0] = ltable0 ^ data[dindex];
+    table[index1] = ltable1 ^ data[dindex+1];
+    table[index2] = ltable2 ^ data[dindex+2];
+    table[index3] = ltable3 ^ data[dindex+3];
+    table[index4] = ltable4 ^ data[dindex+4];
+    table[index5] = ltable5 ^ data[dindex+5];
+    table[index6] = ltable6 ^ data[dindex+6];
+    table[index7] = ltable7 ^ data[dindex+7];
+  }
+
+  for (i = loop_total; i < number; i++) {
+    u64Int datum = data[i];
+    index = (datum >> nglobalm1) & nlocalm1;
+    table[index] ^= datum;
+  }
+}
+
 void
-Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
+HPCC_Power2NodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
                                  u64Int TableSize,
                                  s64Int LocalTableSize,
                                  u64Int MinLocalTableSize,
@@ -271,66 +371,98 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
                                  MPI_Status *finish_statuses,
                                  MPI_Request *finish_req)
 {
-  int i,j;
-  int logTableLocal,ipartner,iterate,niterate;
-  int ndata,nkeep,nsend,nrecv,index,nlocalm1;
-  u64Int ran,datum,procmask;
-  u64Int *data,*send;
+  int i,j,k;
+  int logTableLocal,ipartner,iterate,niterate,iter_mod;
+  int ndata,nkeep,nsend,nrecv, nglobalm1, nlocalm1, nkept;
+  u64Int ran,datum;
+  u64Int *data,*send,*send1,*send2;
+  u64Int *recv[PITER][MAXLOGPROCS];
   MPI_Status status;
+  MPI_Request request[PITER][MAXLOGPROCS];
+  MPI_Request srequest;
 
   /* setup: should not really be part of this timed routine */
 
   data = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
-  send = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
+  send1 = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
+  send2 = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
+  send = send1;
 
-  ran = HPCC_starts(4*GlobalStartMyProc);
+  for (j = 0; j < PITER; j++)
+    for (i = 0; i < logNumProcs; i++)
+      recv[j][i] = (u64Int *) malloc(sizeof(u64Int)*RCHUNK);
+
+  ran = HPCC_starts_LCG(4*GlobalStartMyProc);
 
   niterate = ProcNumUpdates / CHUNK;
   logTableLocal = logTableSize - logNumProcs;
+  nglobalm1 = 64 - logTableSize;
   nlocalm1 = LocalTableSize - 1;
 
   /* actual update loop: this is only section that should be timed */
 
   for (iterate = 0; iterate < niterate; iterate++) {
+    iter_mod = iterate % PITER;
     for (i = 0; i < CHUNK; i++) {
-      ran = (ran << 1) ^ ((s64Int) ran < ZERO64B ? POLY : ZERO64B);
+      ran = LCG_MUL64 * ran + LCG_ADD64;
       data[i] = ran;
     }
-    ndata = CHUNK;
+    nkept = CHUNK;
+    nrecv = 0;
+
+    if (iter_mod == 0)
+      for (k = 0; k < PITER; k++)
+        for (j = 0; j < logNumProcs; j++) {
+          ipartner = (1 << j) ^ MyProc;
+          MPI_Irecv(recv[k][j],RCHUNK,INT64_DT,ipartner,0,MPI_COMM_WORLD,
+                    &request[k][j]);
+        }
 
     for (j = 0; j < logNumProcs; j++) {
       nkeep = nsend = 0;
+      send = (send == send1) ? send2 : send1;
       ipartner = (1 << j) ^ MyProc;
-      procmask = ((u64Int) 1) << (logTableLocal + j);
       if (ipartner > MyProc) {
-        for (i = 0; i < ndata; i++) {
-          if (data[i] & procmask) send[nsend++] = data[i];
-          else data[nkeep++] = data[i];
+      	sort_data(data,data,send,nkept,&nkeep,&nsend,nglobalm1 + logTableLocal+j);
+        if (j > 0) {
+          MPI_Wait(&request[iter_mod][j-1],&status);
+          MPI_Get_count(&status,INT64_DT,&nrecv);
+      	  sort_data(recv[iter_mod][j-1],data,send,nrecv,&nkeep,
+                    &nsend,nglobalm1 + logTableLocal+j);
         }
       } else {
-        for (i = 0; i < ndata; i++) {
-          if (data[i] & procmask) data[nkeep++] = data[i];
-          else send[nsend++] = data[i];
+        sort_data(data,send,data,nkept,&nsend,&nkeep,nglobalm1 + logTableLocal+j);
+        if (j > 0) {
+          MPI_Wait(&request[iter_mod][j-1],&status);
+          MPI_Get_count(&status,INT64_DT,&nrecv);
+          sort_data(recv[iter_mod][j-1],send,data,nrecv,&nsend,
+                    &nkeep,nglobalm1 + logTableLocal+j);
         }
       }
+      if (j > 0) MPI_Wait(&srequest,&status);
+      MPI_Isend(send,nsend,INT64_DT,ipartner,0,MPI_COMM_WORLD,&srequest);
+      if (j == (logNumProcs - 1)) update_table(data,HPCC_Table,nkeep,nglobalm1, nlocalm1);
+      nkept = nkeep;
+    }
 
-      MPI_Sendrecv(send,nsend,INT64_DT,ipartner,0,
-                   &data[nkeep],CHUNKBIG,INT64_DT,
-                   ipartner,0,MPI_COMM_WORLD,&status);
+    if (logNumProcs == 0) update_table(data,HPCC_Table,nkept,nglobalm1, nlocalm1);
+    else {
+      MPI_Wait(&request[iter_mod][j-1],&status);
       MPI_Get_count(&status,INT64_DT,&nrecv);
-      ndata = nkeep + nrecv;
+      update_table(recv[iter_mod][j-1],HPCC_Table,nrecv,nglobalm1, nlocalm1);
+      MPI_Wait(&srequest,&status);
     }
 
-    for (i = 0; i < ndata; i++) {
-      datum = data[i];
-      index = datum & nlocalm1;
-      HPCC_Table[index] ^= datum;
-    }
+    ndata = nkept + nrecv;
   }
 
   /* clean up: should not really be part of this timed routine */
 
+  for (j = 0; j < PITER; j++)
+    for (i = 0; i < logNumProcs; i++) free(recv[j][i]);
+
   free(data);
-  free(send);
+  free(send1);
+  free(send2);
 }
 #endif

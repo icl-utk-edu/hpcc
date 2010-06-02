@@ -210,7 +210,14 @@ through the web form at the HPC~Challenge website.
 
 \section{Source Code Changes across Versions (ChangeLog)}
 
-\subsection{Version 1.4.0 (2009-03-26)}
+\subsection{Version 1.4.1 (2010-06-01)}
+\begin{enumerate}
+\item Added optimized variants of RandomAccess that use Linear Congruential Generator for random number generation.
+\item Made corrections to comments that provide definition of the RandomAccess test.
+\item Removed initialization of the main array from the timed section of optimized versions of RandomAccess.
+\end{enumerate}
+
+\subsection{Version 1.4.0 (2010-03-26)}
 \begin{enumerate}
 \item Added new variant of RandomAccess that uses Linear Congruential Generator for random number generation.
 \item Rearranged the order of benchmarks so that HPL component runs last and may be aborted

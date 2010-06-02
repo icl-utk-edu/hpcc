@@ -49,7 +49,7 @@
  * "look ahead" and "stored updates" are being implemented to assure that the
  * benchmark meets the intent to profile memory architecture and not induce
  * significant artificial data locality. For the purpose of measuring GUPS,
- * we will stipulate that each thread is permitted to look ahead no more than
+ * we will stipulate that each process is permitted to look ahead no more than
  * 1024 random address stream samples with the same number of update messages
  * stored before processing.
  *
@@ -154,9 +154,6 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 
   data = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
   send = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
-
-  for (i = 0; i < LocalTableSize; i++)
-    HPCC_Table[i] = i + GlobalStartMyProc;
 
   ran = HPCC_starts(4*GlobalStartMyProc);
 
@@ -394,9 +391,6 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
   for (j = 0; j < PITER; j++)
     for (i = 0; i < logNumProcs; i++)
       recv[j][i] = (u64Int *) malloc(sizeof(u64Int)*RCHUNK);
-
-  for (i = 0; i < LocalTableSize; i++)
-    HPCC_Table[i] = i + GlobalStartMyProc;
 
   ran = HPCC_starts(4*GlobalStartMyProc);
 

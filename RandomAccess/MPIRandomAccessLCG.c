@@ -49,7 +49,7 @@
  * "look ahead" and "stored updates" are being implemented to assure that the
  * benchmark meets the intent to profile memory architecture and not induce
  * significant artificial data locality. For the purpose of measuring GUPS,
- * we will stipulate that each thread is permitted to look ahead no more than
+ * we will stipulate that each process is permitted to look ahead no more than
  * 1024 random address stream samples with the same number of update messages
  * stored before processing.
  *
@@ -126,6 +126,7 @@ Sum64(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
 }
 #endif
 
+#ifdef HPCC_RA_STDALG
 void
 HPCC_AnyNodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
                               u64Int TableSize,
@@ -182,7 +183,7 @@ HPCC_AnyNodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
    *     Ran = 1;
    *     for (i=0; i<NUPDATE; i++) {
    *       Ran = LCG_MUL64 * Ran + LCG_ADD64;
-   *       Table[Ran >> 64 - LOG2_TABSIZE] ^= Ran;
+   *       Table[Ran >> (64 - LOG2_TABSIZE)] ^= Ran;
    *     }
    */
 
@@ -447,7 +448,7 @@ HPCC_Power2NodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
    *     Ran = 1;
    *     for (i=0; i<NUPDATE; i++) {
    *       Ran = LCG_MUL64 * Ran + LCG_ADD64;
-   *       Table[Ran >> 64 - LOG2_TABSIZE] ^= Ran;
+   *       Table[Ran >> (64 - LOG2_TABSIZE)] ^= Ran;
    *     }
    */
 
@@ -646,6 +647,7 @@ HPCC_Power2NodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
 
   /* end multiprocessor code */
 }
+#endif
 
 int
 HPCC_MPIRandomAccess_LCG(HPCC_Params *params) {
