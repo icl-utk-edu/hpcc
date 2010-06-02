@@ -15,7 +15,7 @@
 \usepackage{url}
 \usepackage[margin=2cm]{geometry}
 \begin{document}
-\title{DARPA/DOE HPC~Challenge Benchmark version 1.4.0}
+\title{DARPA/DOE HPC~Challenge Benchmark version 1.4.1}
 \author{Piotr Luszczek\footnote{University of Tennessee Knoxville, Innovative
 Computing Laboratory}}
 \maketitle
@@ -98,13 +98,17 @@ receives will be posted simultaneously. By default only one non-blocking
 receive is posted.
 \item \texttt{RA\_SANDIA\_NOPT}: if this symbol is defined the
 HPC~Challenge standard algorithm for Global RandomAccess will not be
-used. Instead, instead an alternative implementation from Sandia
-National Laboratory will be used.
+used. Instead, an alternative implementation from Sandia
+National Laboratory will be used. It routes messages in software
+across virtual hyper-cube topology formed from MPI processes.
 \item \texttt{RA\_SANDIA\_OPT2}: if this symbol is defined the
 HPC~Challenge standard algorithm for Global RandomAccess will not be
 used. Instead, instead an alternative implementation from Sandia
 National Laboratory will be used. This implementation is optimized for
-number of processors being powers of two.
+number of processors being powers of two. The optimizations
+are sorting of data before sending and unrolling the data update
+loop. If the number of process is not a power two then the code
+is the same as the one performed with the \texttt{RA\_SANDIA\_NOPT} setting.
 \item \texttt{USING\_FFTW}: if this symbol is defined the standard
 HPC~Challenge FFT implemenation~(called FFTE) will not be used.
 Instead, FFTW library will be called. Defining the
@@ -215,6 +219,7 @@ through the web form at the HPC~Challenge website.
 \item Added optimized variants of RandomAccess that use Linear Congruential Generator for random number generation.
 \item Made corrections to comments that provide definition of the RandomAccess test.
 \item Removed initialization of the main array from the timed section of optimized versions of RandomAccess.
+\item Updated documentation in README.
 \end{enumerate}
 
 \subsection{Version 1.4.0 (2010-03-26)}
