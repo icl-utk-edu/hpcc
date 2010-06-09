@@ -219,6 +219,8 @@ through the web form at the HPC~Challenge website.
 \item Added optimized variants of RandomAccess that use Linear Congruential Generator for random number generation.
 \item Made corrections to comments that provide definition of the RandomAccess test.
 \item Removed initialization of the main array from the timed section of optimized versions of RandomAccess.
+\item Fixed the length of the vector used to compute error when using MPI implementation from FFTW.
+\item Added global reduction to error calculation to achieve more accurate error estimate.
 \item Updated documentation in README.
 \end{enumerate}
 
