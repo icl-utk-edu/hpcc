@@ -3,7 +3,7 @@
 
 cblacslt.c
 
--- V0.0 CBLACS Lite routines --
+-- V0.0 Stripped-down BLACS routines --
 University of Tennessee, October, 2003
 Written by Piotr Luszczek.
 
