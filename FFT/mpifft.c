@@ -121,12 +121,14 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
   HPCC_bcnrand( 2 * tls, 53 * commRank * 2 * tls, work ); /* regenerate data */
 
   maxErr = 0.0;
-  for (i = 0; i < tls; ++i) {
+  for (i = 0; i < locn; ++i) {
     tmp1 = c_re( inout[i] ) - c_re( work[i] );
     tmp2 = c_im( inout[i] ) - c_im( work[i] );
     tmp3 = sqrt( tmp1*tmp1 + tmp2*tmp2 );
     maxErr = maxErr >= tmp3 ? maxErr : tmp3;
   }
+  MPI_Allreduce( &maxErr, UmaxErr, 1, MPI_DOUBLE, MPI_MAX, comm );
+  maxErr = *UmaxErr;
   if (maxErr / log(n) / deps < params->test.thrsh) failure = 0;
 
   if (t2 > 0.0) Gflops = 1e-9 * (5.0 * n * log(n) / log(2.0)) / t2;
