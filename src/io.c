@@ -276,6 +276,8 @@ HPCC_Init(HPCC_Params *params) {
   params->RunSingleRandomAccess = 0;
   params->RunLatencyBandwidth = 0;
   params->RunMPIFFT = 0;
+  params->RunStarFFT = 0;
+  params->RunSingleFFT = 0;
   params->RunHPL = params->RunStarDGEMM = params->RunSingleDGEMM =
   params->RunPTRANS = params->RunStarStream = params->RunSingleStream =
   params->RunMPIRandomAccess_LCG = params->RunStarRandomAccess_LCG = params->RunSingleRandomAccess_LCG =
