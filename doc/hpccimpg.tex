@@ -1,0 +1,98 @@
+\documentclass[twocolumn]{article}
+
+% fonts
+\usepackage{mathptmx}
+\usepackage[adobe-utopia]{mathdesign}
+
+\usepackage[margin=5em,screen]{geometry}
+
+\begin{document}
+
+\section{FFT}
+
+\subsection{Single Node FFT using FFTE}
+Original FFTE 3.2beta2 in Fortran has a fixed size array allocated at compile
+time. This sets the largest possible size of of input vectors. The C code
+should do better with dynamic memory allocation.
+
+\subsubsection{Sizes for Twiddle Factors' Arrays}
+
+Input vector size might be (this is the best case scenario):
+\[ n=2^{2k_2}3^{2k_3}5^{2k_5} \]
+and $\sqrt{n}$:
+\[ \sqrt{n}=2^{k_2}3^{k_3}5^{k_5} \]
+which gives $n_1$ and $n_2$:
+\[ n_1=n_2=\sqrt{n} \]
+
+Input vector size might be (this is the worst case scenario):
+\[ n=2^{2k_2+1}3^{2k_3+1}5^{2k_5+1} \]
+and $\sqrt{n}$:
+\[ \sqrt{n}=2^{k_2}3^{k_3}5^{k_5}\sqrt{2\cdot 3\cdot 5} \]
+which gives $n_1$ and $n_2$:
+\[ n_1=\sqrt{n}\sqrt{2\cdot 3\cdot 5} \]
+\[ n_2=\sqrt{n}/\sqrt{2\cdot 3\cdot 5} \]
+with
+\[ \sqrt{2\cdot 3\cdot 5}\approx 5.4772255750516612 \]
+
+Bounds for $n_1$ and $n_2$:
+\begin{eqnarray*}
+\sqrt{n} \quad \le & n_1 & \le \quad \sqrt{n} \sqrt{2\cdot3\cdot5} \\
+\sqrt{n}/\sqrt{2\cdot3\cdot5} \quad \le & n_2 & \le \quad \sqrt{n} \\
+\end{eqnarray*}
+
+Bounds for $m_1$ and $m_2$:
+\begin{eqnarray*}
+\sqrt[4]{n} \quad \le & m_1 & \le \quad \sqrt[4]{n} \sqrt[4]{2\cdot 3\cdot 5} \\
+\sqrt[4]{n}/(2\cdot 3\cdot 5)^{3/4} \quad \le & m_2 & \le \quad \sqrt[4]{n} \\
+\end{eqnarray*}
+with
+\[ \sqrt[4]{2\cdot 3\cdot 5}\approx 2.340347319320716 \]
+
+Temporary arrays have the following sizes then: \\
+\texttt{w1[} $\max\{\texttt{L2SIZE}, \texttt{NDA2}, n_1\}$ \texttt{]} \\
+\texttt{w2[} $n_2$ \texttt{]} \\
+\texttt{ww[} $L$ \texttt{]} combined storage for \texttt{ww1},\texttt{ww2},\texttt{ww3},\texttt{ww4} \\
+with:
+\[ L = m_1\cdot m_2 + m_2\cdot \frac{n_1}{m_1} + m_1\cdot\frac{n_2}{m_2} + \frac{n_1}{m_1}\cdot\frac{n_2}{m_2}\]
+\[ L = m_2\left(m_1+\frac{n_1}{m_1}\right) + \frac{n_2}{m_2}\left(m_1 + \frac{n_1}{m_1}\right)\]
+\[ L = \left(m_2 + \frac{n_2}{m_2}\right)\left(m_1+\frac{n_1}{m_1}\right) \]
+\[ L \le \left( \sqrt[4]{n} + \frac{\sqrt{n}}{\sqrt[4]{n}/(2\cdot3\cdot5)^{3/4}} \right)
+        \left( \sqrt[4]{n}\sqrt[4]{2\cdot3\cdot5} + \frac{\sqrt{n}\sqrt{2\cdot3\cdot5}}{\sqrt[4]{n}} \right) \]
+\[ L \le \sqrt[4]{n} \left( 1 + (2\cdot3\cdot5)^{3/4} \right) \sqrt[4]{n} \left( \sqrt[4]{2\cdot3\cdot5} + \sqrt{2\cdot3\cdot5}\right) \]
+\[ L \le \sqrt{n} \left( 1 + (2\cdot3\cdot5)^{3/4} \right) \left( 1 + \sqrt[4]{2\cdot3\cdot5}\right) \sqrt[4]{2\cdot3\cdot5} \]
+with
+\[ \left( 1 + (2\cdot3\cdot5)^{3/4} \right) \left( 1 + \sqrt[4]{2\cdot3\cdot5}\right) \sqrt[4]{2\cdot3\cdot5} \approx 108.02799247399386 \]
+
+\subsubsection{Sizes for the Remaining Working Arrays}
+
+\begin{itemize}
+\item \texttt{\mbox{ }C[} $L_C$ \texttt{]}
+\item \texttt{\mbox{ }D[} $L_D$ \texttt{]}
+\end{itemize}
+
+Call graph:
+\begin{itemize}
+\item \texttt{zfft1d}
+  \begin{itemize}
+  \item \texttt{zfft1d0(*,*,*,D)}
+    \begin{itemize}
+    \item \texttt{fft235(*,D,*,n2)}
+      \begin{itemize}
+      \item \texttt{fft8(D, D, m, l)} \\
+        \textbullet\mbox{ } \texttt{fft8a(D[l,8], D[8,l], l)} \\
+        \textbullet\mbox{ } \texttt{fft8b(D[m,l,8], D[m,8,l], m, l)}
+      \item \texttt{fft5(*,D)}
+      \item \texttt{fft5(D,*)}
+      \item \texttt{fft4(*,D)}
+      \item \texttt{fft4(D,*)}
+      \item \texttt{fft3(*,D)}
+      \item \texttt{fft3(D,*)}
+      \item \texttt{fft2(*,D)}
+      \item \texttt{fft2(D,*)}
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+
+\end{document}
