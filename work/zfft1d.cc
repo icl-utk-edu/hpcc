@@ -251,7 +251,7 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
 
   if (1 == iopt)
     for (i = 0; i < n; ++i) {
-      c_im( a[i] ) = -c_im( a[i] );
+      c_im( a->sqbracket(i) ) = -c_im( a->sqbracket(i) );
     }
 
   if (n <= FFTE_L2SIZE / 16 / 3 && n <= FFTE_NDA2) {
@@ -290,7 +290,7 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
     if (0 == iopt) {
       HPCC_settbl( w1, n1 );
       HPCC_settbl( w2, n2 );
-      settbls( ww, ww + nw2, ww + nw3, ww + nw4, n1, n2, m1, m2 );
+      settbls( ww, p->ww2, p->ww3, p->ww4, n1, n2, m1, m2 );
       return 0;
     }
 
@@ -303,7 +303,7 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
     c = p->c + i*p->c_size;
 #endif
 
-    zfft1d0( a, a, b, c, d, w1, w2, ww, ww + nw2, ww + nw3, ww + nw4, n1, n2, m1, m2, ip1, ip2 );
+    zfft1d0( a, a, b, c, d, w1, w2, ww, p->ww2, p->ww3, p->ww4, n1, n2, m1, m2, ip1, ip2 );
 
 #ifdef _OPENMP
    }
@@ -314,8 +314,8 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
   if (1 == iopt) {
     dn = 1.0 / (double)n;
     for (i = 0; i < n; ++i) {
-      c_re( a[i] ) *= dn;
-      c_im( a[i] ) *= -dn;
+      c_re( a->sqbracket(i) ) *= dn;
+      c_im( a->sqbracket(i) ) *= -dn;
     }
   }
 

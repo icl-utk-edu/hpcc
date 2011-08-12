@@ -1,0 +1,27 @@
+On 7/2/2011 11:05 AM, Piotr Luszczek wrote:
+John,
+
+thank you for the report. I would definitely like to see
+more details on this. My access to large machines
+is limited to few architectures. Maybe that's why
+I'm not seeing this on my side.
+
+Well, this one was very strange.  I've been running HPCC 1.4.1 with FFTE for a while on a wide number of systems without seeing problems.  But recently on SGI UV systems I started seeing glibc heap corruption errors in StarFFT.  The same binary, MPI library, and input libraries that ran successfully on one of our clusters gave the heap errors on UV.  I can reproduce the problem with only a single MPI rank.  And using Totalview, the memory checker found the array bounds overrun.
+
+Hopefully you'll be able to reproduce what I'm seeing under the following conditions:
+
+src/io.c modified to run only StarFFT
+P = Q = 1
+N = 20120
+
+Compile with -DHPCC_FFT_235 (I also use -DHPCC_MEMALLCTR -DRA_SANDIA_OPT2, not sure if the former plays a role).
+I use -g optimization so I don't think it's a compiler issue.
+
+For this case when HPCC_fftw_create_plan() is called, p->ww has 262184 elements.  This routine calls HPCC_zfft1d(), from which settbls() is called with 4th argument w4 = ww+nw4, where nw4 is 41752.
+
+In settbls() w4 is initialized in a double loop with loop variable 'is' ranging up to n2/m2-1 = 161 and 'ir' ranging up to n1/m1-1 = 2429, with ldw4 = 2430.  With ARR2D(w4,ir,is,ldw4) expanding to w4[ir+is*ldw4], the maximum array element is 2429+161*2430 = 393659, which is well past the allocated end index 262184-41752 = 220432.
+
+Totalview dies when the index hits 220432.  When I run outside of Totalview (on UV), the job doesn't die until HPCC_fftw_destroy_plan() tries to free p->ww.  And as I said on some systems the job doesn't die at all and the results produced are correct.
+
+thanks,
+John
