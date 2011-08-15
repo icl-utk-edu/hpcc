@@ -59,6 +59,6 @@ extern int HPCC_bcnrand(u64Int_t n, u64Int_t a, void *x);
 #define ARR4D(a, i, j, k, l, lda1, lda2, lda3) a[(i)+(lda1)*((j)+(lda2)*((k)+(lda3)*(l)))]
 #define c_mul3v(v, v1, v2) c_re(v) = c_re(v1) * c_re(v2) - c_im(v1) * c_im(v2); c_im(v) = c_re(v1) * c_im(v2) + c_im(v1) * c_re(v2)
 #define c_assgn(d, s) c_re(d)=c_re(s);c_im(d)=c_im(s)
-#define V3MIN(r, e, v) r = e; V2MIN(r, v)
-#define V2MIN(r, v) r = v < r ? v : r
-#define EMAX(d, v, e) d=e; d=d>v?d:v
+#define V3MIN(r, e, v) r = (e); V2MIN(r, v)
+#define V2MIN(r, v) r = (v) < r ? (v) : r
+#define EMAX(d, v, e) d=(e); d=d>(v)?d:(v)

@@ -268,19 +268,17 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
 
     if (HPCC_ipow( 2, ip1[0] ) < FFTE_NBLK || HPCC_ipow( 2, ip2[0] ) < FFTE_NBLK) {
       m1 = HPCC_ipow( 2, ip1[0] / 2 ) * HPCC_ipow( 3, ip1[1] / 2 ) * HPCC_ipow( 5, ip1[2] / 2 );
-      V2MIN( m1, n1 );
 
       m2 = HPCC_ipow( 2, ip2[0] / 2 ) * HPCC_ipow( 3, ip2[1] / 2 ) * HPCC_ipow( 5, ip2[2] / 2 );
-      V2MIN( m2, n2 );
     } else {
       m1 = HPCC_ipow( 2, ip1[0] / 2);
       m1 = FFTE_NBLK > m1 ? FFTE_NBLK : m1;
-      V2MIN( m1, n1 );
 
       m2 = HPCC_ipow( 2, ip2[0] / 2);
       m2 = FFTE_NBLK > m2 ? FFTE_NBLK : m2;
-      V2MIN( m2, n2 );
     }
+    V2MIN( m1, n1 );
+    V2MIN( m2, n2 );
     nw2 = m1 * m2 + FFTE_NP;
     nw3 = nw2 + m1 * (n2 / m2) + FFTE_NP;
     nw4 = nw3 + m2 * (n1 / m1) + FFTE_NP;
