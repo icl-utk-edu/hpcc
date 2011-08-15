@@ -20,9 +20,31 @@ typedef struct hpcc_fftw_plan_s {
  fftw_complex_ptr w1, w2, ww, ww2, ww3, ww4, c, d;
 } *hpcc_fftw_plan;
 
-extern double *ARR1D(fftw_complex_ptr, int i);
-extern double *ARR2D(fftw_complex_ptr, int i, int j, int ld);
-extern double *ARR3D(fftw_complex_ptr, int i, int j, int k, int ld1, int ld2);
+extern double G_val;
+
+static double *
+arraccss(fftw_complex_ptr this, int idx) {
+  *(this->last_idx) = this->offset + idx;
+  if (*(this->largest_idx) < idx)
+    *(this->largest_idx) = this->offset + idx;
+
+  return &G_val;
+}
+
+static double *
+ARR1D(fftw_complex_ptr a, int i) {
+  return arraccss( a, i );
+}
+
+static double *
+ARR2D(fftw_complex_ptr a, int i, int j, int ld) {
+  return arraccss( a, i + j * ld );
+}
+
+static double *
+ARR3D(fftw_complex_ptr a, int i, int j, int k, int ld1, int ld2) {
+  return arraccss( a, i + j * ld1 + k * ld1 * ld2 );
+}
 
 extern fftw_complex_ptr PTR1D(fftw_complex_ptr v, int i, fftw_complex_ptr tmp);
 extern fftw_complex_ptr PTR2D(fftw_complex_ptr v, int i, int j, int ld, fftw_complex_ptr tmp);

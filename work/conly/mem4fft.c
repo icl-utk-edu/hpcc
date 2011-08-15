@@ -16,30 +16,6 @@ loop_start(int upper_bound) {
   return upper_bound;
 }
 
-double *
-arraccss(fftw_complex_ptr this, int idx) {
-  *(this->last_idx) = this->offset + idx;
-  if (*(this->largest_idx) < idx)
-    *(this->largest_idx) = this->offset + idx;
-
-  return &G_val;
-}
-
-double *
-ARR1D(fftw_complex_ptr a, int i) {
-  return arraccss( a, i );
-}
-
-double *
-ARR2D(fftw_complex_ptr a, int i, int j, int ld) {
-  return arraccss( a, i + j * ld );
-}
-
-double *
-ARR3D(fftw_complex_ptr a, int i, int j, int k, int ld1, int ld2) {
-  return arraccss( a, i + j * ld1 + k * ld1 * ld2 );
-}
-
 fftw_complex_ptr
 copy_ctor(fftw_complex_ptr self, int idx, fftw_complex_ptr other) {
   self->largest_idx = other->largest_idx;
