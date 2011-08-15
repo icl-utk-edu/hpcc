@@ -39,12 +39,24 @@ impl_complex_t& fftw_complex::sqbracket(int idx) {
   return this->index_access(idx);
 }
 
-fftw_complex::fftw_complex(fftw_complex& other) {
-  this->largest_idx = other.largest_idx;
-  this->offset = other.offset;
-  this->last_idx = other.last_idx;
-  this->name = other.name;
-  this->size = other.size;
+void fftw_complex::ctor(fftw_complex* self, const fftw_complex& other, int offset) {
+  self->largest_idx = other.largest_idx;
+  self->offset = other.offset + offset;
+  self->last_idx = other.last_idx;
+  self->name = other.name;
+  self->size = other.size;
+}
+
+fftw_complex::fftw_complex(const fftw_complex& other) {
+  ctor( this, other, other.offset );
+}
+
+fftw_complex::fftw_complex(fftw_complex& other, int offset) {
+  ctor( this, other, offset );
+}
+
+fftw_complex::fftw_complex(fftw_complex* other, int offset) {
+  ctor( this, *other, offset );
 }
 
 fftw_complex::fftw_complex(const char *name, int size) {
@@ -97,11 +109,6 @@ plan_init(hpcc_fftw_plan p, int n) {
 }
 
 void
-show_single_stat(fftw_complex *fc) {
-  printf( "", fc);
-}
-
-int
 plan_show_stats(hpcc_fftw_plan p) {
   p->w1->show_stat();
   p->w2->show_stat();
@@ -113,10 +120,8 @@ plan_show_stats(hpcc_fftw_plan p) {
   p->d->show_stat();
 }
 
-int
-main(int argc, char *argv[]) {
+static void mem4fft(int n) {
   struct hpcc_fftw_plan_s ps;
-  int n = 1024;
   fftw_complex *in, *out;
 
   in = new fftw_complex("INPUT", n);
@@ -130,6 +135,21 @@ main(int argc, char *argv[]) {
   out->show_stat();
 
   plan_show_stats( &ps );
+}
+
+int
+main(int argc, char *argv[]) {
+  int i, j, n = 0, cp, nf[3] = {2, 3, 5};
+
+  for (i = 0; i < 3; ++i) {
+    if (i < argc-1 && sscanf( argv[i+1], "%d", &cp ) > 0 && cp > 0) {
+      for (j = 1; cp ; --cp)
+        j *= nf[i];
+      n += j;
+    }
+  }
+
+  mem4fft( n );
 
   return 0;
 }

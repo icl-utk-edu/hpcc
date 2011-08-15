@@ -633,18 +633,19 @@ HPCC_fft235(fftw_complex *a, fftw_complex *b, fftw_complex *w, int n, const int 
   for (k = 0; k < kp8; ++k) {
     l >>= 3; /* divide by 8 */
 
+    fftw_complex tmp = fftw_complex(w , j);
     if (l >= 2) {
       if (key > 0)
-        fft8( a, b, fftw_complex(w , j), m, l );
+        fft8( a, b, &tmp, m, l );
       else
-        fft8( b, a, fftw_complex(w , j), m, l );
+        fft8( b, a, &tmp, m, l );
 
       key = -key;
     } else {
       if (key > 0)
-        fft8( a, a, fftw_complex(w , j), m, l );
+        fft8( a, a, &tmp, m, l );
       else
-        fft8( b, a, fftw_complex(w , j), m, l );
+        fft8( b, a, &tmp, m, l );
     }
     m <<= 3; /* multiply by 8 */
     j += l;
@@ -653,18 +654,19 @@ HPCC_fft235(fftw_complex *a, fftw_complex *b, fftw_complex *w, int n, const int 
   for (k = 0; k < ip[2]; ++k) {
     l /= 5;
 
+    fftw_complex tmp = fftw_complex(w , j);
     if (l >= 2) {
       if (key > 0)
-        fft5( a, b, fftw_complex(w,j), m, l );
+        fft5( a, b, &tmp, m, l );
       else
-        fft5( b, a, fftw_complex(w,j), m, l );
+        fft5( b, a, &tmp, m, l );
 
       key = -key;
     } else {
       if (key > 0)
-        fft5( a, a, fftw_complex(w,j), m, l );
+        fft5( a, a, &tmp, m, l );
       else
-        fft5( b, a, fftw_complex(w,j), m, l );
+        fft5( b, a, &tmp, m, l );
     }
 
     m *= 5;
@@ -674,18 +676,19 @@ HPCC_fft235(fftw_complex *a, fftw_complex *b, fftw_complex *w, int n, const int 
   for (k = 0; k < kp4; ++k) {
     l >>= 2; /* divide by 4 */
 
+    fftw_complex tmp = fftw_complex(w , j);
     if (l >= 2) {
       if (key > 0)
-        fft4( a, b, fftw_complex(w , j), m, l );
+        fft4( a, b, &tmp, m, l );
       else
-        fft4( b, a, fftw_complex(w , j), m, l );
+        fft4( b, a, &tmp, m, l );
 
       key = -key;
     } else {
       if (key > 0)
-        fft4( a, a, fftw_complex(w , j), m, l );
+        fft4( a, a, &tmp, m, l );
       else
-        fft4( b, a, fftw_complex(w , j), m, l );
+        fft4( b, a, &tmp, m, l );
     }
     m <<= 2; /* multiply by 4 */
     j += l;
@@ -694,18 +697,19 @@ HPCC_fft235(fftw_complex *a, fftw_complex *b, fftw_complex *w, int n, const int 
   for (k = 0; k < ip[1]; ++k) {
     l /= 3;
 
+    fftw_complex tmp = fftw_complex(w , j);
     if (l >= 2) {
       if (key > 0)
-        fft3( a, b, fftw_complex(w,j), m, l );
+        fft3( a, b, &tmp, m, l );
       else
-        fft3( b, a, fftw_complex(w,j), m, l );
+        fft3( b, a, &tmp, m, l );
 
       key = -key;
     } else {
       if (key > 0)
-        fft3( a, a, fftw_complex(w,j), m, l );
+        fft3( a, a, &tmp, m, l );
       else
-        fft3( b, a, fftw_complex(w,j), m, l );
+        fft3( b, a, &tmp, m, l );
     }
 
     m *= 3;
@@ -758,25 +762,29 @@ HPCC_settbl(fftw_complex *w, int n) {
 
   for (k = 0; k < kp8; ++k) {
     l >>= 3; /* divide by 8 */
-    settbl0( fftw_complex(w , j), 8, l );
+    fftw_complex tmp = fftw_complex(w , j);
+    settbl0( &tmp, 8, l );
     j += l;
   }
 
   for (k = 0; k < ip[2]; ++k) {
     l /= 5;
-    settbl0( fftw_complex(w , j), 5, l );
+    fftw_complex tmp = fftw_complex(w , j);
+    settbl0( &tmp, 5, l );
     j += l;
   }
 
   for (k = 0; k < kp4; ++k) {
     l >>= 2; /* divide by 4 */
-    settbl0( fftw_complex(w , j), 4, l );
+    fftw_complex tmp = fftw_complex(w , j);
+    settbl0( &tmp, 4, l );
     j += l;
   }
 
   for (k = 0; k < ip[1]; ++k) {
     l /= 3;
-    settbl0( fftw_complex(w , j), 3, l );
+    fftw_complex tmp = fftw_complex(w , j);
+    settbl0( &tmp, 3, l );
     j += l;
   }
 

@@ -32,10 +32,12 @@ public:
   int *largest_idx, *last_idx;
   const char *name;
 
-  fftw_complex(fftw_complex& other);
+  void ctor(fftw_complex* self, const fftw_complex& other, int offset);
+  fftw_complex(const fftw_complex& other);
+  fftw_complex(fftw_complex& other, int offset);
+  fftw_complex(fftw_complex* other, int offset);
   fftw_complex(const char *name, int n);
   fftw_complex(void);
-  fftw_complex(fftw_complex *other, int offset);
 
   impl_complex_t& operator [](long unsigned int idx);
 

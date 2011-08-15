@@ -1,7 +1,7 @@
 
 CC = g++
-CFLAGS = -pipe -g
-CXXFLAGS = -pipe -g
+CFLAGS = -pipe -g -W -Wall
+CXXFLAGS = -pipe -g -W -Wall
 LDFLAGS = -g
 
 mem4fft: mem4fft.o fft235.o zfft1d.o
