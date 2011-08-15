@@ -23,14 +23,14 @@ C
 #include "hpccfft.h"
 
 static void
-fft2(fftw_complex *a, fftw_complex *b, int m) {
+fft2(fftw_complex_ptr a, fftw_complex_ptr b, int m) {
   int i, lda, ldb;
   double x0, x1, y0, y1;
 
   lda = m;
   ldb = m;
 
-  for (i = 0; i < m; ++i) {
+  for (i = loop_start(m); i < m; ++i) {
     x0 = c_re( ARR2D( a, i, 0, lda ) );
     y0 = c_im( ARR2D( a, i, 0, lda ) );
     x1 = c_re( ARR2D( a, i, 1, lda ) );
@@ -43,7 +43,7 @@ fft2(fftw_complex *a, fftw_complex *b, int m) {
 }
 
 static void
-fft4a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
+fft4a(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int l) {
   int j, lda, ldb;
   double wr1, wr2, wr3, wi1, wi2, wi3;
   double x0, x1, x2, x3, y0, y1, y2, y3;
@@ -51,9 +51,9 @@ fft4a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
   lda = l;
   ldb = 4;
 
-  for (j = 0; j < l; ++j) {
-    wr1 = c_re( w[j] );
-    wi1 = c_im( w[j] );
+  for (j = loop_start(l); j < l; ++j) {
+    wr1 = c_re( ARR1D( w, j ) );
+    wi1 = c_im( ARR1D( w, j ) );
     wr2 = wr1*wr1 - wi1*wi1;
     wi2 = wr1*wi1 + wr1*wi1;
     wr3 = wr1*wr2 - wi1*wi2;
@@ -81,7 +81,7 @@ fft4a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
 }
 
 static void
-fft4b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
+fft4b(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int m, int l) {
   int i, j, lda1, lda2, ldb1, ldb2;
   double x0, x1, x2, x3, y0, y1, y2, y3;
   double wr1, wr2, wr3, wi1, wi2, wi3;
@@ -91,7 +91,7 @@ fft4b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
   ldb1 = m;
   ldb2 = 4;
 
-  for (i = 0; i < m; ++i) {
+  for (i = loop_start(m); i < m; ++i) {
     x0 = c_re( ARR3D( a, i, 0, 0, lda1, lda2 ) ) + c_re( ARR3D( a, i, 0, 2, lda1, lda2 ) );
     y0 = c_im( ARR3D( a, i, 0, 0, lda1, lda2 ) ) + c_im( ARR3D( a, i, 0, 2, lda1, lda2 ) );
     x1 = c_re( ARR3D( a, i, 0, 0, lda1, lda2 ) ) - c_re( ARR3D( a, i, 0, 2, lda1, lda2 ) );
@@ -113,15 +113,15 @@ fft4b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
     c_im( ARR3D( b, i, 3, 0, ldb1, ldb2 ) ) = y1 - y3;
   }
 
-  for (j = 1; j < l; ++j) {
-    wr1 = c_re( w[j] );
-    wi1 = c_im( w[j] );
+  for (j = 1*loop_start(l); j < l; ++j) {
+    wr1 = c_re( ARR1D( w, j ) );
+    wi1 = c_im( ARR1D( w, j ) );
     wr2 = wr1*wr1 - wi1*wi1;
     wi2 = wr1*wi1 + wr1*wi1;
     wr3 = wr1*wr2 - wi1*wi2;
     wi3 = wr1*wi2 + wi1*wr2;
 
-    for (i = 0; i < m; ++i) {
+    for (i = loop_start(m); i < m; ++i) {
       x0 = c_re( ARR3D( a, i, j, 0, lda1, lda2 ) ) + c_re( ARR3D( a, i, j, 2, lda1, lda2 ) );
       y0 = c_im( ARR3D( a, i, j, 0, lda1, lda2 ) ) + c_im( ARR3D( a, i, j, 2, lda1, lda2 ) );
       x1 = c_re( ARR3D( a, i, j, 0, lda1, lda2 ) ) - c_re( ARR3D( a, i, j, 2, lda1, lda2 ) );
@@ -145,7 +145,7 @@ fft4b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
 }
 
 static void
-fft8a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
+fft8a(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int l) {
   int j, lda, ldb;
   double x0, x1, x2, x3, x4, x5, x6, x7, y0, y1, y2, y3, y4, y5, y6, y7;
   double wr1, wr2, wr3, wr4, wr5, wr6, wr7, wi1, wi2, wi3, wi4, wi5, wi6, wi7;
@@ -155,9 +155,9 @@ fft8a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
   lda = l;
   ldb = 8;
 
-  for (j = 0; j < l; ++j) {
-    wr1 = c_re( w[j] );
-    wi1 = c_im( w[j] );
+  for (j = loop_start(l); j < l; ++j) {
+    wr1 = c_re( ARR1D( w, j ) );
+    wi1 = c_im( ARR1D( w, j ) );
     wr2 = wr1*wr1 - wi1*wi1;
     wi2 = wr1*wi1 + wr1*wi1;
     wr3 = wr1*wr2 - wi1*wi2;
@@ -231,7 +231,7 @@ fft8a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
 }
 
 static void
-fft8b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
+fft8b(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int m, int l) {
   int i, j, lda1, lda2, ldb1, ldb2;
   double x0, x1, x2, x3, x4, x5, x6, x7, y0, y1, y2, y3, y4, y5, y6, y7;
   double wr1, wr2, wr3, wr4, wr5, wr6, wr7, wi1, wi2, wi3, wi4, wi5, wi6, wi7;
@@ -243,7 +243,7 @@ fft8b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
   ldb1 = m;
   ldb2 = 8;
 
-  for (i = 0; i < m; ++i) {
+  for (i = loop_start(m); i < m; ++i) {
     x0 = c_re( ARR3D( a, i, 0, 0, lda1, lda2 ) ) + c_re( ARR3D( a, i, 0, 4, lda1, lda2 ) );
     y0 = c_im( ARR3D( a, i, 0, 0, lda1, lda2 ) ) + c_im( ARR3D( a, i, 0, 4, lda1, lda2 ) );
     x1 = c_re( ARR3D( a, i, 0, 0, lda1, lda2 ) ) - c_re( ARR3D( a, i, 0, 4, lda1, lda2 ) );
@@ -304,9 +304,9 @@ fft8b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
     c_im( ARR3D( b, i, 7, 0, ldb1, ldb2 ) ) = v0 - v2;
   }
 
-  for (j = 1; j < l; ++j) {
-    wr1 = c_re( w[j] );
-    wi1 = c_im( w[j] );
+  for (j = 1*loop_start(l); j < l; ++j) {
+    wr1 = c_re( ARR1D( w, j ) );
+    wi1 = c_im( ARR1D( w, j ) );
     wr2 = wr1*wr1 - wi1*wi1;
     wi2 = wr1*wi1 + wr1*wi1;
     wr3 = wr1*wr2 - wi1*wi2;
@@ -320,7 +320,7 @@ fft8b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
     wr7 = wr3*wr4 - wi3*wi4;
     wi7 = wr3*wi4 + wi3*wr4;
 
-    for (i = 0; i < m; ++i) {
+    for (i = loop_start(m); i < m; ++i) {
       x0 = c_re( ARR3D( a, i, j, 0, lda1, lda2 ) ) + c_re( ARR3D( a, i, j, 4, lda1, lda2 ) );
       y0 = c_im( ARR3D( a, i, j, 0, lda1, lda2 ) ) + c_im( ARR3D( a, i, j, 4, lda1, lda2 ) );
       x1 = c_re( ARR3D( a, i, j, 0, lda1, lda2 ) ) - c_re( ARR3D( a, i, j, 4, lda1, lda2 ) );
@@ -382,7 +382,7 @@ fft8b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
 }
 
 static void
-fft3a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
+fft3a(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int l) {
   int j;
   double x0, x1, x2;
   double y0, y1, y2;
@@ -390,9 +390,9 @@ fft3a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
   double wi1, wi2;
   double c31 = 0.86602540378443865, c32 = 0.5;
 
-  for (j = 0; j < l; ++j) {
-    wr1 = c_re( w[j] );
-    wi1 = c_im( w[j] );
+  for (j = loop_start(l); j < l; ++j) {
+    wr1 = c_re( ARR1D( w, j ) );
+    wi1 = c_im( ARR1D( w, j ) );
     wr2=wr1*wr1-wi1*wi1;
     wi2=wr1*wi1+wr1*wi1;
     x0 = c_re( ARR2D( a, j, 1, l ) ) + c_re( ARR2D( a, j, 2, l ) );
@@ -411,7 +411,7 @@ fft3a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
 }
 
 static void
-fft3b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
+fft3b(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int m, int l) {
   int i, j;
   double x0, x1, x2;
   double y0, y1, y2;
@@ -419,7 +419,7 @@ fft3b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
   double wi1, wi2;
   double c31 = 0.86602540378443865, c32 = 0.5;
 
-  for (i = 0; i < m; ++i) {
+  for (i = loop_start(m); i < m; ++i) {
     x0 = c_re( ARR3D( a, i, 0, 1, m, l ) ) + c_re( ARR3D( a, i, 0, 2, m, l ) );
     y0 = c_im( ARR3D( a, i, 0, 1, m, l ) ) + c_im( ARR3D( a, i, 0, 2, m, l ) );
     x1 = c_re( ARR3D( a, i, 0, 0, m, l ) ) - c32 * x0;
@@ -434,12 +434,12 @@ fft3b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
     c_im( ARR3D( b, i, 2, 0, m, 3 ) ) = y1 - y2;
   }
 
-  for (j = 1; j < l; ++j) {
-    wr1 = c_re( w[j] );
-    wi1 = c_im( w[j] );
+  for (j = 1*loop_start(l); j < l; ++j) {
+    wr1 = c_re( ARR1D( w, j ) );
+    wi1 = c_im( ARR1D( w, j ) );
     wr2=wr1*wr1-wi1*wi1;
     wi2=wr1*wi1+wr1*wi1;
-    for (i = 0; i < m; ++i) {
+    for (i = loop_start(m); i < m; ++i) {
       x0 = c_re( ARR3D( a, i, j, 1, m, l ) ) + c_re( ARR3D( a, i, j, 2, m, l ) );
       y0 = c_im( ARR3D( a, i, j, 1, m, l ) ) + c_im( ARR3D( a, i, j, 2, m, l ) );
       x1 = c_re( ARR3D( a, i, j, 0, m, l ) ) - c32 * x0;
@@ -457,7 +457,7 @@ fft3b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
 }
 
 static void
-fft5a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
+fft5a(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int l) {
   int j;
   double wr1, wr2, wr3, wr4;
   double wi1, wi2, wi3, wi4;
@@ -466,9 +466,9 @@ fft5a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
   double c51 = 0.95105651629515357, c52 = 0.61803398874989485;
   double c53 = 0.55901699437494742, c54 = 0.25;
 
-  for (j = 0; j < l; ++j) {
-    wr1 = c_re( w[j] );
-    wi1 = c_im( w[j] );
+  for (j = loop_start(l); j < l; ++j) {
+    wr1 = c_re( ARR1D( w, j ) );
+    wi1 = c_im( ARR1D( w, j ) );
     wr2=wr1*wr1-wi1*wi1;
     wi2=wr1*wi1+wr1*wi1;
     wr3=wr1*wr2-wi1*wi2;
@@ -511,7 +511,7 @@ fft5a(fftw_complex *a, fftw_complex *b, fftw_complex *w, int l) {
 }
 
 static void
-fft5b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
+fft5b(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int m, int l) {
   int i, j;
   double x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10;
   double y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10;
@@ -520,7 +520,7 @@ fft5b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
   double c51 = 0.95105651629515357, c52 = 0.61803398874989485;
   double c53 = 0.55901699437494742, c54 = 0.25;
 
-  for (i = 0; i < m; ++i) {
+  for (i = loop_start(m); i < m; ++i) {
     x0 = c_re( ARR3D( a, i, 0, 1, m, l ) ) + c_re( ARR3D( a, i, 0, 4, m, l ) );
     y0 = c_im( ARR3D( a, i, 0, 1, m, l ) ) + c_im( ARR3D( a, i, 0, 4, m, l ) );
     x1 = c_re( ARR3D( a, i, 0, 2, m, l ) ) + c_re( ARR3D( a, i, 0, 3, m, l ) );
@@ -555,9 +555,9 @@ fft5b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
     c_im( ARR3D( b, i, 4, 0, m, 5 ) ) = y7 - y9;
   }
 
-  for (j = 1; j < l; ++j) {
-    wr1 = c_re( w[j] );
-    wi1 = c_im( w[j] );
+  for (j = 1*loop_start(l); j < l; ++j) {
+    wr1 = c_re( ARR1D( w, j ) );
+    wi1 = c_im( ARR1D( w, j ) );
     wr2 = wr1 * wr1 - wi1*wi1;
     wi2 = wr1 * wi1 + wr1*wi1;
     wr3 = wr1 * wr2 - wi1*wi2;
@@ -602,7 +602,7 @@ fft5b(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
 }
 
 static void
-fft3(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
+fft3(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int m, int l) {
   if (1 == m)
     fft3a( a, b, w, l );
   else
@@ -610,7 +610,7 @@ fft3(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
 }
 
 static void
-fft4(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
+fft4(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int m, int l) {
   if (1 == m)
     fft4a( a, b, w, l );
   else
@@ -618,7 +618,7 @@ fft4(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
 }
 
 static void
-fft5(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
+fft5(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int m, int l) {
   if (1 == m)
     fft5a( a, b, w, l );
   else
@@ -626,7 +626,7 @@ fft5(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
 }
 
 static void
-fft8(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
+fft8(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int m, int l) {
   if (1 == m)
     fft8a( a, b, w, l );
   else
@@ -634,8 +634,9 @@ fft8(fftw_complex *a, fftw_complex *b, fftw_complex *w, int m, int l) {
 }
 
 int
-HPCC_fft235(fftw_complex *a, fftw_complex *b, fftw_complex *w, int n, const int *ip) {
+HPCC_fft235(fftw_complex_ptr a, fftw_complex_ptr b, fftw_complex_ptr w, int n, const int *ip) {
   int j, k, l, m, key, kp4, kp8;
+  struct fftw_complex_ptr_s tmp;
 
   if (ip[0] != 1) {
     kp4 = 2 - (ip[0] + 2) % 3;
@@ -655,16 +656,16 @@ HPCC_fft235(fftw_complex *a, fftw_complex *b, fftw_complex *w, int n, const int 
 
     if (l >= 2) {
       if (key > 0)
-        fft8( a, b, w + j, m, l );
+        fft8( a, b, PTR1D( w , j, &tmp ) , m, l );
       else
-        fft8( b, a, w + j, m, l );
+        fft8( b, a, PTR1D( w , j, &tmp ), m, l );
 
       key = -key;
     } else {
       if (key > 0)
-        fft8( a, a, w + j, m, l );
+        fft8( a, a, PTR1D( w, j, &tmp ), m, l );
       else
-        fft8( b, a, w + j, m, l );
+        fft8( b, a, PTR1D( w, j, &tmp ), m, l );
     }
     m <<= 3; /* multiply by 8 */
     j += l;
@@ -675,16 +676,16 @@ HPCC_fft235(fftw_complex *a, fftw_complex *b, fftw_complex *w, int n, const int 
 
     if (l >= 2) {
       if (key > 0)
-        fft5( a, b, w+j, m, l );
+        fft5( a, b, PTR1D( w, j, &tmp ), m, l );
       else
-        fft5( b, a, w+j, m, l );
+        fft5( b, a, PTR1D( w, j, &tmp ), m, l );
 
       key = -key;
     } else {
       if (key > 0)
-        fft5( a, a, w+j, m, l );
+        fft5( a, a, PTR1D( w, j, &tmp ), m, l );
       else
-        fft5( b, a, w+j, m, l );
+        fft5( b, a, PTR1D( w, j, &tmp ), m, l );
     }
 
     m *= 5;
@@ -696,16 +697,16 @@ HPCC_fft235(fftw_complex *a, fftw_complex *b, fftw_complex *w, int n, const int 
 
     if (l >= 2) {
       if (key > 0)
-        fft4( a, b, w + j, m, l );
+        fft4( a, b, PTR1D( w, j, &tmp ), m, l );
       else
-        fft4( b, a, w + j, m, l );
+        fft4( b, a, PTR1D( w,  j, &tmp ), m, l );
 
       key = -key;
     } else {
       if (key > 0)
-        fft4( a, a, w + j, m, l );
+        fft4( a, a, PTR1D( w, j, &tmp ), m, l );
       else
-        fft4( b, a, w + j, m, l );
+        fft4( b, a, PTR1D( w, j, &tmp ), m, l );
     }
     m <<= 2; /* multiply by 4 */
     j += l;
@@ -716,16 +717,16 @@ HPCC_fft235(fftw_complex *a, fftw_complex *b, fftw_complex *w, int n, const int 
 
     if (l >= 2) {
       if (key > 0)
-        fft3( a, b, w+j, m, l );
+        fft3( a, b, PTR1D( w, j, &tmp ), m, l );
       else
-        fft3( b, a, w+j, m, l );
+        fft3( b, a, PTR1D( w, j, &tmp ), m, l );
 
       key = -key;
     } else {
       if (key > 0)
-        fft3( a, a, w+j, m, l );
+        fft3( a, a, PTR1D( w, j, &tmp ), m, l );
       else
-        fft3( b, a, w+j, m, l );
+        fft3( b, a, PTR1D( w, j, &tmp ), m, l );
     }
 
     m *= 3;
@@ -743,7 +744,7 @@ HPCC_fft235(fftw_complex *a, fftw_complex *b, fftw_complex *w, int n, const int 
 }
 
 static int
-settbl0(fftw_complex *w, int m, int l) {
+settbl0(fftw_complex_ptr w, int m, int l) {
   int i;
   double pi2, px;
 
@@ -751,17 +752,18 @@ settbl0(fftw_complex *w, int m, int l) {
   px = -pi2 / m / l;
 
   for (i = 0; i < l; ++i) {
-    c_re(w[i]) = cos(px * i);
-    c_im(w[i]) = sin(px * i);
+    c_re(ARR1D( w, i )) = cos(px * i);
+    c_im(ARR1D( w, i )) = sin(px * i);
   }
 
   return 0;
 }
 
 int
-HPCC_settbl(fftw_complex *w, int n) {
+HPCC_settbl(fftw_complex_ptr w, int n) {
   int j, k, l, kp4, kp8;
   int ip[3];
+  struct fftw_complex_ptr_s tmp;
 
   HPCC_factor235( n, ip );
 
@@ -778,25 +780,25 @@ HPCC_settbl(fftw_complex *w, int n) {
 
   for (k = 0; k < kp8; ++k) {
     l >>= 3; /* divide by 8 */
-    settbl0( w + j, 8, l );
+    settbl0( PTR1D( w,  j, &tmp ), 8, l );
     j += l;
   }
 
   for (k = 0; k < ip[2]; ++k) {
     l /= 5;
-    settbl0( w + j, 5, l );
+    settbl0( PTR1D( w, j, &tmp ), 5, l );
     j += l;
   }
 
   for (k = 0; k < kp4; ++k) {
     l >>= 2; /* divide by 4 */
-    settbl0( w + j, 4, l );
+    settbl0( PTR1D( w, j, &tmp ), 4, l );
     j += l;
   }
 
   for (k = 0; k < ip[1]; ++k) {
     l /= 3;
-    settbl0( w + j, 3, l );
+    settbl0( PTR1D( w, j, &tmp ), 3, l );
     j += l;
   }
 

@@ -52,14 +52,15 @@ HPCC_ipow(int x, int p) {
 }
 
 static int
-zfft1d0(fftw_complex *a1, fftw_complex *a2, fftw_complex *b, fftw_complex *c, fftw_complex *d,
-  fftw_complex *w1, fftw_complex *w2, fftw_complex *ww1, fftw_complex *ww2, fftw_complex *ww3,
-  fftw_complex *ww4, int n1, int n2, int m1, int m2, int *ip1, int *ip2) {
+zfft1d0(fftw_complex_ptr a1, fftw_complex_ptr a2, fftw_complex_ptr b, fftw_complex_ptr c, fftw_complex_ptr d,
+  fftw_complex_ptr w1, fftw_complex_ptr w2, fftw_complex_ptr ww1, fftw_complex_ptr ww2, fftw_complex_ptr ww3,
+  fftw_complex_ptr ww4, int n1, int n2, int m1, int m2, int *ip1, int *ip2) {
 
   int lda1, lda2, ldb, ldc, ldww1, ldww2, ldww3, ldww4;
   int ii, ij, ij0, ik, ir, is, jj, i, j;
   int tmin1, tmin2, itmp1;
   fftw_complex ztmp1, ztmp2, ztmp3, ztmp4;
+  struct fftw_complex_ptr_s tmp;
 
   lda1 = n1;
   lda2 = n2;
@@ -83,7 +84,7 @@ zfft1d0(fftw_complex *a1, fftw_complex *a2, fftw_complex *b, fftw_complex *c, ff
         V2MIN( tmin2, n2 );
 
         for (j = jj; j < tmin2; ++j) {
-          c_assgn( ARR2D(c, j, i-ii, ldc), ARR2D(a1, i, j, lda1) );
+          c_assgn( "aa", ARR2D(c, j, i-ii, ldc), ARR2D(a1, i, j, lda1) );
         }
       }
     }
@@ -91,7 +92,7 @@ zfft1d0(fftw_complex *a1, fftw_complex *a2, fftw_complex *b, fftw_complex *c, ff
     tmin1 = ii + FFTE_NBLK;
     V2MIN( tmin1, n1 );
     for (i = ii; i < tmin1; ++i)
-      HPCC_fft235( PTR2D(c, 0, i-ii, ldc), d, w2, n2, ip2 );
+      HPCC_fft235( PTR2D(c, 0, i-ii, ldc, &tmp), d, w2, n2, ip2 );
 
     if (HPCC_ipow( 2, ip1[0] ) < FFTE_NBLK || HPCC_ipow( 2, ip2[0] ) < FFTE_NBLK) {
       itmp1 = n2 / m2;
@@ -105,21 +106,21 @@ zfft1d0(fftw_complex *a1, fftw_complex *a2, fftw_complex *b, fftw_complex *c, ff
             ir = i / m1;
             ij = i % m1;
 
-            c_assgn(ztmp1, ARR2D(c, j, i-ii, ldc));
+            c_assgn( "va", ztmp1, ARR2D(c, j, i-ii, ldc));
 
-            c_assgn(ztmp2, ARR2D(ww1, ij, ik, ldww1));
+            c_assgn( "va", ztmp2, ARR2D(ww1, ij, ik, ldww1));
             c_mul3v(ztmp3, ztmp1, ztmp2);
 
-            c_assgn(ztmp2, ARR2D(ww2, ij, is, ldww2));
+            c_assgn( "va", ztmp2, ARR2D(ww2, ij, is, ldww2));
             c_mul3v(ztmp1, ztmp3, ztmp2);
 
-            c_assgn(ztmp3, ARR2D(ww3, ik, ir, ldww3));
+            c_assgn( "va", ztmp3, ARR2D(ww3, ik, ir, ldww3));
             c_mul3v(ztmp2, ztmp1, ztmp3);
 
-            c_assgn(ztmp1, ARR2D(ww4, ir, is, ldww4));
+            c_assgn( "va", ztmp1, ARR2D(ww4, ir, is, ldww4));
             c_mul3v(ztmp3, ztmp2, ztmp1);
 
-            c_assgn(ARR2D(b, i, j, ldb), ztmp3);
+            c_assgn( "av", ARR2D(b, i, j, ldb), ztmp3);
           }
         }
       }
@@ -130,8 +131,8 @@ zfft1d0(fftw_complex *a1, fftw_complex *a2, fftw_complex *b, fftw_complex *c, ff
       itmp1 = n2 / m2;
       for (is = 0; is < itmp1; ++is) {
         for (ik = 0; ik < m2; ++ik) {
-          c_assgn(ztmp1, ARR2D(ww3, ik, ir, ldww3));
-          c_assgn(ztmp2, ARR2D(ww4, ir, is, ldww4));
+          c_assgn( "va", ztmp1, ARR2D(ww3, ik, ir, ldww3));
+          c_assgn( "va", ztmp2, ARR2D(ww4, ir, is, ldww4));
           c_mul3v(ztmp4, ztmp1, ztmp2);
           j = ik + is * m2;
           ij = ij0;
@@ -139,16 +140,16 @@ zfft1d0(fftw_complex *a1, fftw_complex *a2, fftw_complex *b, fftw_complex *c, ff
           tmin1 = ii + FFTE_NBLK;
           V2MIN( tmin1, n1 );
           for (i = ii; i < tmin1; ++i) {
-            c_assgn(ztmp1, ARR2D(ww1, ij, ik, ldww1));
-            c_assgn(ztmp2, ARR2D(ww2, ij, is, ldww2));
+            c_assgn( "va", ztmp1, ARR2D(ww1, ij, ik, ldww1));
+            c_assgn( "va", ztmp2, ARR2D(ww2, ij, is, ldww2));
             c_mul3v(ztmp3, ztmp1, ztmp2);
 
             c_mul3v(ztmp1, ztmp3, ztmp4);
 
-            c_assgn(ztmp2, ARR2D(c, j, i-ii, ldc));
+            c_assgn( "va", ztmp2, ARR2D(c, j, i-ii, ldc));
             c_mul3v(ztmp3, ztmp2, ztmp1);
 
-            c_assgn(ARR2D(b, i, j, ldb), ztmp3);
+            c_assgn( "av", ARR2D(b, i, j, ldb), ztmp3);
 
             ++ij;
           }
@@ -164,12 +165,12 @@ zfft1d0(fftw_complex *a1, fftw_complex *a2, fftw_complex *b, fftw_complex *c, ff
     tmin1 = jj + FFTE_NBLK;
     V2MIN(tmin1, n2);
     for (j = jj; j < tmin1; ++j) {
-      HPCC_fft235( PTR2D(b, 0, j, ldb), c, w1, n1, ip1 );
+      HPCC_fft235( PTR2D(b, 0, j, ldb, &tmp ), c, w1, n1, ip1 );
     }
 
     for (i = 0; i < n1; ++i)
       for (j = jj; j < tmin1; ++j) {
-        c_assgn(ARR2D(a2, j, i, lda2), ARR2D(b, i, j, ldb));
+        c_assgn( "aa", ARR2D(a2, j, i, lda2), ARR2D(b, i, j, ldb));
       }
   }
 
@@ -177,7 +178,7 @@ zfft1d0(fftw_complex *a1, fftw_complex *a2, fftw_complex *b, fftw_complex *c, ff
 }
 
 static int
-settbls(fftw_complex *w1, fftw_complex *w2, fftw_complex *w3, fftw_complex *w4,
+settbls(fftw_complex_ptr w1, fftw_complex_ptr w2, fftw_complex_ptr w3, fftw_complex_ptr w4,
   int n1, int n2, int m1, int m2) {
 
   int j, k, is, ir;
@@ -231,23 +232,28 @@ settbls(fftw_complex *w1, fftw_complex *w2, fftw_complex *w3, fftw_complex *w4,
 }	/* settbls */
 
 int
-HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p) {
+HPCC_zfft1d(int n, fftw_complex_ptr a, fftw_complex_ptr b, int iopt, hpcc_fftw_plan p) {
   int i;
   int m1, m2, n1, n2, nd, nw2, nw3, nw4;
   double dn;
   int ip[3], ip1[3], ip2[3];
-  fftw_complex *w1, *w2, *ww, *c;
+  fftw_complex_ptr w1, w2, ww, c;
+  fftw_complex_ptr ww2, ww3, ww4, d;
 
   w1 = p->w1;
   w2 = p->w2;
   ww = p->ww;
+  ww2 = p->ww2;
+  ww3 = p->ww3;
+  ww4 = p->ww4;
   c = p->c;
+  d = p->d;
 
   HPCC_factor235( n, ip );
 
   if (1 == iopt)
     for (i = 0; i < n; ++i) {
-      c_im( a[i] ) = -c_im( a[i] );
+      c_im( ARR1D( a, i ) ) = -c_im( ARR1D( a, i ) );
     }
 
   if (n <= FFTE_L2SIZE / 16 / 3 && n <= FFTE_NDA2) {
@@ -286,7 +292,7 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
     if (0 == iopt) {
       HPCC_settbl( w1, n1 );
       HPCC_settbl( w2, n2 );
-      settbls( ww, ww + nw2, ww + nw3, ww + nw4, n1, n2, m1, m2 );
+      settbls( ww, ww2, ww3, ww4, n1, n2, m1, m2 );
       return 0;
     }
 
@@ -299,7 +305,7 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
     c = p->c + i*p->c_size;
 #endif
 
-    zfft1d0( a, a, b, c, c + nd, w1, w2, ww, ww + nw2, ww + nw3, ww + nw4, n1, n2, m1, m2, ip1, ip2 );
+    zfft1d0( a, a, b, c, d, w1, w2, ww, ww2, ww3, ww4, n1, n2, m1, m2, ip1, ip2 );
 
 #ifdef _OPENMP
    }
@@ -310,8 +316,8 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
   if (1 == iopt) {
     dn = 1.0 / (double)n;
     for (i = 0; i < n; ++i) {
-      c_re( a[i] ) *= dn;
-      c_im( a[i] ) *= -dn;
+      c_re( ARR1D( a, i ) ) *= dn;
+      c_im( ARR1D( a, i ) ) *= -dn;
     }
   }
 
