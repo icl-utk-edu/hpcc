@@ -1,0 +1,9 @@
+
+plot \
+ "< sed -e 's/[][]/ /g' enumerate_all.txt| grep '^ww2'|sort -n -k 2" using 2:3 title "ww2", \
+ sqrt(x)*3.9
+
+# exp(log(x)*0.50)/sqrt(2*3*5), \
+# exp(log(x)*0.33)
+# "< sed -e 's/[][]/ /g' enumerate_all.txt| grep ^w2|sort -n -k 2" using 2:($3/sqrt($2)/0.375) title "w2"#, \
+# "< sed -e 's/[][]/ /g' enumerate_all.txt| grep '^ww2'|sort -n -k 2" using 2:(sqrt($2)/$3/6) title "ww2"#, \

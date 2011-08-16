@@ -1,0 +1,4 @@
+
+plot \
+ "< sed -e 's/[][]/ /g' enumerate_all.txt| grep ^w1|sort -n -k 2" using 2:3 title "w1", \
+ 1.1*sqrt(x)
