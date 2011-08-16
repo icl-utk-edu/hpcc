@@ -167,7 +167,7 @@ enumerate_all() {
 
 int
 main(int argc, char *argv[]) {
-  int i, n = 0, cp, nf[3] = {2, 3, 5};
+  int i, n = 1, cp, nf[3] = {2, 3, 5};
 
   /* first argument starts with A (as in All)? */
   if (argc == 2 && argv[1][0] == 'A')
@@ -177,7 +177,7 @@ main(int argc, char *argv[]) {
     if (i >= argc-1)
       break;
     if (sscanf( argv[i+1], "%d", &cp ) > 0 && cp > 0) {
-      n += HPCC_ipow( nf[i], cp );
+      n *= HPCC_ipow( nf[i], cp );
     }
   }
 
