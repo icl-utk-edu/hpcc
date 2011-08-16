@@ -5,7 +5,7 @@ typedef double floating_point;
 typedef long s64Int_t;
 
 typedef struct fftw_complex_s {
-  int v;
+  double v;
 } fftw_complex;
 
 typedef struct fftw_complex_ptr_s {
@@ -46,10 +46,24 @@ ARR3D(fftw_complex_ptr a, int i, int j, int k, int ld1, int ld2) {
   return arraccss( a, i + j * ld1 + k * ld1 * ld2 );
 }
 
+static void
+c_assgn_aa(double *d, double *s) {
+  *d = *s;
+}
+
+static void
+c_assgn_av(double *d, fftw_complex s) {
+  *d = s.v;
+}
+
+static void
+c_assgn_va(fftw_complex s, double *d) {
+  *d = s.v;
+}
+
 extern fftw_complex_ptr PTR1D(fftw_complex_ptr v, int i, fftw_complex_ptr tmp);
 extern fftw_complex_ptr PTR2D(fftw_complex_ptr v, int i, int j, int ld, fftw_complex_ptr tmp);
 
-extern void c_assgn(char *format, ...);
 extern void c_mul3v(fftw_complex v1, fftw_complex v2, fftw_complex v3);
 
 extern int HPCC_factor235_8(s64Int_t n, int *ip);

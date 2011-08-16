@@ -1,5 +1,5 @@
 
-CFLAGS = -g -Q -pipe -W -Wall
+CFLAGS = -g -pipe -W -Wall
 LDFLAGS = -g
 
 mem4fft: fft235.o zfft1d.o

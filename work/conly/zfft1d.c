@@ -84,7 +84,7 @@ zfft1d0(fftw_complex_ptr a1, fftw_complex_ptr a2, fftw_complex_ptr b, fftw_compl
         V2MIN( tmin2, n2 );
 
         for (j = jj; j < tmin2; ++j) {
-          c_assgn( "aa", ARR2D(c, j, i-ii, ldc), ARR2D(a1, i, j, lda1) );
+          c_assgn_aa( ARR2D(c, j, i-ii, ldc), ARR2D(a1, i, j, lda1) );
         }
       }
     }
@@ -106,21 +106,21 @@ zfft1d0(fftw_complex_ptr a1, fftw_complex_ptr a2, fftw_complex_ptr b, fftw_compl
             ir = i / m1;
             ij = i % m1;
 
-            c_assgn( "va", ztmp1, ARR2D(c, j, i-ii, ldc));
+            c_assgn_va( ztmp1, ARR2D(c, j, i-ii, ldc));
 
-            c_assgn( "va", ztmp2, ARR2D(ww1, ij, ik, ldww1));
+            c_assgn_va( ztmp2, ARR2D(ww1, ij, ik, ldww1));
             c_mul3v(ztmp3, ztmp1, ztmp2);
 
-            c_assgn( "va", ztmp2, ARR2D(ww2, ij, is, ldww2));
+            c_assgn_va( ztmp2, ARR2D(ww2, ij, is, ldww2));
             c_mul3v(ztmp1, ztmp3, ztmp2);
 
-            c_assgn( "va", ztmp3, ARR2D(ww3, ik, ir, ldww3));
+            c_assgn_va( ztmp3, ARR2D(ww3, ik, ir, ldww3));
             c_mul3v(ztmp2, ztmp1, ztmp3);
 
-            c_assgn( "va", ztmp1, ARR2D(ww4, ir, is, ldww4));
+            c_assgn_va( ztmp1, ARR2D(ww4, ir, is, ldww4));
             c_mul3v(ztmp3, ztmp2, ztmp1);
 
-            c_assgn( "av", ARR2D(b, i, j, ldb), ztmp3);
+            c_assgn_av( ARR2D(b, i, j, ldb), ztmp3);
           }
         }
       }
@@ -131,8 +131,8 @@ zfft1d0(fftw_complex_ptr a1, fftw_complex_ptr a2, fftw_complex_ptr b, fftw_compl
       itmp1 = n2 / m2;
       for (is = 0; is < itmp1; ++is) {
         for (ik = 0; ik < m2; ++ik) {
-          c_assgn( "va", ztmp1, ARR2D(ww3, ik, ir, ldww3));
-          c_assgn( "va", ztmp2, ARR2D(ww4, ir, is, ldww4));
+          c_assgn_va( ztmp1, ARR2D(ww3, ik, ir, ldww3));
+          c_assgn_va( ztmp2, ARR2D(ww4, ir, is, ldww4));
           c_mul3v(ztmp4, ztmp1, ztmp2);
           j = ik + is * m2;
           ij = ij0;
@@ -140,16 +140,16 @@ zfft1d0(fftw_complex_ptr a1, fftw_complex_ptr a2, fftw_complex_ptr b, fftw_compl
           tmin1 = ii + FFTE_NBLK;
           V2MIN( tmin1, n1 );
           for (i = ii; i < tmin1; ++i) {
-            c_assgn( "va", ztmp1, ARR2D(ww1, ij, ik, ldww1));
-            c_assgn( "va", ztmp2, ARR2D(ww2, ij, is, ldww2));
+            c_assgn_va( ztmp1, ARR2D(ww1, ij, ik, ldww1));
+            c_assgn_va( ztmp2, ARR2D(ww2, ij, is, ldww2));
             c_mul3v(ztmp3, ztmp1, ztmp2);
 
             c_mul3v(ztmp1, ztmp3, ztmp4);
 
-            c_assgn( "va", ztmp2, ARR2D(c, j, i-ii, ldc));
+            c_assgn_va( ztmp2, ARR2D(c, j, i-ii, ldc));
             c_mul3v(ztmp3, ztmp2, ztmp1);
 
-            c_assgn( "av", ARR2D(b, i, j, ldb), ztmp3);
+            c_assgn_av( ARR2D(b, i, j, ldb), ztmp3);
 
             ++ij;
           }
@@ -170,7 +170,7 @@ zfft1d0(fftw_complex_ptr a1, fftw_complex_ptr a2, fftw_complex_ptr b, fftw_compl
 
     for (i = 0; i < n1; ++i)
       for (j = jj; j < tmin1; ++j) {
-        c_assgn( "aa", ARR2D(a2, j, i, lda2), ARR2D(b, i, j, ldb));
+        c_assgn_aa( ARR2D(a2, j, i, lda2), ARR2D(b, i, j, ldb));
       }
   }
 
