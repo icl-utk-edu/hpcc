@@ -45,6 +45,24 @@ def next235(t):
 
   return (30, 19, 13)
 
+def find_minsize(results):
+  names = ("w1", "w2", "ww", "ww2", "ww3", "ww4", "c", "d")
+
+  l = list()
+  for p in range(1, 30):
+    l.append(1<<p)
+    if p <= 19: l.append(3**p)
+    if p <= 13: l.append(5**p)
+  l.sort()
+
+  mm = dict()
+  for v in l:
+    pass
+
+  for n in results:
+    for v in l:
+      pass
+
 NDA2 = 65536
 NBLK = 16
 NP=8
@@ -99,6 +117,8 @@ def enumfft(fname):
   ffmt = "%7.4f"
   for k in maxmultall:
     print "Multipliers:", "%6s" % k, ffmt % maxmult.get(k, -1.0), ffmt % bounds[k][1], ffmt % maxmultall[k]
+
+  find_minsize(results)
 
 def main(argv):
   enumfft("enumerate_all.txt")
