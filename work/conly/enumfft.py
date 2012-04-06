@@ -2,6 +2,10 @@
 import sys
 import math
 
+"""
+>python enumfft.py |grep Variable.w1\  |sort -n -k 6
+"""
+
 def factor_single(n, f):
   c = 0
   while n % f == 0:
@@ -45,23 +49,32 @@ def next235(t):
 
   return (30, 19, 13)
 
-def find_minsize(results):
-  names = ("w1", "w2", "ww", "ww2", "ww3", "ww4", "c", "d")
+def find_minsize(results, allbounds):
+  allnames = ("w1", "w2", "ww", "ww2", "ww3", "ww4", "c", "d")
 
-  l = list()
+  powers235 = list()
   for p in range(1, 30):
-    l.append(1<<p)
-    if p <= 19: l.append(3**p)
-    if p <= 13: l.append(5**p)
-  l.sort()
+    powers235.append(1<<p)
+    if p <= 19: powers235.append(3**p)
+    if p <= 13: powers235.append(5**p)
+  powers235.sort()
 
   mm = dict()
-  for v in l:
+  for v in powers235:
     pass
 
   for n in results:
-    for v in l:
-      pass
+    for name in allnames:
+      if not results[n].has_key(name):
+        raise ValueError, "%d %s" % (n, name)
+
+      bound = results[n][name]
+      fcn, mul, dflt = allbounds[name]
+      alloc_size = max(int(mul*fcn(n))+0.5, 1)
+      if bound >= alloc_size:
+        print "Exceeded", name, n, bound, alloc_size, 1.0 / (fcn(n) / bound), mul, dflt, "Problem" * int(dflt < bound)
+      if bound >= dflt:
+        print "Variable", name, n, bound, alloc_size, 1.0 / (fcn(n) / bound), mul, dflt
 
 NDA2 = 65536
 NBLK = 16
@@ -80,7 +93,7 @@ def enumfft(fname):
       "ww2": [math.sqrt,  3.9,    NDA2],
       "ww3": [math.sqrt,  5.4773, NDA2],
       "ww4": [float,     1.0/256, NDA2+2**13], # there are instances where the space is O(N/81), O(N/162), O(N/243): they all need 72899
-      "c":   [math.sqrt, 16.0,    NDA2*NBLK/2],
+      "c":   [math.sqrt, 16.75,    NDA2*NBLK/2],
       "d":   [math.sqrt,  1.0,    NDA2*NBLK/2],
       }
 
@@ -97,7 +110,7 @@ def enumfft(fname):
     if not results.has_key(n):
       results[n] = dict()
 
-    results[n][name] = size
+    results[n][name] = size # structure of 'results' results[32768]["ww4"] = 127
 
     if "INPUT" == name:
       t = factor235(n)
@@ -118,7 +131,7 @@ def enumfft(fname):
   for k in maxmultall:
     print "Multipliers:", "%6s" % k, ffmt % maxmult.get(k, -1.0), ffmt % bounds[k][1], ffmt % maxmultall[k]
 
-  find_minsize(results)
+  find_minsize(results, bounds)
 
 def main(argv):
   enumfft("enumerate_all.txt")
