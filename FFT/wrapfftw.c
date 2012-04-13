@@ -20,7 +20,8 @@ HPCC_fftw_create_plan(int n, fftw_direction dir, int flags) {
   p->w2 = (fftw_complex *)fftw_malloc( (FFTE_NDA2/2 + FFTE_NP) * (sizeof *p->w2) );
   p->ww = (fftw_complex *)fftw_malloc( ((FFTE_NDA2+FFTE_NP) * 4 + FFTE_NP) * (sizeof *p->ww) );
 
-  p->c_size = (FFTE_NDA2+FFTE_NP) * (FFTE_NBLK + 1) + FFTE_NP;
+  p->c_size = (FFTE_NDA2+FFTE_NP) * FFTE_NBLK + FFTE_NP;
+  p->d_size = FFTE_NDA2+FFTE_NP;
 #ifdef _OPENMP
 #pragma omp parallel
   {
@@ -29,13 +30,16 @@ HPCC_fftw_create_plan(int n, fftw_direction dir, int flags) {
       int i;
       i = omp_get_num_threads();
       p->c = (fftw_complex *)fftw_malloc( p->c_size * (sizeof *p->c) * i );
+      p->d = (fftw_complex *)fftw_malloc( p->d_size * (sizeof *p->d) * i );
     }
   }
 #else
   p->c = (fftw_complex *)fftw_malloc( p->c_size * (sizeof *p->c) );
+  p->d = (fftw_complex *)fftw_malloc( p->d_size * (sizeof *p->d) );
 #endif
 
-  if (! p->w1 || ! p->w2 || ! p->ww || ! p->c) {
+  if (! p->w1 || ! p->w2 || ! p->ww || ! p->c || ! p->d) {
+    if (p->d) fftw_free( p->d );
     if (p->c) fftw_free( p->c );
     if (p->ww) fftw_free( p->ww );
     if (p->w2) fftw_free( p->w2 );
@@ -56,6 +60,7 @@ HPCC_fftw_create_plan(int n, fftw_direction dir, int flags) {
 void
 HPCC_fftw_destroy_plan(hpcc_fftw_plan p) {
   if (! p) return;
+  fftw_free( p->d );
   fftw_free( p->c );
   fftw_free( p->ww );
   fftw_free( p->w2 );

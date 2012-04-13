@@ -236,12 +236,13 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
   int m1, m2, n1, n2, nd, nw2, nw3, nw4;
   double dn;
   int ip[3], ip1[3], ip2[3];
-  fftw_complex *w1, *w2, *ww, *c;
+  fftw_complex *w1, *w2, *ww, *c, *d;
 
   w1 = p->w1;
   w2 = p->w2;
   ww = p->ww;
   c = p->c;
+  d = p->d;
 
   HPCC_factor235( n, ip );
 
@@ -297,9 +298,10 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
    {
     i = omp_get_thread_num();
     c = p->c + i*p->c_size;
+    d = p->d + i*p->d_size;
 #endif
 
-    zfft1d0( a, a, b, c, c + nd, w1, w2, ww, ww + nw2, ww + nw3, ww + nw4, n1, n2, m1, m2, ip1, ip2 );
+    zfft1d0( a, a, b, c, d, w1, w2, ww, ww + nw2, ww + nw3, ww + nw4, n1, n2, m1, m2, ip1, ip2 );
 
 #ifdef _OPENMP
    }
