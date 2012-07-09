@@ -70,7 +70,7 @@ def find_minsize(results, allbounds):
 
       bound = results[n][name]
       fcn, mul, dflt = allbounds[name]
-      alloc_size = max(int(mul*fcn(n))+0.5, 1)
+      alloc_size = max(int(mul*fcn(n)), 1)
       if bound >= alloc_size:
         print "Exceeded", name, n, bound, alloc_size, 1.0 / (fcn(n) / bound), mul, dflt, "Problem" * int(dflt < bound)
       if bound >= dflt:
@@ -94,7 +94,7 @@ def enumfft(fname):
       "ww3": [math.sqrt,  5.4773, NDA2],
       "ww4": [float,     1.0/256, NDA2+2**13], # there are instances where the space is O(N/81), O(N/162), O(N/243): they all need 72899
       "c":   [math.sqrt, 16.75,    NDA2*NBLK/2],
-      "d":   [math.sqrt,  1.0,    NDA2*NBLK/2],
+      "d":   [math.sqrt,  1.0,    NDA2],
       }
 
   maxmult = dict()
