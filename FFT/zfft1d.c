@@ -233,14 +233,17 @@ settbls(fftw_complex *w1, fftw_complex *w2, fftw_complex *w3, fftw_complex *w4,
 int
 HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p) {
   int i;
-  int m1, m2, n1, n2, nd, nw2, nw3, nw4;
+  int m1, m2, n1, n2, nd;
   double dn;
   int ip[3], ip1[3], ip2[3];
-  fftw_complex *w1, *w2, *ww, *c, *d;
+  fftw_complex *w1, *w2, *ww1, *ww2, *ww3, *ww4, *c, *d;
 
   w1 = p->w1;
   w2 = p->w2;
-  ww = p->ww;
+  ww1 = p->ww1;
+  ww2 = p->ww2;
+  ww3 = p->ww3;
+  ww4 = p->ww4;
   c = p->c;
   d = p->d;
 
@@ -280,14 +283,11 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
     }
     V2MIN( m1, n1 );
     V2MIN( m2, n2 );
-    nw2 = m1 * m2 + FFTE_NP;
-    nw3 = nw2 + m1 * (n2 / m2) + FFTE_NP;
-    nw4 = nw3 + m2 * (n1 / m1) + FFTE_NP;
 
     if (0 == iopt) {
       HPCC_settbl( w1, n1 );
       HPCC_settbl( w2, n2 );
-      settbls( ww, ww + nw2, ww + nw3, ww + nw4, n1, n2, m1, m2 );
+      settbls( ww1, ww2, ww3, ww4, n1, n2, m1, m2 );
       return 0;
     }
 
@@ -301,7 +301,7 @@ HPCC_zfft1d(int n, fftw_complex *a, fftw_complex *b, int iopt, hpcc_fftw_plan p)
     d = p->d + i*p->d_size;
 #endif
 
-    zfft1d0( a, a, b, c, d, w1, w2, ww, ww + nw2, ww + nw3, ww + nw4, n1, n2, m1, m2, ip1, ip2 );
+    zfft1d0( a, a, b, c, d, w1, w2, ww1, ww2, ww3, ww4, n1, n2, m1, m2, ip1, ip2 );
 
 #ifdef _OPENMP
    }

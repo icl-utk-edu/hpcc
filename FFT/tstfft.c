@@ -19,8 +19,8 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
 #ifdef HPCC_FFT_235
   int f[3];
 
-  /* Need 2 vectors */
-  n = HPCC_LocalVectorSize( params, 2, sizeof(fftw_complex), 0 );
+  /* Need 2 vectors for input and output and 1 vector of scratch spaces */
+  n = HPCC_LocalVectorSize( params, 3, sizeof(fftw_complex), 0 );
 
   /* Adjust local size for factors */
   for ( ; HPCC_factor235( n, f ); n--)
@@ -80,7 +80,7 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
     HPCC_fftw_destroy_plan( ip );
   }
 
-  HPCC_bcnrand( 2*n, 0, out ); /* regenerate data */
+  HPCC_bcnrand( 2*(s64Int)n, 0, out ); /* regenerate data */
   maxErr = 0.0;
   for (i = 0; i < n; i++) {
     tmp1 = c_re( in[i] ) - c_re( out[i] );

@@ -1,0 +1,13 @@
+Release 1.4.2
+=============
+
+Split storage for 'c' and 'd' in non-MPI FFTs.
+Add variable size scratch space to non-MPI FFTs.
+Reduce vector size for local FFT tests due to larger scratch space needed
+Fix FFT vector generation due to 32-bit overflow
+
+Fix RandomAccess bug from SGI due to variable sizes
+Fix RandomAccess bug from Ram due to variable sizes
+Fix STREAM double overflow
+Add barriers to MPI FFT
+Change closing brace } in PTRANS

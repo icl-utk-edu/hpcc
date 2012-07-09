@@ -18,7 +18,7 @@ typedef enum {
 #endif
 
 struct hpcc_fftw_plan_struct {
-  fftw_complex *w1, *w2, *ww, *c, *d;
+  fftw_complex *w1, *w2, *ww1, *ww2, *ww3, *ww4, *c, *d;
   int n, c_size, d_size;
   int flags;
   fftw_direction dir;
