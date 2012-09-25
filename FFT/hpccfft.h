@@ -62,3 +62,5 @@ extern int HPCC_bcnrand(u64Int_t n, u64Int_t a, void *x);
 #define V3MIN(r, e, v) r = (e); V2MIN(r, v)
 #define V2MIN(r, v) r = (v) < r ? (v) : r
 #define EMAX(d, v, e) d=(e); d=d>(v)?d:(v)
+
+#define    Mmax( a_, b_ )      ( ( (a_) > (b_) ) ?  (a_) : (b_) )
