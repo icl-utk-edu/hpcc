@@ -21,7 +21,7 @@
 extern void
 HPCC_Power2NodesTime(u64Int logTableSize,
        u64Int TableSize,
-       u64Int LocalTableSize,
+       s64Int LocalTableSize,
        u64Int MinLocalTableSize,
        u64Int GlobalStartMyProc,
        u64Int Top,
@@ -38,7 +38,7 @@ HPCC_Power2NodesTime(u64Int logTableSize,
 
 extern void HPCC_AnyNodesTime(u64Int logTableSize,
     u64Int TableSize,
-    u64Int LocalTableSize,
+    s64Int LocalTableSize,
     u64Int MinLocalTableSize,
     u64Int GlobalStartMyProc,
     u64Int Top,

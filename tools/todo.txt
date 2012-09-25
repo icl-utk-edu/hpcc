@@ -6,8 +6,10 @@ Add variable size scratch space to non-MPI FFTs.
 Reduce vector size for local FFT tests due to larger scratch space needed
 Fix FFT vector generation due to 32-bit overflow
 
+Fix RandomAccess bug from HP sent on 4/12/11 and 4/16/11
 Fix RandomAccess bug from SGI due to variable sizes
 Fix RandomAccess bug from Ram due to variable sizes
 Fix STREAM double overflow
 Add barriers to MPI FFT
-Change closing brace } in PTRANS
+Change closing brace } in PTRANS?
+TODO: use HPL's MAX() macro in FFT (and maybe others).

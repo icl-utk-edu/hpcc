@@ -135,12 +135,11 @@ HPCC_AnyNodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
                               s64Int ProcNumUpdates,
                               MPI_Datatype INT64_DT,
                               MPI_Status *finish_statuses,
-                              MPI_Request *finish_req)
-{
-  int i,j;
-  int ipartner,iterate,niterate,npartition,proclo,nlower,nupper,procmid;
-  int ndata,nkeep,nsend,nrecv,index, nfrac;
-  u64Int ran,datum,nglobalm1,indexmid;
+                              MPI_Request *finish_req) {
+  int i, ipartner,npartition,proclo,nlower,nupper,procmid;
+  int ndata,nkeep,nsend,nrecv,nfrac;
+  s64Int iterate, niterate;
+  u64Int ran,datum,nglobalm1,indexmid, index;
   u64Int *data,*send, *offsets;
   MPI_Status status;
 
@@ -269,12 +268,11 @@ HPCC_Power2NodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
                                  s64Int ProcNumUpdates,
                                  MPI_Datatype INT64_DT,
                                  MPI_Status *finish_statuses,
-                                 MPI_Request *finish_req)
-{
-  int i,j;
-  int logTableLocal,ipartner,iterate,niterate;
-  int ndata,nkeep,nsend,nrecv,index, nglobalm1, nlocalm1;
-  u64Int ran,datum,procmask;
+                                 MPI_Request *finish_req) {
+  int i, j, logTableLocal,ipartner;
+  int ndata, nkeep, nsend, nrecv;
+  s64Int iterate, niterate;
+  u64Int ran,datum,procmask, nglobalm1, nlocalm1, index;
   u64Int *data,*send;
   MPI_Status status;
 
@@ -287,7 +285,7 @@ HPCC_Power2NodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
 
   niterate = ProcNumUpdates / CHUNK;
   logTableLocal = logTableSize - logNumProcs;
-  nlocalm1 = LocalTableSize - 1;
+  nlocalm1 = (u64Int)(LocalTableSize - 1);
   nglobalm1 = 64 - logTableSize;
 
   /* actual update loop: this is only section that should be timed */

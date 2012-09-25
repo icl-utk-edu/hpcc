@@ -138,12 +138,11 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
                               s64Int ProcNumUpdates,
                               MPI_Datatype INT64_DT,
                               MPI_Status *finish_statuses,
-                              MPI_Request *finish_req)
-{
-  int i,j;
-  int ipartner,iterate,niterate,npartition,proclo,nlower,nupper,procmid;
-  int ndata,nkeep,nsend,nrecv,index, nfrac;
-  u64Int ran,datum,nglobalm1,indexmid;
+                              MPI_Request *finish_req) {
+  int i, ipartner,npartition,proclo,nlower,nupper,procmid;
+  int ndata,nkeep,nsend,nrecv,nfrac;
+  s64Int iterate, niterate;
+  u64Int ran,datum,nglobalm1,indexmid, index;
   u64Int *data,*send, *offsets;
   MPI_Status status;
 
@@ -310,18 +309,17 @@ void sort_data(u64Int *source, u64Int *nomatch, u64Int *match, int number,
 /* Manual unrolling is a significant win if -Msafeptr is used -KDU */
 
 static
-void update_table(u64Int *data, u64Int *table, int number, int nlocalm1)
-{
-  int i,dindex,index;
+void update_table(u64Int *data, u64Int *table, int number, u64Int nlocalm1) {
+  int i,dindex;
   int div_num = number / 8;
   int loop_total = div_num * 8;
-  u64Int index0,index1,index2,index3,index4,index5,index6,index7;
+  u64Int index,index0,index1,index2,index3,index4,index5,index6,index7;
   u64Int ltable0,ltable1,ltable2,ltable3,ltable4,ltable5,ltable6,ltable7;
 
   for (i = 0; i < div_num; i++) {
     dindex = i*8;
 
-    index0 = data[dindex] & nlocalm1;
+    index0 = data[dindex  ] & nlocalm1;
     index1 = data[dindex+1] & nlocalm1;
     index2 = data[dindex+2] & nlocalm1;
     index3 = data[dindex+3] & nlocalm1;
@@ -369,12 +367,11 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
                                  s64Int ProcNumUpdates,
                                  MPI_Datatype INT64_DT,
                                  MPI_Status *finish_statuses,
-                                 MPI_Request *finish_req)
-{
-  int i,j,k;
-  int logTableLocal,ipartner,iterate,niterate,iter_mod;
-  int ndata,nkeep,nsend,nrecv,nlocalm1, nkept;
-  u64Int ran,datum,procmask;
+                                 MPI_Request *finish_req) {
+  int i, j, k, logTableLocal, ipartner;
+  int ndata, nkeep, nsend, nrecv, nkept;
+  s64Int iterate, niterate, iter_mod;
+  u64Int ran, procmask, nlocalm1;
   u64Int *data,*send,*send1,*send2;
   u64Int *recv[PITER][MAXLOGPROCS];
   MPI_Status status;
@@ -396,7 +393,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 
   niterate = ProcNumUpdates / CHUNK;
   logTableLocal = logTableSize - logNumProcs;
-  nlocalm1 = LocalTableSize - 1;
+  nlocalm1 = (u64Int)(LocalTableSize - 1);
 
   /* actual update loop: this is only section that should be timed */
 

@@ -1,7 +1,7 @@
 
 extern void HPCC_Power2NodesMPIRandomAccessCheck(u64Int logTableSize,
 				     u64Int TableSize,
-				     u64Int LocalTableSize,
+				     s64Int LocalTableSize,
 				     u64Int GlobalStartMyProc,
 				     int logNumProcs,
 				     int NumProcs,
@@ -13,7 +13,7 @@ extern void HPCC_Power2NodesMPIRandomAccessCheck(u64Int logTableSize,
 
 extern void HPCC_AnyNodesMPIRandomAccessCheck(u64Int logTableSize,
 				  u64Int TableSize,
-				  u64Int LocalTableSize,
+				  s64Int LocalTableSize,
 				  u64Int MinLocalTableSize,
 				  u64Int GlobalStartMyProc,
 				  u64Int Top,
@@ -28,7 +28,7 @@ extern void HPCC_AnyNodesMPIRandomAccessCheck(u64Int logTableSize,
 
 extern void HPCC_Power2NodesMPIRandomAccessCheck_LCG(u64Int logTableSize,
 				     u64Int TableSize,
-				     u64Int LocalTableSize,
+				     s64Int LocalTableSize,
 				     u64Int GlobalStartMyProc,
 				     int logNumProcs,
 				     int NumProcs,
@@ -40,7 +40,7 @@ extern void HPCC_Power2NodesMPIRandomAccessCheck_LCG(u64Int logTableSize,
 
 extern void HPCC_AnyNodesMPIRandomAccessCheck_LCG(u64Int logTableSize,
 				  u64Int TableSize,
-				  u64Int LocalTableSize,
+				  s64Int LocalTableSize,
 				  u64Int MinLocalTableSize,
 				  u64Int GlobalStartMyProc,
 				  u64Int Top,
@@ -51,5 +51,3 @@ extern void HPCC_AnyNodesMPIRandomAccessCheck_LCG(u64Int logTableSize,
 				  u64Int ProcNumUpdates,
 				  MPI_Datatype UINT64_DT,
 				  s64Int *NumErrors);
-
-
