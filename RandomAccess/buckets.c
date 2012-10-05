@@ -66,7 +66,7 @@ void HPCC_InsertUpdate(u64Int ran, int pe, Bucket_Ptr Buckets)
     HPCC_ra_Heap_Insert (pe, numUpdates);
   }
   else { /* PE already in heap, just increment number of updates */
-    HPCC_ra_Heap_IncrementKey(pe, numUpdates);
+    HPCC_ra_Heap_IncrementKey(pe);
   }
 
 }
@@ -94,6 +94,9 @@ int HPCC_GetUpdates(Bucket_Ptr Buckets, u64Int *bufferPtr, int bufferSize, int *
     update = update->forward;
     HPCC_PoolReturnObj(Update_Pool, tmp);
   }
+
+  if (buffer - bufferPtr > bufferSize)
+    buffer --;
 
   *peUpdates = bucket->numUpdates;
   bucket->numUpdates = 0;

@@ -115,7 +115,6 @@
 #include "RandomAccess.h"
 #include "buckets.h"
 #include "time_bound.h"
-#include "verification.h"
 
 #define CHUNK       MAX_TOTAL_PENDING_UPDATES
 #define CHUNKBIG    (32*CHUNK)
@@ -125,20 +124,7 @@
 
 #ifdef RA_SANDIA_OPT2
 void
-AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
-                              u64Int TableSize,
-                              s64Int LocalTableSize,
-                              u64Int MinLocalTableSize,
-                              u64Int GlobalStartMyProc,
-                              u64Int Top,
-                              int logNumProcs,
-                              int NumProcs,
-                              int Remainder,
-                              int MyProc,
-                              s64Int ProcNumUpdates,
-                              MPI_Datatype INT64_DT,
-                              MPI_Status *finish_statuses,
-                              MPI_Request *finish_req) {
+AnyNodesMPIRandomAccessUpdate(HPCC_RandomAccess_tabparams_t tparams) {
   int i, ipartner,npartition,proclo,nlower,nupper,procmid;
   int ndata,nkeep,nsend,nrecv,nfrac;
   s64Int iterate, niterate;
@@ -154,15 +140,15 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
   data = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
   send = (u64Int *) malloc(CHUNKBIG*sizeof(u64Int));
 
-  ran = HPCC_starts(4*GlobalStartMyProc);
+  ran = HPCC_starts(4*tparams.GlobalStartMyProc);
 
-  offsets = (u64Int *) malloc((NumProcs+1)*sizeof(u64Int));
-  MPI_Allgather(&GlobalStartMyProc,1,INT64_DT,offsets,1,INT64_DT,
+  offsets = (u64Int *) malloc((tparams.NumProcs+1)*sizeof(u64Int));
+  MPI_Allgather(&tparams.GlobalStartMyProc,1,tparams.dtype64,offsets,1,tparams.dtype64,
                 MPI_COMM_WORLD);
-  offsets[NumProcs] = TableSize;
+  offsets[tparams.NumProcs] = tparams.TableSize;
 
-  niterate = 4 * TableSize / NumProcs / CHUNK + 1;
-  nglobalm1 = TableSize - 1;
+  niterate = 4 * tparams.TableSize / tparams.NumProcs / CHUNK + 1;
+  nglobalm1 = tparams.TableSize - 1;
 
   /* actual update loop: this is only section that should be timed */
 
@@ -173,7 +159,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
     }
     ndata = CHUNK;
 
-    npartition = NumProcs;
+    npartition = tparams.NumProcs;
     proclo = 0;
     while (npartition > 1) {
       nlower = npartition/2;
@@ -182,7 +168,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
       indexmid = offsets[procmid];
 
       nkeep = nsend = 0;
-      if (MyProc < procmid) {
+      if (tparams.MyProc < procmid) {
         for (i = 0; i < ndata; i++) {
           if ((data[i] & nglobalm1) >= indexmid) send[nsend++] = data[i];
           else data[nkeep++] = data[i];
@@ -195,48 +181,48 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
       }
 
       if (nlower == nupper) {
-        if (MyProc < procmid) ipartner = MyProc + nlower;
-        else ipartner = MyProc - nlower;
-        MPI_Sendrecv(send,nsend,INT64_DT,ipartner,0,&data[nkeep],
-                     CHUNKBIG,INT64_DT,ipartner,0,MPI_COMM_WORLD,&status);
-        MPI_Get_count(&status,INT64_DT,&nrecv);
+        if (tparams.MyProc < procmid) ipartner = tparams.MyProc + nlower;
+        else ipartner = tparams.MyProc - nlower;
+        MPI_Sendrecv(send,nsend,tparams.dtype64,ipartner,0,&data[nkeep],
+                     CHUNKBIG,tparams.dtype64,ipartner,0,MPI_COMM_WORLD,&status);
+        MPI_Get_count(&status,tparams.dtype64,&nrecv);
         ndata = nkeep + nrecv;
       } else {
-        if (MyProc < procmid) {
-          nfrac = (nlower - (MyProc-proclo)) * nsend / nupper;
-          ipartner = MyProc + nlower;
-          MPI_Sendrecv(send,nfrac,INT64_DT,ipartner,0,&data[nkeep],
-                       CHUNKBIG,INT64_DT,ipartner,0,MPI_COMM_WORLD,&status);
-          MPI_Get_count(&status,INT64_DT,&nrecv);
+        if (tparams.MyProc < procmid) {
+          nfrac = (nlower - (tparams.MyProc-proclo)) * nsend / nupper;
+          ipartner = tparams.MyProc + nlower;
+          MPI_Sendrecv(send,nfrac,tparams.dtype64,ipartner,0,&data[nkeep],
+                       CHUNKBIG,tparams.dtype64,ipartner,0,MPI_COMM_WORLD,&status);
+          MPI_Get_count(&status,tparams.dtype64,&nrecv);
           nkeep += nrecv;
-          MPI_Sendrecv(&send[nfrac],nsend-nfrac,INT64_DT,ipartner+1,0,
-                       &data[nkeep],CHUNKBIG,INT64_DT,
+          MPI_Sendrecv(&send[nfrac],nsend-nfrac,tparams.dtype64,ipartner+1,0,
+                       &data[nkeep],CHUNKBIG,tparams.dtype64,
                        ipartner+1,0,MPI_COMM_WORLD,&status);
-          MPI_Get_count(&status,INT64_DT,&nrecv);
+          MPI_Get_count(&status,tparams.dtype64,&nrecv);
           ndata = nkeep + nrecv;
-        } else if (MyProc > procmid && MyProc < procmid+nlower) {
-          nfrac = (MyProc - procmid) * nsend / nlower;
-          ipartner = MyProc - nlower;
-          MPI_Sendrecv(&send[nfrac],nsend-nfrac,INT64_DT,ipartner,0,
-                       &data[nkeep],CHUNKBIG,INT64_DT,
+        } else if (tparams.MyProc > procmid && tparams.MyProc < procmid+nlower) {
+          nfrac = (tparams.MyProc - procmid) * nsend / nlower;
+          ipartner = tparams.MyProc - nlower;
+          MPI_Sendrecv(&send[nfrac],nsend-nfrac,tparams.dtype64,ipartner,0,
+                       &data[nkeep],CHUNKBIG,tparams.dtype64,
                        ipartner,0,MPI_COMM_WORLD,&status);
-          MPI_Get_count(&status,INT64_DT,&nrecv);
+          MPI_Get_count(&status,tparams.dtype64,&nrecv);
           nkeep += nrecv;
-          MPI_Sendrecv(send,nfrac,INT64_DT,ipartner-1,0,&data[nkeep],
-                       CHUNKBIG,INT64_DT,ipartner-1,0,MPI_COMM_WORLD,&status);
-          MPI_Get_count(&status,INT64_DT,&nrecv);
+          MPI_Sendrecv(send,nfrac,tparams.dtype64,ipartner-1,0,&data[nkeep],
+                       CHUNKBIG,tparams.dtype64,ipartner-1,0,MPI_COMM_WORLD,&status);
+          MPI_Get_count(&status,tparams.dtype64,&nrecv);
           ndata = nkeep + nrecv;
         } else {
-          if (MyProc == procmid) ipartner = MyProc - nlower;
-          else ipartner = MyProc - nupper;
-          MPI_Sendrecv(send,nsend,INT64_DT,ipartner,0,&data[nkeep],
-                       CHUNKBIG,INT64_DT,ipartner,0,MPI_COMM_WORLD,&status);
-          MPI_Get_count(&status,INT64_DT,&nrecv);
+          if (tparams.MyProc == procmid) ipartner = tparams.MyProc - nlower;
+          else ipartner = tparams.MyProc - nupper;
+          MPI_Sendrecv(send,nsend,tparams.dtype64,ipartner,0,&data[nkeep],
+                       CHUNKBIG,tparams.dtype64,ipartner,0,MPI_COMM_WORLD,&status);
+          MPI_Get_count(&status,tparams.dtype64,&nrecv);
           ndata = nkeep + nrecv;
         }
       }
 
-      if (MyProc < procmid) npartition = nlower;
+      if (tparams.MyProc < procmid) npartition = nlower;
       else {
         proclo = procmid;
         npartition = nupper;
@@ -245,7 +231,7 @@ AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
 
     for (i = 0; i < ndata; i++) {
       datum = data[i];
-      index = (datum & nglobalm1) - GlobalStartMyProc;
+      index = (datum & nglobalm1) - tparams.GlobalStartMyProc;
       HPCC_Table[index] ^= datum;
     }
   }
@@ -354,20 +340,7 @@ void update_table(u64Int *data, u64Int *table, int number, u64Int nlocalm1) {
 }
 
 void
-Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
-                                 u64Int TableSize,
-                                 s64Int LocalTableSize,
-                                 u64Int MinLocalTableSize,
-                                 u64Int GlobalStartMyProc,
-                                 u64Int Top,
-                                 int logNumProcs,
-                                 int NumProcs,
-                                 int Remainder,
-                                 int MyProc,
-                                 s64Int ProcNumUpdates,
-                                 MPI_Datatype INT64_DT,
-                                 MPI_Status *finish_statuses,
-                                 MPI_Request *finish_req) {
+Power2NodesMPIRandomAccessUpdate(HPCC_RandomAccess_tabparams_t tparams) {
   int i, j, k, logTableLocal, ipartner;
   int ndata, nkeep, nsend, nrecv, nkept;
   s64Int iterate, niterate, iter_mod;
@@ -386,14 +359,14 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
   send = send1;
 
   for (j = 0; j < PITER; j++)
-    for (i = 0; i < logNumProcs; i++)
+    for (i = 0; i < tparams.logNumProcs; i++)
       recv[j][i] = (u64Int *) malloc(sizeof(u64Int)*RCHUNK);
 
-  ran = HPCC_starts(4*GlobalStartMyProc);
+  ran = HPCC_starts(4*tparams.GlobalStartMyProc);
 
-  niterate = ProcNumUpdates / CHUNK;
-  logTableLocal = logTableSize - logNumProcs;
-  nlocalm1 = (u64Int)(LocalTableSize - 1);
+  niterate = tparams.ProcNumUpdates / CHUNK;
+  logTableLocal = tparams.logTableSize - tparams.logNumProcs;
+  nlocalm1 = (u64Int)(tparams.LocalTableSize - 1);
 
   /* actual update loop: this is only section that should be timed */
 
@@ -408,22 +381,22 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
 
     if (iter_mod == 0)
       for (k = 0; k < PITER; k++)
-        for (j = 0; j < logNumProcs; j++) {
-          ipartner = (1 << j) ^ MyProc;
-          MPI_Irecv(recv[k][j],RCHUNK,INT64_DT,ipartner,0,MPI_COMM_WORLD,
+        for (j = 0; j < tparams.logNumProcs; j++) {
+          ipartner = (1 << j) ^ tparams.MyProc;
+          MPI_Irecv(recv[k][j],RCHUNK,tparams.dtype64,ipartner,0,MPI_COMM_WORLD,
                     &request[k][j]);
         }
 
-    for (j = 0; j < logNumProcs; j++) {
+    for (j = 0; j < tparams.logNumProcs; j++) {
       nkeep = nsend = 0;
       send = (send == send1) ? send2 : send1;
-      ipartner = (1 << j) ^ MyProc;
+      ipartner = (1 << j) ^ tparams.MyProc;
       procmask = ((u64Int) 1) << (logTableLocal + j);
-      if (ipartner > MyProc) {
+      if (ipartner > tparams.MyProc) {
       	sort_data(data,data,send,nkept,&nkeep,&nsend,logTableLocal+j);
         if (j > 0) {
           MPI_Wait(&request[iter_mod][j-1],&status);
-          MPI_Get_count(&status,INT64_DT,&nrecv);
+          MPI_Get_count(&status,tparams.dtype64,&nrecv);
       	  sort_data(recv[iter_mod][j-1],data,send,nrecv,&nkeep,
                     &nsend,logTableLocal+j);
         }
@@ -431,21 +404,21 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
         sort_data(data,send,data,nkept,&nsend,&nkeep,logTableLocal+j);
         if (j > 0) {
           MPI_Wait(&request[iter_mod][j-1],&status);
-          MPI_Get_count(&status,INT64_DT,&nrecv);
+          MPI_Get_count(&status,tparams.dtype64,&nrecv);
           sort_data(recv[iter_mod][j-1],send,data,nrecv,&nsend,
                     &nkeep,logTableLocal+j);
         }
       }
       if (j > 0) MPI_Wait(&srequest,&status);
-      MPI_Isend(send,nsend,INT64_DT,ipartner,0,MPI_COMM_WORLD,&srequest);
-      if (j == (logNumProcs - 1)) update_table(data,HPCC_Table,nkeep,nlocalm1);
+      MPI_Isend(send,nsend,tparams.dtype64,ipartner,0,MPI_COMM_WORLD,&srequest);
+      if (j == (tparams.logNumProcs - 1)) update_table(data,HPCC_Table,nkeep,nlocalm1);
       nkept = nkeep;
     }
 
-    if (logNumProcs == 0) update_table(data,HPCC_Table,nkept,nlocalm1);
+    if (tparams.logNumProcs == 0) update_table(data,HPCC_Table,nkept,nlocalm1);
     else {
       MPI_Wait(&request[iter_mod][j-1],&status);
-      MPI_Get_count(&status,INT64_DT,&nrecv);
+      MPI_Get_count(&status,tparams.dtype64,&nrecv);
       update_table(recv[iter_mod][j-1],HPCC_Table,nrecv,nlocalm1);
       MPI_Wait(&srequest,&status);
     }
@@ -456,7 +429,7 @@ Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
   /* clean up: should not really be part of this timed routine */
 
   for (j = 0; j < PITER; j++)
-    for (i = 0; i < logNumProcs; i++) free(recv[j][i]);
+    for (i = 0; i < tparams.logNumProcs; i++) free(recv[j][i]);
 
   free(data);
   free(send1);

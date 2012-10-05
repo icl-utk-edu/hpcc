@@ -11,6 +11,6 @@ typedef struct heap_record {
 extern void HPCC_ra_Heap_Init (int size);
 extern void HPCC_ra_Heap_Insert (int index, int key);
 extern void HPCC_ra_Heap_ExtractMax (int *index, int *key);
-extern void HPCC_ra_Heap_IncrementKey (int index, int key);
+extern void HPCC_ra_Heap_IncrementKey (int index);
 extern void HPCC_ra_Heapify (int node);
 extern void HPCC_ra_Heap_Free ();

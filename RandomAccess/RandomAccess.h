@@ -46,72 +46,38 @@ extern u64Int *HPCC_Table;
 extern u64Int LocalSendBuffer[LOCAL_BUFFER_SIZE];
 extern u64Int LocalRecvBuffer[MAX_RECV*LOCAL_BUFFER_SIZE];
 
-extern void
-AnyNodesMPIRandomAccessUpdate(u64Int logTableSize,
-                              u64Int TableSize,
-                              s64Int LocalTableSize,
-                              u64Int MinLocalTableSize,
-                              u64Int GlobalStartMyProc,
-                              u64Int Top,
-                              int logNumProcs,
-                              int NumProcs,
-                              int Remainder,
-                              int MyProc,
-                              s64Int ProcNumUpdates,
-                              MPI_Datatype INT64_DT,
-                              MPI_Status *finish_statuses,
-                              MPI_Request *finish_req);
+typedef struct HPCC_RandomAccess_tabparams_s {
+  s64Int LocalTableSize; /* local size of the table may be rounded up >= MinLocalTableSize */
+  s64Int ProcNumUpdates; /* usually 4 times the local size except for time-bound runs */
 
-extern void
-Power2NodesMPIRandomAccessUpdate(u64Int logTableSize,
-                                 u64Int TableSize,
-                                 s64Int LocalTableSize,
-                                 u64Int MinLocalTableSize,
-                                 u64Int GlobalStartMyProc,
-                                 u64Int Top,
-                                 int logNumProcs,
-                                 int NumProcs,
-                                 int Remainder,
-                                 int MyProc,
-                                 s64Int ProcNumUpdates,
-                                 MPI_Datatype INT64_DT,
-                                 MPI_Status *finish_statuses,
-                                 MPI_Request *finish_req);
+  u64Int logTableSize;   /* it is an unsigned 64-bit value to type-promote expressions */
+  u64Int TableSize;      /* always power of 2 */
+  u64Int MinLocalTableSize; /* TableSize/NumProcs */
+  u64Int GlobalStartMyProc; /* first global index of the global table stored locally */
+  u64Int Top; /* global indices below 'Top' are asigned in MinLocalTableSize+1 blocks;
+                 above 'Top' -- in MinLocalTableSize blocks */
 
-extern void
-HPCC_AnyNodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
-                              u64Int TableSize,
-                              s64Int LocalTableSize,
-                              u64Int MinLocalTableSize,
-                              u64Int GlobalStartMyProc,
-                              u64Int Top,
-                              int logNumProcs,
-                              int NumProcs,
-                              int Remainder,
-                              int MyProc,
-                              s64Int ProcNumUpdates,
-                              MPI_Datatype INT64_DT,
-                              MPI_Status *finish_statuses,
-                              MPI_Request *finish_req);
+  MPI_Datatype dtype64;
+  MPI_Status *finish_statuses; /* storage for 'NumProcs' worth of statuses */
+  MPI_Request *finish_req;     /* storage for 'NumProcs' worth of requests */
 
-extern void
-HPCC_Power2NodesMPIRandomAccessUpdate_LCG(u64Int logTableSize,
-                                 u64Int TableSize,
-                                 s64Int LocalTableSize,
-                                 u64Int MinLocalTableSize,
-                                 u64Int GlobalStartMyProc,
-                                 u64Int Top,
-                                 int logNumProcs,
-                                 int NumProcs,
-                                 int Remainder,
-                                 int MyProc,
-                                 s64Int ProcNumUpdates,
-                                 MPI_Datatype INT64_DT,
-                                 MPI_Status *finish_statuses,
-                                 MPI_Request *finish_req);
+  int logNumProcs, NumProcs, MyProc;
+
+  int Remainder; /* TableSize % NumProcs */
+} HPCC_RandomAccess_tabparams_t;
+
+extern void AnyNodesMPIRandomAccessUpdate(HPCC_RandomAccess_tabparams_t tparams);
+extern void Power2NodesMPIRandomAccessUpdate(HPCC_RandomAccess_tabparams_t tparams);
+extern void HPCC_AnyNodesMPIRandomAccessUpdate_LCG(HPCC_RandomAccess_tabparams_t tparams);
+extern void HPCC_Power2NodesMPIRandomAccessUpdate_LCG(HPCC_RandomAccess_tabparams_t tparams);
 
 extern int HPCC_RandomAccess(HPCC_Params *params, int doIO, double *GUPs, int *failure);
 extern int HPCC_RandomAccess_LCG(HPCC_Params *params, int doIO, double *GUPs, int *failure);
+
+extern void HPCC_Power2NodesMPIRandomAccessCheck(HPCC_RandomAccess_tabparams_t tparams, s64Int *NumErrors);
+extern void HPCC_AnyNodesMPIRandomAccessCheck(HPCC_RandomAccess_tabparams_t tparams, s64Int *NumErrors);
+extern void HPCC_Power2NodesMPIRandomAccessCheck_LCG(HPCC_RandomAccess_tabparams_t tparams, s64Int *NumErrors);
+extern void HPCC_AnyNodesMPIRandomAccessCheck_LCG(HPCC_RandomAccess_tabparams_t tparams, s64Int *NumErrors);
 
 #if defined( RA_SANDIA_NOPT )
 #define HPCC_RA_ALGORITHM 1

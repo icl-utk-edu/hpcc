@@ -67,7 +67,7 @@ void HPCC_ra_Heap_Insert (int index, int key)
 
 }
 
-void HPCC_ra_Heap_IncrementKey (int index, int key)
+void HPCC_ra_Heap_IncrementKey (int index)
 {
 
   int node;
