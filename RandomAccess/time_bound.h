@@ -1,6 +1,9 @@
 
+#if defined( HPCC_RA_STDALG )
+#if ! defined(RA_TIME_BOUND_DISABLE)
 #define RA_TIME_BOUND 1
-#undef RA_TIME_BOUND
+#endif
+#endif
 
 /* time bound in seconds */
 #define TIME_BOUND 60
@@ -16,8 +19,12 @@
  * memory size.
  */
 /* 1% of total number of updates */
-#define _RA_SAMPLE_FACTOR 100
+#define RA_SAMPLE_FACTOR 100
 
 extern void HPCC_Power2NodesTime(HPCC_RandomAccess_tabparams_t tparams, double timeBound, u64Int *numIter);
 
 extern void HPCC_AnyNodesTime(HPCC_RandomAccess_tabparams_t tparams, double timeBound, u64Int *numIter);
+
+extern void HPCC_Power2NodesTimeLCG(HPCC_RandomAccess_tabparams_t tparams, double timeBound, u64Int *numIter);
+
+extern void HPCC_AnyNodesTimeLCG(HPCC_RandomAccess_tabparams_t tparams, double timeBound, u64Int *numIter);

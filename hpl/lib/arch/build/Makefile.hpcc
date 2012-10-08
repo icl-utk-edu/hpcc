@@ -31,8 +31,8 @@ HDEP13 = ../../../include/hpl_pmisc.h ../../../include/hpl_ptimer.h
 OBJS13 = ../../../testing/ptimer/HPL_ptimer.o ../../../testing/ptimer/HPL_ptimer_cputime.o ../../../testing/ptimer/HPL_ptimer_walltime.o
 HDEP14 = ../../../include/hpl_misc.h ../../../include/hpl_blas.h ../../../include/hpl_auxil.h ../../../include/hpl_gesv.h ../../../include/hpl_pmisc.h ../../../include/hpl_pauxil.h ../../../include/hpl_panel.h ../../../include/hpl_pmatgen.h ../../../include/hpl_pgesv.h ../../../include/hpl_ptimer.h ../../../include/hpl_ptest.h
 OBJS14 = ../../../testing/ptest/HPL_pddriver.o ../../../testing/ptest/HPL_pdinfo.o ../../../testing/ptest/HPL_pdtest.o
-HDEP15 = ../../../../include/hpcc.h ../../../include/hpl.h ../../../../RandomAccess/RandomAccess.h ../../../../RandomAccess/buckets.h ../../../../RandomAccess/heap.h ../../../../RandomAccess/pool.h ../../../../RandomAccess/time_bound.h ../../../../RandomAccess/verification.h
-OBJS15 = ../../../../RandomAccess/MPIRandomAccess.o ../../../../RandomAccess/buckets.o ../../../../RandomAccess/core_single_cpu_lcg.o ../../../../RandomAccess/core_single_cpu.o ../../../../RandomAccess/heap.o ../../../../RandomAccess/pool.o ../../../../RandomAccess/single_cpu_lcg.o ../../../../RandomAccess/single_cpu.o ../../../../RandomAccess/star_single_cpu_lcg.o ../../../../RandomAccess/star_single_cpu.o ../../../../RandomAccess/time_bound.o ../../../../RandomAccess/utility.o ../../../../RandomAccess/verification_lcg.o ../../../../RandomAccess/verification.o ../../../../RandomAccess/MPIRandomAccess_vanilla.o ../../../../RandomAccess/MPIRandomAccess_opt.o ../../../../RandomAccess/MPIRandomAccessLCG.o ../../../../RandomAccess/MPIRandomAccessLCG_vanilla.o ../../../../RandomAccess/MPIRandomAccessLCG_opt.o
+HDEP15 = ../../../../include/hpcc.h ../../../include/hpl.h ../../../../RandomAccess/RandomAccess.h ../../../../RandomAccess/buckets.h ../../../../RandomAccess/heap.h ../../../../RandomAccess/pool.h ../../../../RandomAccess/time_bound.h
+OBJS15 = ../../../../RandomAccess/MPIRandomAccess.o ../../../../RandomAccess/buckets.o ../../../../RandomAccess/core_single_cpu_lcg.o ../../../../RandomAccess/core_single_cpu.o ../../../../RandomAccess/heap.o ../../../../RandomAccess/pool.o ../../../../RandomAccess/single_cpu_lcg.o ../../../../RandomAccess/single_cpu.o ../../../../RandomAccess/star_single_cpu_lcg.o ../../../../RandomAccess/star_single_cpu.o ../../../../RandomAccess/time_bound.o ../../../../RandomAccess/time_bound_lcg.o ../../../../RandomAccess/utility.o ../../../../RandomAccess/verification_lcg.o ../../../../RandomAccess/verification.o ../../../../RandomAccess/MPIRandomAccess_vanilla.o ../../../../RandomAccess/MPIRandomAccess_opt.o ../../../../RandomAccess/MPIRandomAccessLCG.o ../../../../RandomAccess/MPIRandomAccessLCG_vanilla.o ../../../../RandomAccess/MPIRandomAccessLCG_opt.o
 HDEP16 = ../../../../include/hpcc.h ../../../include/hpl.h
 OBJS16 = ../../../../STREAM/onecpu.o ../../../../STREAM/stream.o
 HDEP17 = ../../../../include/hpcc.h ../../../include/hpl.h ../../../../PTRANS/cblacslt.h
@@ -476,6 +476,9 @@ clean:
 
 ../../../../RandomAccess/time_bound.o : ../../../../RandomAccess/time_bound.c $(HDEP15)
 	$(CC) -o ../../../../RandomAccess/time_bound.o -c ../../../../RandomAccess/time_bound.c -I../../../../include $(CCFLAGS)
+
+../../../../RandomAccess/time_bound_lcg.o : ../../../../RandomAccess/time_bound_lcg.c $(HDEP15)
+	$(CC) -o ../../../../RandomAccess/time_bound_lcg.o -c ../../../../RandomAccess/time_bound_lcg.c -I../../../../include $(CCFLAGS)
 
 ../../../../RandomAccess/utility.o : ../../../../RandomAccess/utility.c $(HDEP15)
 	$(CC) -o ../../../../RandomAccess/utility.o -c ../../../../RandomAccess/utility.c -I../../../../include $(CCFLAGS)

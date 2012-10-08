@@ -12,8 +12,6 @@
  * number of updates then is estimated based on
  * the average execution time per update and the time
  * bound.
- *
- *
  */
 
 
@@ -77,7 +75,7 @@ void HPCC_Power2NodesTime(HPCC_RandomAccess_tabparams_t tparams, double timeBoun
   localBufferSize = LOCAL_BUFFER_SIZE;
   Buckets = HPCC_InitBuckets(tparams.NumProcs, maxPendingUpdates);
 
-  SendCnt = 4 * tparams.LocalTableSize/_RA_SAMPLE_FACTOR;
+  SendCnt = 4 * tparams.LocalTableSize/RA_SAMPLE_FACTOR;
   Ran = HPCC_starts (4 * tparams.GlobalStartMyProc);
 
   i = 0;
@@ -336,7 +334,7 @@ void HPCC_AnyNodesTime(HPCC_RandomAccess_tabparams_t tparams, double timeBound, 
   localBufferSize = LOCAL_BUFFER_SIZE;
   Buckets = HPCC_InitBuckets(tparams.NumProcs, maxPendingUpdates);
 
-  SendCnt = 4 * tparams.LocalTableSize/_RA_SAMPLE_FACTOR;
+  SendCnt = 4 * tparams.LocalTableSize/RA_SAMPLE_FACTOR;
   Ran = HPCC_starts (4 * tparams.GlobalStartMyProc);
 
   i = 0;

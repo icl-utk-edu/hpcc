@@ -129,6 +129,16 @@ Sum64(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
   int i, n = *len; s64Int *invec64 = (s64Int *)invec, *inoutvec64 = (s64Int *)inoutvec;
   for (i = n; i; i--, invec64++, inoutvec64++) *inoutvec64 += *invec64;
 }
+
+static void
+MinInt64(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
+  int i, n = *len; s64Int *invec64 = (s64Int *)invec, *inoutvec64 = (s64Int *)inoutvec, min_val;
+  if (datatype)
+    for (i = n; i; i--, invec64++, inoutvec64++) {
+      min_val = inoutvec64[0];
+      *inoutvec64 = *inoutvec64 > *invec64 ? *invec64 : *inoutvec64;
+    }
+}
 #endif
 
 #ifdef HPCC_RA_STDALG
@@ -178,7 +188,7 @@ AnyNodesMPIRandomAccessUpdate(HPCC_RandomAccess_tabparams_t tparams) {
    *     }
    */
 
-  SendCnt = tparams.ProcNumUpdates; /* SendCnt = (4 * tparams.LocalTableSize); */
+  SendCnt = tparams.ProcNumUpdates; /* SendCnt = (4 * LocalTableSize); */
   Ran = HPCC_starts (4 * tparams.GlobalStartMyProc);
 
   i = 0;
@@ -429,7 +439,7 @@ Power2NodesMPIRandomAccessUpdate(HPCC_RandomAccess_tabparams_t tparams) {
    *     }
    */
 
-  SendCnt = tparams.ProcNumUpdates; /*  SendCnt = (4 * tparams.LocalTableSize); */
+  SendCnt = tparams.ProcNumUpdates; /*  SendCnt = (4 * LocalTableSize); */
   Ran = HPCC_starts (4 * tparams.GlobalStartMyProc);
 
   i = 0;
@@ -643,7 +653,10 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
                        * NumUpdates_Default due to execution time bounds */
 
 #ifdef RA_TIME_BOUND
-  s64Int GlbNumUpdates;  /* for reduction */
+  s64Int localProcNumUpdates, GlbNumUpdates;  /* for reduction */
+#ifndef LONG_IS_64BITS
+  MPI_Op min_int64;
+#endif
 #endif
 
   FILE *outFile = NULL;
@@ -749,24 +762,18 @@ HPCC_MPIRandomAccess(HPCC_Params *params) {
   MPI_Allreduce( &params->HPLrdata.time, &timeBound, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD );
   timeBound = Mmax( 0.25 * timeBound, (double)TIME_BOUND );
   if (PowerofTwo) {
-    HPCC_Power2NodesTime(logTableSize, TableSize, tparams.LocalTableSize,
-                    MinLocalTableSize, GlobalStartMyProc, Top,
-                    logNumProcs, NumProcs, Remainder,
-                    MyProc, INT64_DT, timeBound, (u64Int *)&ProcNumUpdates,
-                    finish_statuses, finish_req);
-
+    HPCC_Power2NodesTime( tparams, timeBound, (u64Int *)&localProcNumUpdates );
   } else {
-    HPCC_AnyNodesTime(logTableSize, TableSize, LocalTableSize,
-                 MinLocalTableSize, GlobalStartMyProc, Top,
-                 logNumProcs, NumProcs, Remainder,
-                 MyProc, INT64_DT, timeBound, (u64Int *)&ProcNumUpdates,
-                 finish_statuses, finish_req);
+    HPCC_AnyNodesTime( tparams, timeBound, (u64Int *)&localProcNumUpdates );
   }
   /* be conservative: get the smallest number of updates among all procs */
-  MPI_Reduce( &ProcNumUpdates, &GlbNumUpdates, 1, INT64_DT,
-              MPI_MIN, 0, MPI_COMM_WORLD );
-  /* distribute number of updates per proc to all procs */
-  MPI_Bcast( &GlbNumUpdates, 1, INT64_DT, 0, MPI_COMM_WORLD );
+#ifdef LONG_IS_64BITS
+  MPI_Allreduce( &localProcNumUpdates, &GlbNumUpdates, 1, MPI_LONG, MPI_MIN, MPI_COMM_WORLD );
+#else
+  MPI_Op_create( MinInt64, 1, &min_int64 );
+  MPI_Allreduce( &localProcNumUpdates, &GlbNumUpdates, 1, tparams.dtype64, min_int64, MPI_COMM_WORLD );
+  MPI_Op_free( &min_int64 );
+#endif
   tparams.ProcNumUpdates = Mmin(GlbNumUpdates, (4*tparams.LocalTableSize));
   /* works for both PowerofTwo and AnyNodes */
   NumUpdates = Mmin((tparams.ProcNumUpdates*tparams.NumProcs), (s64Int)NumUpdates_Default);
