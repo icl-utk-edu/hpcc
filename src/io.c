@@ -216,8 +216,10 @@ HPCC_Init(HPCC_Params *params) {
   MPI_Comm comm = MPI_COMM_WORLD;
   time_t currentTime;
   char hostname[MPI_MAX_PROCESSOR_NAME + 1]; int hostnameLen;
+#ifdef HPCC_MEMALLCTR
   size_t hpl_mem, ptrans_mem;
   long dMemSize;
+#endif
 
   outputFile = NULL;
 
