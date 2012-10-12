@@ -568,6 +568,7 @@ Cblacs_dSendrecv(int ctxt, int mSrc, int nSrc, double *Asrc, int ldaSrc, int rde
   MPI_Datatype typeSrc, typeDest;
   MPI_Status stat;
   int src, dest, dataIsContiguousSrc, dataIsContiguousDest, countSrc, countDest, npcol;
+  long int lSrc = mSrc * (long int)nSrc, lDest = mDest * (long int)nDest, li;
 
   CBLACS_INIT;
 
@@ -600,8 +601,19 @@ Cblacs_dSendrecv(int ctxt, int mSrc, int nSrc, double *Asrc, int ldaSrc, int rde
   dest = cdest + rdest * npcol;
   src  = csrc + rsrc * npcol;
 
-  MPI_Sendrecv( Asrc, countSrc, typeSrc, dest, 0, Adest, countDest, typeDest, src, 0, comm,
+  if (dataIsContiguousSrc && dataIsContiguousDest && lSrc == lDest) {
+    int mlength, maxpayload = 12500000; /* 100 MB at a time */
+
+    for (li = 0; li < lSrc; li += maxpayload) {
+      mlength = maxpayload;
+      if (lSrc - li < maxpayload)
+        mlength = lSrc - li;
+      MPI_Sendrecv( Asrc + li, mlength, typeSrc, dest, 0, Adest + li, mlength, typeDest, src, 0, comm, &stat );
+    }
+  } else {
+    MPI_Sendrecv( Asrc, countSrc, typeSrc, dest, 0, Adest, countDest, typeDest, src, 0, comm,
                 &stat ); /* IBM's (old ?) MPI doesn't have: MPI_STATUS_IGNORE */
+  }
 
   if (! dataIsContiguousSrc) MPI_Type_free( &typeSrc );
   if (! dataIsContiguousDest) MPI_Type_free( &typeDest );

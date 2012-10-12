@@ -11,18 +11,19 @@ Fix RandomAccess bug from Ram due to variable sizes
 Silenced multiple compiler warnings.
 - Enable time-bound in standard algorithm by default.
 - Add LCG to time-bound.
+- Reduce message size in PTRANS for large local matrix size (may exceed several GiB for 2 ranks and 50k matrix)
 
-Fix STREAM double overflow
+- Fix STREAM double overflow
+- add barriers to STREAM (Intel, IBM, SGI)
 Add barriers to MPI FFT
 Change closing brace } in PTRANS?
 TODO: use HPL's MAX() macro in FFT (and maybe others).
 HPL bug reported by Steve Whalen.
 - mpifft.c:16 variable 'n' unitialized according to the compiler.
-- remove custom 64-bit type for int
-- remove custom MPI operations for 64-bit ints
+- remove custom 64-bit type for int, use "long long" and new format strings (C99 is over a decade old now)
+- remove custom MPI operations for 64-bit ints and use "long long"
 - remove large comment block at line 2 at all RandomAccess files and
-- repeat once somewhere else appropriate
+repeat once somewhere else appropriate
 - the official spelling is MPI_LONG_LONG and MPI_UNSIGNED_LONG_LONG
 - document RA_TIME_BOUND_DISABLE (GUPS around 0.003 for standard alg.)
-- add barriers to STREAM (Intel, IBM)
 - add threads to PTRANS (Intel)
