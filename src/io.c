@@ -246,7 +246,7 @@ HPCC_Init(HPCC_Params *params) {
   fprintf( outputFile,
             "########################################################################\n" );
   fprintf( outputFile,
-            "This is the DARPA/DOE HPC Challenge Benchmark version %d.%d.%d October 2003\n",
+            "This is the DARPA/DOE HPC Challenge Benchmark version %d.%d.%d October 2012\n",
             HPCC_VERSION_MAJOR, HPCC_VERSION_MINOR, HPCC_VERSION_MICRO );
   fprintf( outputFile, "Produced by Jack Dongarra and Piotr Luszczek\n" );
   fprintf( outputFile, "Innovative Computing Laboratory\n" );

@@ -15,9 +15,10 @@
 \usepackage{url}
 \usepackage[margin=2cm]{geometry}
 \begin{document}
-\title{DARPA/DOE HPC~Challenge Benchmark version 1.4.1}
+\title{DARPA/DOE HPC~Challenge Benchmark version 1.4.2}
 \author{Piotr Luszczek\footnote{University of Tennessee Knoxville, Innovative
 Computing Laboratory}}
+\date{October 12, 2012}
 \maketitle
 
 \section{Introduction}
@@ -25,8 +26,8 @@ This is a suite of benchmarks that measure performance of processor,
 memory subsytem, and the interconnect. For details refer to the
 HPC~Challenge web site (\url{http://icl.cs.utk.edu/hpcc/}.)
 
-In essence, HPC~Challenge consists of a number of subbenchmarks each
-of which tests a different aspect of the system.
+In essence, HPC~Challenge consists of a number of tests each
+of which measures performance of a different aspect of the system.
 
 If you are familiar with the High Performance Linpack~(HPL) benchmark
 code (see the HPL web site:
@@ -73,11 +74,13 @@ define a symbol \texttt{S}, the majority of compilers requires option
 \texttt{-DS} to be used. Currently, the following options are
 available in the HPC~Challenge source code:
 \begin{itemize}
+
 \item \texttt{HPCC\_FFT\_235}: if this symbol is defined the FFTE
 code (an FFT implementation) will use vector sizes and processor
 counts that are not limited to powers of 2. Instead, the vector sizes
 and processor counts to be used will be a product of powers of 2, 3,
 and 5.
+
 \item \texttt{HPCC\_FFTW\_ESTIMATE}: if this symbol is defined it will
 affect the way external FFTW library is called~(it does not have any
 effect if the FFTW library is not used). When defined, this symbol
@@ -86,21 +89,26 @@ flag~(instead of \texttt{FFTW\_MEASURE}). This might result with worse
 performance results but shorter execution time of the
 benchmark. Defining this symbol may also positively affect the memory
 fragmentation caused by the FFTW's planning routine.
+
 \item \texttt{HPCC\_MEMALLCTR}: if this symbol is defined a custom
 memory allocator will be used to alleviate effects of memory
 fragmentation and allow for larger data sets to be used which may
 result in obtaining better performance.
+
 \item \texttt{HPL\_USE\_GETPROCESSTIMES}: if this symbol is defined
 then Windows-specific \texttt{GetProcessTimes()} function will be used
 to measure the elapsed CPU time.
+
 \item \texttt{USE\_MULTIPLE\_RECV}: if this symbol is defined then multiple non-blocking
 receives will be posted simultaneously. By default only one non-blocking
 receive is posted.
+
 \item \texttt{RA\_SANDIA\_NOPT}: if this symbol is defined the
 HPC~Challenge standard algorithm for Global RandomAccess will not be
 used. Instead, an alternative implementation from Sandia
 National Laboratory will be used. It routes messages in software
 across virtual hyper-cube topology formed from MPI processes.
+
 \item \texttt{RA\_SANDIA\_OPT2}: if this symbol is defined the
 HPC~Challenge standard algorithm for Global RandomAccess will not be
 used. Instead, instead an alternative implementation from Sandia
@@ -109,12 +117,19 @@ number of processors being powers of two. The optimizations
 are sorting of data before sending and unrolling the data update
 loop. If the number of process is not a power two then the code
 is the same as the one performed with the \texttt{RA\_SANDIA\_NOPT} setting.
+
+\item \texttt{RA\_TIME\_BOUND\_DISABLE}: if this symbol is defined then the
+standard Global RandomAccess code will be used without time limits. This is
+discouraged for most runs because the standard algorithm tends to be slow for
+large array sizes due to a large overhead for short MPI messages.
+
 \item \texttt{USING\_FFTW}: if this symbol is defined the standard
 HPC~Challenge FFT implemenation~(called FFTE) will not be used.
 Instead, FFTW library will be called. Defining the
 \texttt{USING\_FFTW} symbol is not sufficient: appropriate flags have
 to be added in the make script so that FFTW headers files can be found
 at compile time and the FFTW libraries at link time.
+
 \end{itemize}
 
 \section{Runtime Configuration}
@@ -214,10 +229,21 @@ through the web form at the HPC~Challenge website.
 
 \section{Source Code Changes across Versions (ChangeLog)}
 
-\subsection{Version 1.4.2 (2012-07-10)}
+\subsection{Version 1.4.2 (2012-10-12)}
 \begin{enumerate}
+\item Increased sizes of scratch vectors for local FFT tests to account for
+runs on systems with large main memory (reported by IBM, SGI and Intel).
 \item Reduced vector size for local FFT tests due to larger scratch space needed.
-\item Increased sizes of scratch vectors for local FFT tests to account for runs on systems with large main memory.
+\item Added a type cast to prevent overflow of a 32-bit integer vector
+  size in FFT data generation routine (reported by IBM).
+\item Fixed variable types to handle array sizes that overflow 32-bit
+  integers in RandomAccess (reported by IBM and SGI).
+\item Changed time-bound code to be used by default in Global RandomAccess and
+allowed for it to be switched off with a compile time flag if necessary.
+\item Code cleanup to allow compilation without warnings of RandomAccess test.
+\item Changed communication code in PTRANS to avoid large message sizes that
+caused problems in some MPI implementations.
+\item Updated documentation in README.txt and README.html files.
 \end{enumerate}
 
 \subsection{Version 1.4.1 (2010-06-01)}
