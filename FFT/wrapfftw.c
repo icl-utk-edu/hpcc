@@ -22,7 +22,7 @@ HPCC_fftw_create_plan(int n, fftw_direction dir, int flags) {
   ww1_size = Mmax( FFTE_NDA2 + FFTE_NDA4*FFTE_NP + FFTE_NP, (int)(1.0 * sqrt( n )) );
   ww2_size = Mmax( FFTE_NDA2 + FFTE_NDA4*FFTE_NP + FFTE_NP, (int)(3.9 * sqrt( n )) );
   ww3_size = Mmax( FFTE_NDA2 + FFTE_NDA4*FFTE_NP + FFTE_NP, (int)(5.4773 * sqrt( n )) );
-  ww4_size = Mmax( FFTE_NDA2 + (1 << 13), (int)(1.0/256.0 * sqrt( n )) );
+  ww4_size = Mmax( FFTE_NDA2 + (1 << 13), (int)(1.0/256.0 * n) );
 
   p->w1 = (fftw_complex *)fftw_malloc( w1_size * (sizeof *p->w1) );
   p->w2 = (fftw_complex *)fftw_malloc( w2_size * (sizeof *p->w2) );
