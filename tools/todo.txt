@@ -1,18 +1,4 @@
-Release 1.4.2
-=============
-
-Split storage for 'c' and 'd' in non-MPI FFTs.
-Add variable size scratch space to non-MPI FFTs.
-Reduce vector size for local FFT tests due to larger scratch space needed
-Fix FFT vector generation due to 32-bit overflow
-Fix RandomAccess bug from HP sent on 4/12/11 and 4/16/11
-Fix RandomAccess bug from SGI due to variable sizes
-Fix RandomAccess bug from Ram due to variable sizes
-Silenced multiple compiler warnings.
-- Enable time-bound in standard algorithm by default.
-- Add LCG to time-bound.
-- Reduce message size in PTRANS for large local matrix size (may exceed several GiB for 2 ranks and 50k matrix)
-
+- Fix HPL_dlamch() so it detects infinite loop and bails out. Use C constants (check if EPSILON value needs to be multiplied or divided by 2 or 10).
 - Fix STREAM double overflow
 - Use ideas from DLADIV2 submitted by Victor Liu vkl@stanford.edu to LAPACK for better checking STREAM
 - add barriers to STREAM (Intel, IBM, SGI)
@@ -29,4 +15,20 @@ repeat once somewhere else appropriate
 - the official spelling is MPI_LONG_LONG and MPI_UNSIGNED_LONG_LONG
 - document RA_TIME_BOUND_DISABLE (GUPS around 0.003 for standard alg.)
 - add threads to PTRANS (Intel)
-- Affinity in DGEMM
+- Set affinity in DGEMM
+
+Release 1.4.2
+=============
+
+Split storage for 'c' and 'd' in non-MPI FFTs.
+Add variable size scratch space to non-MPI FFTs.
+Reduce vector size for local FFT tests due to larger scratch space needed
+Fix FFT vector generation due to 32-bit overflow
+Fix RandomAccess bug from HP sent on 4/12/11 and 4/16/11
+Fix RandomAccess bug from SGI due to variable sizes
+Fix RandomAccess bug from Ram due to variable sizes
+Silenced multiple compiler warnings.
+- Enable time-bound in standard algorithm by default.
+- Add LCG to time-bound.
+- Reduce message size in PTRANS for large local matrix size (may exceed several GiB for 2 ranks and 50k matrix)
+
