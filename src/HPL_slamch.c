@@ -1,10 +1,10 @@
 /*
  * -- High Performance Computing Linpack Benchmark (HPL)
- *    HPL - 1.0a - January 20, 2004
+ *    HPL - 2.0 - September 10, 2008
  *    Antoine P. Petitet
  *    University of Tennessee, Knoxville
- *    Innovative Computing Laboratories
- *    (C) Copyright 2000-2004 All Rights Reserved
+ *    Innovative Computing Laboratory
+ *    (C) Copyright 2000-2008 All Rights Reserved
  *
  * -- Copyright notice and Licensing terms:
  *
@@ -22,7 +22,7 @@
  * 3. All  advertising  materials  mentioning  features  or  use of this
  * software must display the following acknowledgement:
  * This  product  includes  software  developed  at  the  University  of
- * Tennessee, Knoxville, Innovative Computing Laboratories.
+ * Tennessee, Knoxville, Innovative Computing Laboratory.
  *
  * 4. The name of the  University,  the name of the  Laboratory,  or the
  * names  of  its  contributors  may  not  be used to endorse or promote
@@ -47,7 +47,14 @@
 /*
  * Include files
  */
+#include <float.h>
+
+#ifndef FLT_DIGITS
+#define FLT_DIGITS 24
+#endif
+
 #include <hpcc.h>
+
 #ifdef HPL_rone
 #undef HPL_rone
 #endif
@@ -159,14 +166,29 @@ float HPL_slamch
 /*
  * .. Local Variables ..
  */
-   static float              eps, sfmin, base, t, rnd, emin, rmin, emax,
+   /*static*/ float              eps, sfmin, base, t, rnd, emin, rmin, emax,
                               rmax, prec;
    float                     small;
-   static int                 first=1;
+   /*static*/ int                 first=0/*1*/;
    int                        beta=0, imax=0, imin=0, it=0, lrnd=0;
 /* ..
  * .. Executable Statements ..
  */
+   eps = FLT_EPSILON / FLT_RADIX;
+   base = FLT_RADIX;
+   prec = FLT_EPSILON;
+   t = FLT_DIGITS;
+   rnd = FLT_ROUNDS < 2 ? HPL_rone : HPL_rzero;
+   emin = FLT_MIN_EXP;
+   rmin = FLT_MIN;
+   emax = FLT_MAX_EXP;
+   rmax = FLT_MAX;
+
+   sfmin = rmin;
+   small = HPL_rone / rmax;
+   if (small >= sfmin)
+     sfmin = small * ( HPL_rone + eps );
+
    if( first != 0 )
    {
       first = 0;

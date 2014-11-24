@@ -1,7 +1,21 @@
 - Fix HPL_dlamch() so it detects infinite loop and bails out. Use C constants (check if EPSILON value needs to be multiplied or divided by 2 or 10).
 - Fix STREAM double overflow
+- initialize memory sent in bw/lat
 - Use ideas from DLADIV2 submitted by Victor Liu vkl@stanford.edu to LAPACK for better checking STREAM
 - add barriers to STREAM (Intel, IBM, SGI)
+- 64-bits in STREAM
+- make sure XMALLOC() becomes memalign() so the compiler can see it
+- improve seeding of random number generation especially in PTRANS where short runs might be under one second and use the same seed (use MPI_Wtime)
+- print (and read) seeds used for random number generation for reproducibiity
+- print which value was chosen for communication results like in line 1011 of src/bench_lat_bw_1.5.2.c
+- Remove funny BEGIN_IO/END_IO macros for better visibility
+- make outFname more intuitive: outFname_or_null
+- introduce verbosity levels
+- use external file to switch benchmarks on/off so one binary can be used for parameter tuning and submission runs
+- improve build infrastructure: in-source and out-of-source Makefile
+- introduce auto-configuration system based on shell
+- FFTW3.3 with 64-bit interface
+
 Add barriers to MPI FFT
 Change closing brace } in PTRANS?
 TODO: use HPL's MAX() macro in FFT (and maybe others).

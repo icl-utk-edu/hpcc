@@ -47,6 +47,12 @@
 /*
  * Include files
  */
+#include <float.h>
+
+#ifndef DBL_DIGITS
+#define DBL_DIGITS 53
+#endif
+
 #include "hpl.h"
 /*
  * ---------------------------------------------------------------------
@@ -147,14 +153,29 @@ double HPL_dlamch
 /*
  * .. Local Variables ..
  */
-   static double              eps, sfmin, base, t, rnd, emin, rmin, emax,
+   /*static*/ double              eps, sfmin, base, t, rnd, emin, rmin, emax,
                               rmax, prec;
    double                     small;
-   static int                 first=1;
+   /*static*/ int                 first=0/*1*/;
    int                        beta=0, imax=0, imin=0, it=0, lrnd=0;
 /* ..
  * .. Executable Statements ..
  */
+   eps = DBL_EPSILON / FLT_RADIX;
+   base = FLT_RADIX;
+   prec = DBL_EPSILON;
+   t = DBL_DIGITS;
+   rnd = FLT_ROUNDS < 2 ? HPL_rone : HPL_rzero;
+   emin = DBL_MIN_EXP;
+   rmin = DBL_MIN;
+   emax = DBL_MAX_EXP;
+   rmax = DBL_MAX;
+
+   sfmin = rmin;
+   small = HPL_rone / rmax;
+   if (small >= sfmin)
+     sfmin = small * ( HPL_rone + eps );
+
    if( first != 0 )
    {
       first = 0;
