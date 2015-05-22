@@ -12,43 +12,42 @@ HPCC_StarStream(HPCC_Params *params) {
   double addLocalGBs, addMinGBs, addMaxGBs, addAvgGBs;
   double triadLocalGBs, triadMinGBs, triadMaxGBs, triadAvgGBs;
   FILE *outputFile;
-  MPI_Comm comm = MPI_COMM_WORLD;
 
   copyLocalGBs = copyMinGBs = copyMaxGBs = copyAvgGBs =
   scaleLocalGBs = scaleMinGBs = scaleMaxGBs = scaleAvgGBs =
   addLocalGBs = addMinGBs = addMaxGBs = addAvgGBs =
   triadLocalGBs = triadMinGBs = triadMaxGBs = triadAvgGBs = 0.0;
 
-  MPI_Comm_size( comm, &commSize );
-  MPI_Comm_rank( comm, &myRank );
+  MPI_Comm_size( MPI_COMM_WORLD, &commSize );
+  MPI_Comm_rank( MPI_COMM_WORLD, &myRank );
 
-  rv = HPCC_Stream( params, 0 == myRank, &copyLocalGBs, &scaleLocalGBs, &addLocalGBs, &triadLocalGBs,
-               &failure );
-  MPI_Reduce( &rv, &errCount, 1, MPI_INT, MPI_SUM, 0, comm );
-  MPI_Allreduce( &failure, &failureAll, 1, MPI_INT, MPI_MAX, comm );
+  rv = HPCC_Stream( params, 0 == myRank, MPI_COMM_WORLD, myRank,
+      &copyLocalGBs, &scaleLocalGBs, &addLocalGBs, &triadLocalGBs, &failure );
+  MPI_Reduce( &rv, &errCount, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD );
+  MPI_Allreduce( &failure, &failureAll, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD );
   if (failureAll) params->Failure = 1;
 
-  MPI_Reduce( &copyLocalGBs, &copyMinGBs, 1, MPI_DOUBLE, MPI_MIN, 0, comm );
-  MPI_Reduce( &copyLocalGBs, &copyAvgGBs, 1, MPI_DOUBLE, MPI_SUM, 0, comm );
-  MPI_Reduce( &copyLocalGBs, &copyMaxGBs, 1, MPI_DOUBLE, MPI_MAX, 0, comm );
+  MPI_Reduce( &copyLocalGBs, &copyMinGBs, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD );
+  MPI_Reduce( &copyLocalGBs, &copyAvgGBs, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD );
+  MPI_Reduce( &copyLocalGBs, &copyMaxGBs, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD );
   copyAvgGBs /= commSize;
-  MPI_Reduce( &scaleLocalGBs, &scaleMinGBs, 1, MPI_DOUBLE, MPI_MIN, 0, comm );
-  MPI_Reduce( &scaleLocalGBs, &scaleAvgGBs, 1, MPI_DOUBLE, MPI_SUM, 0, comm );
-  MPI_Reduce( &scaleLocalGBs, &scaleMaxGBs, 1, MPI_DOUBLE, MPI_MAX, 0, comm );
+  MPI_Reduce( &scaleLocalGBs, &scaleMinGBs, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD );
+  MPI_Reduce( &scaleLocalGBs, &scaleAvgGBs, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD );
+  MPI_Reduce( &scaleLocalGBs, &scaleMaxGBs, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD );
   scaleAvgGBs /= commSize;
-  MPI_Reduce( &addLocalGBs, &addMinGBs, 1, MPI_DOUBLE, MPI_MIN, 0, comm );
-  MPI_Reduce( &addLocalGBs, &addAvgGBs, 1, MPI_DOUBLE, MPI_SUM, 0, comm );
-  MPI_Reduce( &addLocalGBs, &addMaxGBs, 1, MPI_DOUBLE, MPI_MAX, 0, comm );
+  MPI_Reduce( &addLocalGBs, &addMinGBs, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD );
+  MPI_Reduce( &addLocalGBs, &addAvgGBs, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD );
+  MPI_Reduce( &addLocalGBs, &addMaxGBs, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD );
   addAvgGBs /= commSize;
-  MPI_Reduce( &triadLocalGBs, &triadMinGBs, 1, MPI_DOUBLE, MPI_MIN, 0, comm );
-  MPI_Reduce( &triadLocalGBs, &triadAvgGBs, 1, MPI_DOUBLE, MPI_SUM, 0, comm );
-  MPI_Reduce( &triadLocalGBs, &triadMaxGBs, 1, MPI_DOUBLE, MPI_MAX, 0, comm );
+  MPI_Reduce( &triadLocalGBs, &triadMinGBs, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD );
+  MPI_Reduce( &triadLocalGBs, &triadAvgGBs, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD );
+  MPI_Reduce( &triadLocalGBs, &triadMaxGBs, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD );
   triadAvgGBs /= commSize;
 
-  MPI_Bcast( &copyAvgGBs, 1, MPI_DOUBLE, 0, comm ); params->StarStreamCopyGBs = copyAvgGBs;
-  MPI_Bcast( &scaleAvgGBs, 1, MPI_DOUBLE, 0, comm ); params->StarStreamScaleGBs = scaleAvgGBs;
-  MPI_Bcast( &addAvgGBs, 1, MPI_DOUBLE, 0, comm ); params->StarStreamAddGBs = addAvgGBs;
-  MPI_Bcast( &triadAvgGBs, 1, MPI_DOUBLE, 0, comm ); params->StarStreamTriadGBs = triadAvgGBs;
+  MPI_Bcast( &copyAvgGBs, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD ); params->StarStreamCopyGBs = copyAvgGBs;
+  MPI_Bcast( &scaleAvgGBs, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD ); params->StarStreamScaleGBs = scaleAvgGBs;
+  MPI_Bcast( &addAvgGBs, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD ); params->StarStreamAddGBs = addAvgGBs;
+  MPI_Bcast( &triadAvgGBs, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD ); params->StarStreamTriadGBs = triadAvgGBs;
 
   BEGIN_IO( myRank, params->outFname, outputFile);
   fprintf( outputFile, "Node(s) with error %d\n", errCount );
@@ -76,12 +75,11 @@ HPCC_SingleStream(HPCC_Params *params) {
   double copyLocalGBs, scaleLocalGBs, addLocalGBs, triadLocalGBs;
   double scl = 1.0 / RAND_MAX;
   FILE *outputFile;
-  MPI_Comm comm = MPI_COMM_WORLD;
 
   copyLocalGBs = scaleLocalGBs = addLocalGBs = triadLocalGBs = 0.0;
 
-  MPI_Comm_size( comm, &commSize );
-  MPI_Comm_rank( comm, &myRank );
+  MPI_Comm_size( MPI_COMM_WORLD, &commSize );
+  MPI_Comm_rank( MPI_COMM_WORLD, &myRank );
 
   srand(time(NULL));
   scl *= commSize;
@@ -94,21 +92,21 @@ HPCC_SingleStream(HPCC_Params *params) {
       if (rank > 0 && rank < commSize) break;
     }
 
-  MPI_Bcast( &rank, 1, MPI_INT, 0, comm ); /* broadcast the rank selected on node 0 */
+  MPI_Bcast( &rank, 1, MPI_INT, 0, MPI_COMM_WORLD ); /* broadcast the rank selected on node 0 */
 
   if (myRank == rank) /* if this node has been selected */
-    rv = HPCC_Stream( params, 0 == myRank, &copyLocalGBs, &scaleLocalGBs, &addLocalGBs,
-                 &triadLocalGBs, &failure );
+    rv = HPCC_Stream( params, 0 == myRank, MPI_COMM_SELF, myRank,
+        &copyLocalGBs, &scaleLocalGBs, &addLocalGBs, &triadLocalGBs, &failure );
 
-  MPI_Bcast( &rv, 1, MPI_INT, rank, comm ); /* broadcast error code */
-  MPI_Bcast( &failure, 1, MPI_INT, rank, comm ); /* broadcast failure indication */
+  MPI_Bcast( &rv, 1, MPI_INT, rank, MPI_COMM_WORLD ); /* broadcast error code */
+  MPI_Bcast( &failure, 1, MPI_INT, rank, MPI_COMM_WORLD ); /* broadcast failure indication */
   if (failure) params->Failure = 1;
 
   /* broadcast results */
-  MPI_Bcast( &copyLocalGBs, 1, MPI_DOUBLE, rank, comm );
-  MPI_Bcast( &scaleLocalGBs, 1, MPI_DOUBLE, rank, comm );
-  MPI_Bcast( &addLocalGBs, 1, MPI_DOUBLE, rank, comm );
-  MPI_Bcast( &triadLocalGBs, 1, MPI_DOUBLE, rank, comm );
+  MPI_Bcast( &copyLocalGBs,  1, MPI_DOUBLE, rank, MPI_COMM_WORLD );
+  MPI_Bcast( &scaleLocalGBs, 1, MPI_DOUBLE, rank, MPI_COMM_WORLD );
+  MPI_Bcast( &addLocalGBs,   1, MPI_DOUBLE, rank, MPI_COMM_WORLD );
+  MPI_Bcast( &triadLocalGBs, 1, MPI_DOUBLE, rank, MPI_COMM_WORLD );
   errCount = rv;
   params->SingleStreamCopyGBs = copyLocalGBs;
   params->SingleStreamScaleGBs = scaleLocalGBs;

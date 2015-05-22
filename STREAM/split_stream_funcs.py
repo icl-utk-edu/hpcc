@@ -10,6 +10,7 @@ Tuple = (
   ("tuned_STREAM_Scale(double", "scale"),
   ("void tuned_STREAM_Add(", "add"),
   ("tuned_STREAM_Triad(double", "triad"),
+  ("void computeSTREAMerrors(", "checkerr"),
 ), "hpcc"),
 
 ("stream_mpi.c", (
@@ -63,6 +64,7 @@ Replacements = (
 ("MAX", "Mmax"),
 ("MIN", "Mmin"),
 ("ssize_t", "int"),
+("abs", "fabs"),
 )
 
 for tup in Tuple:

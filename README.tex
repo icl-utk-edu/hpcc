@@ -229,10 +229,19 @@ through the web form at the HPC~Challenge website.
 
 \section{Source Code Changes across Versions (ChangeLog)}
 
-\subsection{Version 1.5.0 (2015-05-05)}
+\subsection{Version 1.5.0alpha (2015-05-22)}
 \begin{enumerate}
-  \item Infinite loop due to default compiler optimization in DLAMCH and SLAMCH
-  \item Fixes to allow compiling with a C++ compiler.
+  \item Added global error accounting in STREAM.
+  \item Updated checking to report from multiple MPI processes contributing to overall error.
+  \item Added barrier to make sure all processes enter STREAM kernel tests at the same time.
+  \item Updated naming conventions to match the original benchmark in STREAM.
+  \item Changed scaling constant to prevent verification from overflowing in STREAM.
+  \item Simplified MPI communicator code in STREAM.
+  \item Substituted large constants for more descriptive compile time arithmetic in STREAM.
+  \item Added the ``restrict'' keyword to the STREAM vector pointers for faster generated code.
+  \item Updated STREAM code to the official STREAM MPI version 1.7.
+  \item Removed infinite loop due to default compiler optimization in DLAMCH and SLAMCH.
+  \item Added compiler flags to allow compiling with a C++ compiler.
 \end{enumerate}
 
 \subsection{Version 1.4.3 (2013-08-26)}

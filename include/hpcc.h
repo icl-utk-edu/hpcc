@@ -159,8 +159,9 @@ extern int HPCC_TestFFT(HPCC_Params *params, int doIO, double *UGflops, int *Un,
 extern int HPCC_TestDGEMM(HPCC_Params *params, int doIO, double *UGflops, int *Un, int *Ufailure);
 extern int MaxMem(int nprocs, int imrow, int imcol, int nmat, int *mval, int *nval, int nbmat,
   int *mbval, int *nbval, int ngrids, int *npval, int *nqval, long *maxMem);
-extern int HPCC_Stream(HPCC_Params *params, int doIO, double *copyGBs, double *scaleGBs,
-  double *addGBs, double *triadGBs, int *failure);
+extern int HPCC_Stream(HPCC_Params *params, int doIO, MPI_Comm comm, int world_rank
+  double *copyGBs, double *scaleGBs, double *addGBs, double *triadGBs,
+  int *failure);
 extern void main_bench_lat_bw(HPCC_Params *params);
 
 extern int pdtrans(char *trans, int *m, int *n, int * mb, int *nb, double *a, int *lda,
