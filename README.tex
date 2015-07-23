@@ -3,19 +3,19 @@
 % This is the master README. Translation to text and HTML files is done
 % with HeVeA.
 %
-% Postprocessing - replace </STYLE> with:
-% TT {color:navy}
-% H2, H3, H4 {color: #527bbd;}
-% H2 {border-bottom: 2px solid silver;}
+% Postprocessing - replace </style> with:
+% tt {color:navy}
+% h2, h3, h4 {color: #527bbd;}
+% h2 {border-bottom: 2px solid silver;}
 %.verbatim {background: #ffffee; border: 1px solid silver; padding: 0.5em;}
-% </STYLE>
+% </style>
 
 \documentclass[twocolumn]{article}
 \usepackage{mathptmx}
 \usepackage{url}
 \usepackage[margin=2cm]{geometry}
 \begin{document}
-\title{DARPA/DOE HPC~Challenge Benchmark version 1.4.2}
+\title{DARPA/DOE HPC~Challenge Benchmark version 1.5.0beta}
 \author{Piotr Luszczek\footnote{University of Tennessee Knoxville, Innovative
 Computing Laboratory}}
 \date{October 12, 2012}
@@ -228,6 +228,15 @@ contains results of the benchmark. This file should be uploaded
 through the web form at the HPC~Challenge website.
 
 \section{Source Code Changes across Versions (ChangeLog)}
+
+\subsection{Version 1.5.0beta (2015-07-23)}
+\begin{enumerate}
+  \item Added new targets to the main make(1) file.
+  \item Fixed bug introduced while updating to MPI STREAM 1.7 with spurious global communicator (reported by NEC).
+  \item Added make(1) file for OpenMPI from MacPorts.
+  \item Fixed bug introduced while updating to MPI STREAM 1.7 that caused some ranks to use NULL communicator.
+  \item Fixed bug introduced while updating to MPI STREAM 1.7 that caused syntax errors.
+\end{enumerate}
 
 \subsection{Version 1.5.0alpha (2015-05-22)}
 \begin{enumerate}
