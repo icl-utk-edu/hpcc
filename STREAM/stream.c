@@ -254,8 +254,10 @@ checkSTREAMresults(FILE *outFile, int doIO, double *AvgErrByRank, int numranks, 
 
   if (fabs(aAvgErr/aj) > epsilon) {
     err++;
-    fprintf( outFile, "Failed Validation on array a[], AvgRelAbsErr > epsilon (%e)\n",epsilon);
-    fprintf( outFile, "     Expected Value: %e, AvgAbsErr: %e, AvgRelAbsErr: %e\n",aj,aAvgErr,fabs(aAvgErr)/aj);
+    if (doIO) {
+      fprintf( outFile, "Failed Validation on array a[], AvgRelAbsErr > epsilon (%e)\n",epsilon);
+      fprintf( outFile, "     Expected Value: %e, AvgAbsErr: %e, AvgRelAbsErr: %e\n",aj,aAvgErr,fabs(aAvgErr)/aj);
+    }
     ierr = 0;
     for (j=0; j<array_elements; j++) {
       if (fabs(a[j]/aj-1.0) > epsilon) {
@@ -268,9 +270,11 @@ checkSTREAMresults(FILE *outFile, int doIO, double *AvgErrByRank, int numranks, 
   }
   if (fabs(bAvgErr/bj) > epsilon) {
     err++;
-    fprintf( outFile, "Failed Validation on array b[], AvgRelAbsErr > epsilon (%e)\n",epsilon);
-    fprintf( outFile, "     Expected Value: %e, AvgAbsErr: %e, AvgRelAbsErr: %e\n",bj,bAvgErr,fabs(bAvgErr)/bj);
-    fprintf( outFile, "     AvgRelAbsErr > Epsilon (%e)\n",epsilon);
+    if (doIO) {
+      fprintf( outFile, "Failed Validation on array b[], AvgRelAbsErr > epsilon (%e)\n",epsilon);
+      fprintf( outFile, "     Expected Value: %e, AvgAbsErr: %e, AvgRelAbsErr: %e\n",bj,bAvgErr,fabs(bAvgErr)/bj);
+      fprintf( outFile, "     AvgRelAbsErr > Epsilon (%e)\n",epsilon);
+    }
     ierr = 0;
     for (j=0; j<array_elements; j++) {
       if (fabs(b[j]/bj-1.0) > epsilon) {
@@ -283,9 +287,11 @@ checkSTREAMresults(FILE *outFile, int doIO, double *AvgErrByRank, int numranks, 
   }
   if (fabs(cAvgErr/cj) > epsilon) {
     err++;
-    fprintf( outFile, "Failed Validation on array c[], AvgRelAbsErr > epsilon (%e)\n",epsilon);
-    fprintf( outFile, "     Expected Value: %e, AvgAbsErr: %e, AvgRelAbsErr: %e\n",cj,cAvgErr,fabs(cAvgErr)/cj);
-    fprintf( outFile, "     AvgRelAbsErr > Epsilon (%e)\n",epsilon);
+    if (doIO) {
+      fprintf( outFile, "Failed Validation on array c[], AvgRelAbsErr > epsilon (%e)\n",epsilon);
+      fprintf( outFile, "     Expected Value: %e, AvgAbsErr: %e, AvgRelAbsErr: %e\n",cj,cAvgErr,fabs(cAvgErr)/cj);
+      fprintf( outFile, "     AvgRelAbsErr > Epsilon (%e)\n",epsilon);
+    }
     ierr = 0;
     for (j=0; j<array_elements; j++) {
       if (fabs(c[j]/cj-1.0) > epsilon) {
@@ -298,7 +304,8 @@ checkSTREAMresults(FILE *outFile, int doIO, double *AvgErrByRank, int numranks, 
   }
   if (err == 0) {
     *failure = 0;
-    fprintf( outFile, "Solution Validates: avg error less than %e on all three arrays\n",epsilon);
+    if (doIO)
+      fprintf( outFile, "Solution Validates: avg error less than %e on all three arrays\n",epsilon);
   }
 }
 
