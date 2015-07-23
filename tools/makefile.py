@@ -238,7 +238,14 @@ def Dist(deps, prfx="hpcc"):
         if not os.path.isfile(fname):
             raise RuntimeError, "File " + fname + " doesn't exist."
 
-    print "tar --group=root --owner=root -cvohf " + allPrfx[:-1] + ".tar", string.join( allItems, " " )
+    if sys.platform in ("linux", "linux2"):
+        cmnd = "tar"
+        group = "root"
+    elif sys.platform == "darwin":
+        cmnd = "gnutar"
+        group = "wheel"
+
+    print "%s --group=%s --owner=root -cvohf " % (cmnd, group) + allPrfx[:-1] + ".tar", string.join( allItems, " " )
 
 
 def main(argv):
@@ -246,9 +253,10 @@ def main(argv):
 
     if len(argv) > 1 and argv[1] == "dist":
         if len(argv) > 2: # use custom directory prefix
-            Dist(allDeps, argv[2])
+          prefix = argv[2]
         else:
-            Dist(allDeps)
+          prefix = os.path.split(os.path.dirname(argv[0]))[-2]
+        Dist(allDeps, prefix)
     else:
         Gen(allDeps)
 
