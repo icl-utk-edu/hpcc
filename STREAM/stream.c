@@ -607,7 +607,7 @@ HPCC_Stream(HPCC_Params *params, int doIO, MPI_Comm comm, int world_rank,
        timings across all the MPI ranks. */
 
     /* Gather all timing data to MPI rank 0 */
-    MPI_Gather(times, 4*NTIMES, MPI_DOUBLE, TimesByRank, 4*NTIMES, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gather(times, 4*NTIMES, MPI_DOUBLE, TimesByRank, 4*NTIMES, MPI_DOUBLE, 0, comm);
 
     /* Rank 0 processes all timing data */
     if (myrank == 0) {
@@ -662,7 +662,7 @@ HPCC_Stream(HPCC_Params *params, int doIO, MPI_Comm comm, int world_rank,
     /* --- Every Rank Checks its Results --- */
     computeSTREAMerrors(&AvgError[0], &AvgError[1], &AvgError[2]);
     /* --- Collect the Average Errors for Each Array on Rank 0 --- */
-    MPI_Gather(AvgError, 3, MPI_DOUBLE, AvgErrByRank, 3, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gather(AvgError, 3, MPI_DOUBLE, AvgErrByRank, 3, MPI_DOUBLE, 0, comm);
 
     /* -- Combined averaged errors and report on Rank 0 only --- */
     if (myrank == 0) {
