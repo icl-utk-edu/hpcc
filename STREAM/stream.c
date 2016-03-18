@@ -608,7 +608,7 @@ HPCC_Stream(HPCC_Params *params, int doIO, MPI_Comm comm, int world_rank,
        The best estimate of the maximum performance is the minimum of the "outside the barrier"
        timings across all the MPI ranks. */
 
-    memcpy(times_copy, times, 4 * NTIMES * (sizeof *times_copy) );
+    memcpy(times_copy, times, sizeof times_copy );
 
     /* for each iteration and each kernel, collect the minimum time across all MPI ranks */
     MPI_Allreduce( times_copy, times, 4*NTIMES, MPI_DOUBLE, MPI_MIN, comm );
