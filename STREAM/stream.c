@@ -388,8 +388,8 @@ int
 HPCC_Stream(HPCC_Params *params, int doIO, MPI_Comm comm, int world_rank,
   double *copyGBs, double *scaleGBs, double *addGBs, double *triadGBs, int *failure) {
     int quantum,  BytesPerWord, numranks, myrank;
-    int i, j, k;
-    double  scalar, t, t0, t1, tmin, times[4][NTIMES], times_copy[4][NTIMES];
+    int j, k;
+    double  scalar, t, t0, t1, times[4][NTIMES], times_copy[4][NTIMES];
     FILE *outFile;
     double GiBs = 1024.0 * 1024.0 * 1024.0, curGBs;
     double AvgError[3] = {0.0,0.0,0.0};
