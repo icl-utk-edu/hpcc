@@ -443,13 +443,11 @@ Cvgred2d(int ConTxt, char *scope, int m, int n, void *A, int lda, int rowRank,
 void
 Cdgsum2d(int ConTxt, char *scope, char *top, int m, int n, double *A, int lda, int rdest, int cdest){
   CBLACS_INIT;
-  top = top; /* user `top'ology is ignored */
   Cvgred2d( ConTxt, scope, m, n, A, lda, rdest, cdest, MPI_DOUBLE, sizeof(double), MPI_SUM );
 }
 void
 Cigsum2d(int ConTxt, char *scope, char *top, int m, int n, int *A, int lda, int rdest, int cdest){
   CBLACS_INIT;
-  top = top; /* user `top'ology is ignored */
   Cvgred2d( ConTxt, scope, m, n, A, lda, rdest, cdest, MPI_INT, sizeof(int), MPI_SUM );
 }
 
@@ -545,7 +543,6 @@ Cdgamx2d(int ConTxt, char *scope, char *top, int m, int n, double *A, int lda, i
   CBLACS_INIT;
   if (ldia > 0) {CblacsWarn(); rA = cA; return;} /* no AMAX_LOC yet */
   MPI_Op_create( CblacsAbsMax, 1, &op );
-  top = top; /* user `top'ology is ignored */
   Cvgred2d( ConTxt, scope, m, n, A, lda, rdest, cdest, MPI_DOUBLE, sizeof(double), op );
   MPI_Op_free( &op );
 }
@@ -556,7 +553,6 @@ Cdgamn2d(int ConTxt, char *scope, char *top, int m, int n, double *A, int lda, i
   CBLACS_INIT;
   if (ldia > 0) {CblacsWarn(); rA = cA; return;} /* no AMAX_LOC yet */
   MPI_Op_create( CblacsAbsMin, 1, &op );
-  top = top; /* user `top'ology is ignored */
   Cvgred2d( ConTxt, scope, m, n, A, lda, rdest, cdest, MPI_DOUBLE, sizeof(double), op );
   MPI_Op_free( &op );
 }
@@ -706,7 +702,6 @@ CblacsBcast(int ConTxt, char *scope, int m, int n, void *A, int lda, int rowRank
 void
 Cdgebs2d(int ConTxt, char *scope, char *top, int m, int n, double *A, int lda) {
   CBLACS_INIT;
-  top = top; /* user `top'ology is ignored */
   CblacsBcast( ConTxt, scope, m, n, A, lda, -1, -1, MPI_DOUBLE );
 }
 
@@ -752,18 +747,15 @@ Cdgebs2d(int ConTxt, char *scope, char *top, int m, int n, double *A, int lda) {
 void
 Cdgebr2d(int ConTxt, char *scope, char *top, int m, int n, double *A, int lda, int rsrc, int csrc) {
   CBLACS_INIT;
-  top = top; /* user `top'ology is ignored */
   CblacsBcast( ConTxt, scope, m, n, A, lda, rsrc, csrc, MPI_DOUBLE );
 }
 void
 Cigebs2d(int ConTxt, char *scope, char *top, int m, int n, int *A, int lda) {
   CBLACS_INIT;
-  top = top; /* user `top'ology is ignored */
   CblacsBcast( ConTxt, scope, m, n, A, lda, -1, -1, MPI_INT );
 }
 void
 Cigebr2d(int ConTxt, char *scope, char *top, int m, int n, int *A, int lda, int rsrc, int csrc) {
   CBLACS_INIT;
-  top = top; /* user `top'ology is ignored */
   CblacsBcast( ConTxt, scope, m, n, A, lda, rsrc, csrc, MPI_INT );
 }
