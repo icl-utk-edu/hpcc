@@ -198,7 +198,7 @@ ErrorReduce(FILE *f, char *str, int eCode, MPI_Comm comm) {
 
   if (rCode) {
     if (f)
-      fprintf( f, str );
+      fprintf( f, "%s", str );
 
     return -1;
   }
