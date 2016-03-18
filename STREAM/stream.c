@@ -389,12 +389,11 @@ HPCC_Stream(HPCC_Params *params, int doIO, MPI_Comm comm, int world_rank,
   double *copyGBs, double *scaleGBs, double *addGBs, double *triadGBs, int *failure) {
     int quantum,  BytesPerWord, numranks, myrank;
     int i, j, k;
-    double  scalar, t, t0, t1, tmin, times[4][NTIMES];
+    double  scalar, t, t0, t1, tmin, times[4][NTIMES], times_copy[4][NTIMES];
     FILE *outFile;
     double GiBs = 1024.0 * 1024.0 * 1024.0, curGBs;
     double AvgError[3] = {0.0,0.0,0.0};
     double *AvgErrByRank;
-    double *TimesByRank;
 
 
     if (doIO) {
@@ -481,13 +480,10 @@ HPCC_Stream(HPCC_Params *params, int doIO, MPI_Comm comm, int world_rank,
        auxiliary arrays mess up the NUMA placement of the primary arrays. */
 
     /* There are 3 average error values for each rank (using double). */
-    AvgErrByRank = (double *) malloc(3 * sizeof(double) * numranks);
+    AvgErrByRank = HPCC_XMALLOC( double, 3 * numranks );
 
     /* There are 4*NTIMES timing values for each rank (always doubles) */
-    TimesByRank = (double *) malloc(4 * NTIMES * sizeof(double) * numranks);
-    if (AvgErrByRank == NULL || TimesByRank == NULL) {
-      if (AvgErrByRank != NULL) free( AvgErrByRank );
-      if (TimesByRank != NULL) free( TimesByRank );
+    if (AvgErrByRank == NULL) {
       if (doIO)
         fprintf( outFile, "Ooops -- allocation of arrays to collect timing data on MPI rank %d failed\n", world_rank);
       MPI_Abort(comm, 3); /* FIXME: handle failure more gracefully */
@@ -495,7 +491,6 @@ HPCC_Stream(HPCC_Params *params, int doIO, MPI_Comm comm, int world_rank,
 
     /* FIXME: replace with loop to use floating-point data */
     memset(AvgErrByRank,0,3*sizeof(double)*numranks);
-    memset(TimesByRank,0,4*NTIMES*sizeof(double)*numranks);
 
     if (doIO) fprintf( outFile, HLINE);
 
@@ -613,34 +608,21 @@ HPCC_Stream(HPCC_Params *params, int doIO, MPI_Comm comm, int world_rank,
        The best estimate of the maximum performance is the minimum of the "outside the barrier"
        timings across all the MPI ranks. */
 
-    /* Gather all timing data to MPI rank 0 */
-    MPI_Gather(times, 4*NTIMES, MPI_DOUBLE, TimesByRank, 4*NTIMES, MPI_DOUBLE, 0, comm);
+    memcpy(times_copy, times, 4 * NTIMES * (sizeof *times_copy) );
 
-    /* Rank 0 processes all timing data */
-    if (myrank == 0) {
-      /* for each iteration and each kernel, collect the minimum time across all MPI ranks
-         and overwrite the rank 0 "times" variable with the minimum so the original post-
-         processing code can still be used. */
-      for (k=0; k<NTIMES; k++) {
-        for (j=0; j<4; j++) {
-          tmin = 1.0e36;
-          for (i=0; i<numranks; i++) {
-            tmin = Mmin(tmin, TimesByRank[4*NTIMES*i+j*NTIMES+k]);
-          }
-          times[j][k] = tmin;
-        }
-      }
+    /* for each iteration and each kernel, collect the minimum time across all MPI ranks */
+    MPI_Allreduce( times_copy, times, 4*NTIMES, MPI_DOUBLE, MPI_MIN, comm );
 
-      /* Back to the original code, but now using the minimum global timing across all ranks */
-      for (k=1; k<NTIMES; k++) /* note -- skip first iteration */
-      {
+    /* Back to the original code, but now using the minimum global timing across all ranks */
+    for (k=1; k<NTIMES; k++) /* note -- skip first iteration */
+    {
       for (j=0; j<4; j++)
       {
         avgtime[j] = avgtime[j] + times[j][k];
         mintime[j] = Mmin(mintime[j], times[j][k]);
         maxtime[j] = Mmax(maxtime[j], times[j][k]);
       }
-      }
+    }
 
     if (doIO)
       fprintf( outFile, "Function      Rate (GB/s)   Avg time     Min time     Max time\n");
@@ -650,21 +632,21 @@ HPCC_Stream(HPCC_Params *params, int doIO, MPI_Comm comm, int world_rank,
       /* make sure no division by zero */
       curGBs = (mintime[j] > 0.0 ? 1.0 / mintime[j] : -1.0);
       curGBs *= 1e-9 * bytes[j] * array_elements;
-        if (doIO)
-          fprintf( outFile, "%s%11.4f  %11.4f  %11.4f  %11.4f\n", label[j],
-                   curGBs,
-                   avgtime[j],
-                   mintime[j],
-                   maxtime[j]);
-        switch (j) {
-          case 0: *copyGBs = curGBs; break;
-          case 1: *scaleGBs = curGBs; break;
-          case 2: *addGBs = curGBs; break;
-          case 3: *triadGBs = curGBs; break;
-        }
+      if (doIO)
+        fprintf( outFile, "%s%11.4f  %11.4f  %11.4f  %11.4f\n", label[j],
+                 curGBs,
+                 avgtime[j],
+                 mintime[j],
+                 maxtime[j]);
+      switch (j) {
+        case 0: *copyGBs = curGBs; break;
+        case 1: *scaleGBs = curGBs; break;
+        case 2: *addGBs = curGBs; break;
+        case 3: *triadGBs = curGBs; break;
+      }
     }
-    if (doIO) fprintf( outFile, HLINE);
-    }
+    if (doIO)
+      fprintf( outFile, HLINE);
 
     /* --- Every Rank Checks its Results --- */
     computeSTREAMerrors(&AvgError[0], &AvgError[1], &AvgError[2]);
@@ -676,6 +658,8 @@ HPCC_Stream(HPCC_Params *params, int doIO, MPI_Comm comm, int world_rank,
       checkSTREAMresults( outFile, doIO, AvgErrByRank, numranks, failure );
       if (doIO) fprintf( outFile, HLINE);
     }
+
+    HPCC_free(AvgErrByRank);
 
     HPCC_free(c);
     HPCC_free(b);
