@@ -49,7 +49,7 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
 #endif
 
   t0 = -MPI_Wtime();
-  HPCC_bcnrand( 2*n, 0, in );
+  HPCC_bcnrand( 2*(s64Int)n, 0, in );
   t0 += MPI_Wtime();
 
 #ifdef HPCC_FFTW_ESTIMATE
