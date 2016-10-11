@@ -178,6 +178,8 @@ void HPL_pdtest
                     "[%d,%d] %s", info[1], info[2],
                     "Memory allocation failed for A, x and b. Skip." );
       (TEST->kskip)++;
+      /* some processes might have succeeded with allocation */
+      if (vptr) free(vptr);
       return;
    }
 /*
