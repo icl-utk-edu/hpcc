@@ -59,13 +59,23 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
 #endif
 
   t1 = -MPI_Wtime();
+#ifdef USING_FFTW3
+  p = fftw_plan_dft_1d(n, in, out, FFTW_FORWARD, flags);
+#else
   p = fftw_create_plan( n, FFTW_FORWARD, flags );
+#endif
+
   t1 += MPI_Wtime();
 
   if (! p) goto comp_end;
 
   t2 = -MPI_Wtime();
+#ifdef USING_FFTW3
+  fftw_execute(p);
+#else
   fftw_one( p, in, out );
+#endif
+
   t2 += MPI_Wtime();
 
   fftw_destroy_plan(p);

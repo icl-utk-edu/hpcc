@@ -18,10 +18,16 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
   double maxErr, tmp1, tmp2, tmp3, t0, t1, t2, t3, Gflops;
   double deps;
   fftw_complex *inout, *work;
+#if defined(USING_FFTW3)
+  fftw_plan p;
+  ptrdiff_t local_ni, local_i_start;
+  ptrdiff_t local_no, local_o_start;
+#else
   fftw_mpi_plan p;
+#endif
   hpcc_fftw_mpi_plan ip;
   int sAbort, rAbort;
-#ifdef USING_FFTW
+#if defined(USING_FFTW)
   int ilocn, iloc0, ialocn, ialoc0, itls;
 #endif
 
@@ -59,19 +65,28 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
   flags = FFTW_MEASURE;
 #endif
 
+#ifndef USING_FFTW3
   t1 = -MPI_Wtime();
   p = fftw_mpi_create_plan( comm, n, FFTW_FORWARD, flags );
   t1 += MPI_Wtime();
 
   if (! p) goto no_plan;
+#endif
 
-#ifdef USING_FFTW
+
+#if defined(USING_FFTW)
   fftw_mpi_local_sizes( p, &ilocn, &iloc0, &ialocn, &ialoc0, &itls );
   locn = ilocn;
   loc0 = iloc0;
   alocn = ialocn;
   aloc0 = ialoc0;
   tls = itls;
+#elif defined(USING_FFTW3)
+  tls = fftw_mpi_local_size_1d(n, comm, FFTW_FORWARD, flags, &local_ni, &local_i_start, &local_no, &local_o_start);
+  locn = local_ni;
+  loc0 = local_i_start;
+  alocn = local_no;
+  aloc0 = local_o_start;
 #else
   fftw_mpi_local_sizes( p, &locn, &loc0, &alocn, &aloc0, &tls );
 #endif
@@ -83,9 +98,24 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
   if (! inout || ! work) sAbort = 1;
   MPI_Allreduce( &sAbort, &rAbort, 1, MPI_INT, MPI_SUM, comm );
   if (rAbort > 0) {
+#ifndef USING_FFTW3
     fftw_mpi_destroy_plan( p );
+#endif
     goto comp_end;
   }
+
+
+#ifdef USING_FFTW3
+  t1 = -MPI_Wtime();
+  p = fftw_mpi_plan_dft_1d(n, inout, inout, comm,FFTW_FORWARD, flags);
+  t1 += MPI_Wtime();
+
+  if (! p) {
+	  fftw_destroy_plan( p );
+	  goto comp_end;
+  }
+#endif
+
 
   /* Make sure that `inout' and `work' are initialized in parallel if using
      Open MP: this will ensure better placement of pages if first-touch policy
@@ -103,10 +133,19 @@ MPIFFT0(HPCC_Params *params, int doIO, FILE *outFile, MPI_Comm comm, int locN,
   t0 += MPI_Wtime();
 
   t2 = -MPI_Wtime();
+#ifdef USING_FFTW3
+  fftw_execute(p);
+#else
   fftw_mpi( p, 1, inout, work );
+#endif
+
   t2 += MPI_Wtime();
 
+#ifdef USING_FFTW3
+  fftw_destroy_plan( p );
+#else
   fftw_mpi_destroy_plan( p );
+#endif
 
   ip = HPCC_fftw_mpi_create_plan( comm, n, FFTW_BACKWARD, FFTW_ESTIMATE );
 
