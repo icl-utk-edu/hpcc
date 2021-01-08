@@ -1,5 +1,16 @@
-#ifdef USING_FFTW
+#if defined(USING_FFTW)
+
 #include <fftw_mpi.h>
+
+#elif defined(USING_FFTW3)
+
+#include <fftw3-mpi.h>
+
+typedef int fftw_direction;
+
+#define c_re(c)  ((c)[0])
+#define c_im(c)  ((c)[1])
+
 #else
 #include <mpi.h>
 typedef struct hpcc_fftw_mpi_plan_struct *fftw_mpi_plan;

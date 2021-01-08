@@ -13,6 +13,10 @@
 #include <omp.h>
 #endif
 
+#ifdef USING_FFTW3
+#include <fftw3-mpi.h>
+#endif
+
 static double HPCC_MemProc = -1.0, HPCC_MemVal = -1.0;
 static int HPCC_MemSpec = -1;
 
@@ -359,6 +363,10 @@ HPCC_Init(HPCC_Params *params) {
   i = iiamax( params->PTRANSnbs, params->PTRANSnbval, 1 );
   nbMax = params->PTRANSnbval[i];
 
+#ifdef USING_FFTW3
+  fftw_mpi_init();
+#endif
+
 #ifdef HPCC_MEMALLCTR
   MaxMem( commSize, 0, 0, params->PTRANSns, params->PTRANSnval, params->PTRANSnval, params->PTRANSnbs, params->PTRANSnbval, params->PTRANSnbval, params->PTRANSnpqs, params->PTRANSpval, params->PTRANSqval, &dMemSize );
   ptrans_mem = dMemSize * sizeof(double) + 3 * commSize * sizeof(int);
@@ -379,6 +387,10 @@ HPCC_Finalize(HPCC_Params *params) {
 
 #ifdef HPCC_MEMALLCTR
   HPCC_alloc_finalize();
+#endif
+
+#ifdef USING_FFTW3
+  fftw_mpi_init();
 #endif
 
   time( &currentTime );
