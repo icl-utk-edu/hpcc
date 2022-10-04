@@ -507,6 +507,15 @@ HPCC_Finalize(HPCC_Params *params) {
   fprintf( outputFile, "SingleSTREAM_Scale=%g\n", params->SingleStreamScaleGBs );
   fprintf( outputFile, "SingleSTREAM_Add=%g\n", params->SingleStreamAddGBs );
   fprintf( outputFile, "SingleSTREAM_Triad=%g\n", params->SingleStreamTriadGBs );
+  
+#if defined(USING_FFTW3)
+  fprintf( outputFile, "FFT_API=FFTW3\n" );
+#elif defined(USING_FFTW)
+  fprintf( outputFile, "FFT_API=FFTW2\n" );
+#else
+  fprintf( outputFile, "FFT_API=FFTE(built-in)\n" );
+#endif
+
   fprintf( outputFile, "FFT_N=%d\n", params->FFT_N );
   fprintf( outputFile, "StarFFT_Gflops=%g\n",   params->StarFFTGflops );
   fprintf( outputFile, "SingleFFT_Gflops=%g\n", params->SingleFFTGflops );
