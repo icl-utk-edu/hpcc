@@ -13,6 +13,10 @@
 #include <omp.h>
 #endif
 
+#ifdef USING_FFTW3
+#include <fftw3-mpi.h>
+#endif
+
 static double HPCC_MemProc = -1.0, HPCC_MemVal = -1.0;
 static int HPCC_MemSpec = -1;
 
@@ -359,6 +363,10 @@ HPCC_Init(HPCC_Params *params) {
   i = iiamax( params->PTRANSnbs, params->PTRANSnbval, 1 );
   nbMax = params->PTRANSnbval[i];
 
+#ifdef USING_FFTW3
+  fftw_mpi_init();
+#endif
+
 #ifdef HPCC_MEMALLCTR
   MaxMem( commSize, 0, 0, params->PTRANSns, params->PTRANSnval, params->PTRANSnval, params->PTRANSnbs, params->PTRANSnbval, params->PTRANSnbval, params->PTRANSnpqs, params->PTRANSpval, params->PTRANSqval, &dMemSize );
   ptrans_mem = dMemSize * sizeof(double) + 3 * commSize * sizeof(int);
@@ -379,6 +387,10 @@ HPCC_Finalize(HPCC_Params *params) {
 
 #ifdef HPCC_MEMALLCTR
   HPCC_alloc_finalize();
+#endif
+
+#ifdef USING_FFTW3
+  fftw_mpi_init();
 #endif
 
   time( &currentTime );
@@ -495,6 +507,15 @@ HPCC_Finalize(HPCC_Params *params) {
   fprintf( outputFile, "SingleSTREAM_Scale=%g\n", params->SingleStreamScaleGBs );
   fprintf( outputFile, "SingleSTREAM_Add=%g\n", params->SingleStreamAddGBs );
   fprintf( outputFile, "SingleSTREAM_Triad=%g\n", params->SingleStreamTriadGBs );
+  
+#if defined(USING_FFTW3)
+  fprintf( outputFile, "FFT_API=FFTW3\n" );
+#elif defined(USING_FFTW)
+  fprintf( outputFile, "FFT_API=FFTW2\n" );
+#else
+  fprintf( outputFile, "FFT_API=FFTE(built-in)\n" );
+#endif
+
   fprintf( outputFile, "FFT_N=%d\n", params->FFT_N );
   fprintf( outputFile, "StarFFT_Gflops=%g\n",   params->StarFFTGflops );
   fprintf( outputFile, "SingleFFT_Gflops=%g\n", params->SingleFFTGflops );

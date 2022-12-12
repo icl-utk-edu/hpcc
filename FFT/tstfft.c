@@ -48,24 +48,40 @@ TestFFT1(HPCC_Params *params, int doIO, FILE *outFile, double *UGflops, int *Un,
   }
 #endif
 
-  t0 = -MPI_Wtime();
-  HPCC_bcnrand( 2*(s64Int)n, 0, in );
-  t0 += MPI_Wtime();
-
 #ifdef HPCC_FFTW_ESTIMATE
   flags = FFTW_ESTIMATE;
 #else
   flags = FFTW_MEASURE;
 #endif
 
+#ifdef USING_FFTW3
+  /* in fftw3 plan should be created before initialization of input */
+  t1 = -MPI_Wtime();
+  p = fftw_plan_dft_1d(n, in, out, FFTW_FORWARD, flags);
+  t1 += MPI_Wtime();
+
+  if (! p) goto comp_end;
+#endif
+
+  t0 = -MPI_Wtime();
+  HPCC_bcnrand( 2*(s64Int)n, 0, in );
+  t0 += MPI_Wtime();
+
+#ifndef USING_FFTW3
   t1 = -MPI_Wtime();
   p = fftw_create_plan( n, FFTW_FORWARD, flags );
   t1 += MPI_Wtime();
 
   if (! p) goto comp_end;
+#endif
 
   t2 = -MPI_Wtime();
+#ifdef USING_FFTW3
+  fftw_execute(p);
+#else
   fftw_one( p, in, out );
+#endif
+
   t2 += MPI_Wtime();
 
   fftw_destroy_plan(p);

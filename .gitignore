@@ -1,0 +1,8 @@
+*.o
+/hpcc
+/.cproject
+/.project
+/.settings
+/hpccinf.txt
+/hpccoutf.txt
+
